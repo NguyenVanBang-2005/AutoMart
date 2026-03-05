@@ -1,0 +1,31 @@
+# ===== Core FastAPI =====
+fastapi
+uvicorn[standard]
+
+# ===== Templates & Static =====
+jinja2
+python-multipart
+
+# ===== Config & Env =====
+python-dotenv
+pydantic
+pydantic-settings
+
+# ===== Database (SQLAlchemy) =====
+sqlalchemy
+alembic
+
+# ===== Security =====
+passlib[bcrypt]
+python-jose[cryptography]
+
+# ===== HTTP & Utils =====
+httpx
+requests
+
+# ===== AI / ML (tuỳ chọn – dùng cho ai_models) =====
+numpy
+scikit-learn
+
+# Nếu dùng LLM / embedding API (ví dụ OpenAI)
+# openai
