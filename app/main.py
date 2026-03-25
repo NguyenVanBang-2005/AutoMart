@@ -9,7 +9,6 @@ from app.core.config import settings
 from app.core.database import init_db, engine
 from app.api.v1.router import api_router
 from sqlmodel import Session
-from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -29,7 +28,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
-app.add_middleware(HTTPSRedirectMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
