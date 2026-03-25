@@ -50,8 +50,11 @@ app.include_router(api_router, prefix="/api/v1")
 
 def get_current_user_for_template(request: Request):
     """Truyền user vào mọi template để hiển thị đúng UI"""
-    with Session(engine) as session:
-        return get_current_user_from_cookie(request, session)
+    try:
+        with Session(engine) as session:
+            return get_current_user_from_cookie(request, session)
+    except Exception:
+        return None
 
 # ── Frontend routes ───────────────────────────────────
 @app.get("/")
