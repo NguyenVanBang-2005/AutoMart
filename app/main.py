@@ -60,6 +60,9 @@ def get_current_user_for_template(request: Request):
 @app.get("/")
 def home(request: Request):
     user = get_current_user_for_template(request)
+    template_path = BASE_DIR / "templates" / "index.html"
+    print(f"Template path exists: {template_path.exists()}")
+    print(f"BASE_DIR: {BASE_DIR}")
     return templates.TemplateResponse("index.html", {
         "request": request,
         "current_user": user
