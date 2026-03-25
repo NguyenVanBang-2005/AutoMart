@@ -63,39 +63,44 @@ def home(request: Request):
     template_path = BASE_DIR / "templates" / "index.html"
     print(f"Template path exists: {template_path.exists()}")
     print(f"BASE_DIR: {BASE_DIR}")
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "current_user": user
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"current_user": user}
+    )
 
 @app.get("/mua-xe")
 def mua_xe(request: Request):
     user = get_current_user_for_template(request)
-    return templates.TemplateResponse("mua_xe.html", {
-        "request": request,
-        "current_user": user
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"current_user": user}
+    )
 
 @app.get("/ban-xe")
 def ban_xe(request: Request):
     user = get_current_user_for_template(request)
-    return templates.TemplateResponse("ban_xe.html", {
-        "request": request,
-        "current_user": user
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"current_user": user}
+    )
 
 @app.get("/lien-he")
 def lien_he(request: Request):
     user = get_current_user_for_template(request)
-    return templates.TemplateResponse("lien_he.html", {
-        "request": request,
-        "current_user": user
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"current_user": user}
+    )
 
 @app.get("/tu-van")
 def tu_van(request: Request):
     user = get_current_user_for_template(request)
-    return templates.TemplateResponse("tu_van.html", {
-        "request": request,
-        "current_user": user
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"current_user": user}
+    )
