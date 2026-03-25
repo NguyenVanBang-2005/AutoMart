@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="vi" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}AutoMart - Mua Bán Xe Cũ Uy Tín{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  {% block extra_head %}{% endblock %}
+ </head>
+ <body class="h-full">
+  <div class="app-container">
+   {% include 'partials/header.html' %}
+   {% block content %}{% endblock %}
+   {% include 'partials/footer.html' %}
+   {% include 'partials/modals.html' %}
+   {% include 'partials/toast.html' %}
+  </div>
+  <script src="{{ url_for('static', path='main.js') }}"></script>
+  {% block extra_scripts %}{% endblock %}
+ </body>
+</html>

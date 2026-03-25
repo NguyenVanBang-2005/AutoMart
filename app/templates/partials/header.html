@@ -1,0 +1,33 @@
+<header class="header">
+ <nav class="nav-container">
+  <a href="/" class="logo" id="siteLogo">Auto<span class="logo-accent">Mart</span></a>
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
+  <ul class="nav-menu" id="navMenu">
+   <li><a href="/" class="nav-link">Trang chủ</a></li>
+   <li><a href="/mua-xe" class="nav-link">Mua xe</a></li>
+   <li><a href="/ban-xe" class="nav-link">Bán xe</a></li>
+   <li><a href="/tu-van" class="nav-link">Tư vấn</a></li>
+   <li><a href="/lien-he" class="nav-link">Liên hệ</a></li>
+  </ul>
+  <div class="nav-actions">
+   {% if current_user %}
+    <!-- Đã đăng nhập — server render, không cần JS -->
+    <span style="font-weight:600; color:var(--accent-primary); margin-right:8px;">
+     Xin chào, {{ current_user.ho_ten }}
+    </span>
+    <button class="btn btn-secondary btn-small" onclick="handleLogout()">
+     Đăng xuất
+    </button>
+    <a href="/ban-xe" class="btn btn-primary btn-small">+ Đăng tin</a>
+   {% else %}
+    <!-- Chưa đăng nhập -->
+    <button class="btn btn-secondary btn-small" onclick="openModal('loginModal')">
+     <span class="icon-person"></span> Đăng nhập
+    </button>
+    <button class="btn btn-primary btn-small" onclick="openModal('registerModal')">
+     + Đăng ký
+    </button>
+   {% endif %}
+  </div>
+ </nav>
+</header>

@@ -14,6 +14,7 @@ pydantic-settings
 # ===== Database (SQLAlchemy) =====
 sqlalchemy
 alembic
+sqlmodel
 
 # ===== Security =====
 passlib[bcrypt]

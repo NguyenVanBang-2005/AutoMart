@@ -1,0 +1,189 @@
+<!-- Modal: Đăng tin bán xe -->
+<div class="modal" id="sellModal">
+ <div class="modal-content">
+  <div class="modal-header">
+   <h3 class="modal-title"><span class="icon-car"></span> Đăng tin bán xe</h3>
+   <button class="modal-close" onclick="closeModal('sellModal')" aria-label="Close">×</button>
+  </div>
+  <div class="modal-body">
+   <form id="sellForm" onsubmit="handleSellSubmit(event)">
+    <div class="search-grid">
+     <div class="form-group">
+      <label class="form-label">Hãng xe *</label>
+      <select class="form-control" required>
+       <option value="">Chọn hãng xe</option>
+       <option>Toyota</option>
+       <option>Honda</option>
+       <option>Mazda</option>
+       <option>Hyundai</option>
+       <option>Kia</option>
+       <option>Ford</option>
+      </select>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Dòng xe *</label>
+      <input type="text" class="form-control" placeholder="VD: Camry, Civic..." required>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Năm sản xuất *</label>
+      <select class="form-control" required>
+       <option value="">Chọn năm</option>
+       <option>2024</option>
+       <option>2023</option>
+       <option>2022</option>
+       <option>2021</option>
+       <option>2020</option>
+      </select>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Số Km đã đi *</label>
+      <input type="number" class="form-control" placeholder="VD: 30000" required>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Giá mong muốn (triệu) *</label>
+      <input type="number" class="form-control" placeholder="VD: 500" required>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Khu vực *</label>
+      <select class="form-control" required>
+       <option value="">Chọn khu vực</option>
+       <option>TP. Hồ Chí Minh</option>
+       <option>Hà Nội</option>
+       <option>Đà Nẵng</option>
+       <option>Cần Thơ</option>
+      </select>
+     </div>
+     <div class="form-group form-group-full">
+      <label class="form-label">Mô tả thêm</label>
+      <textarea class="form-control" rows="3" placeholder="Tình trạng xe, lịch sử bảo dưỡng..."></textarea>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Họ tên *</label>
+      <input type="text" class="form-control" required>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Số điện thoại *</label>
+      <input type="tel" class="form-control" required>
+     </div>
+    </div>
+   </form>
+  </div>
+  <div class="modal-footer">
+   <button class="btn btn-gray" onclick="closeModal('sellModal')">Đóng</button>
+   <button class="btn btn-primary" type="submit" form="sellForm">
+    <span class="icon-check"></span> Gửi thông tin
+   </button>
+  </div>
+ </div>
+</div>
+
+<!-- Modal: Đăng nhập -->
+<div class="modal" id="loginModal">
+ <div class="modal-content">
+  <div class="modal-header">
+   <h3 class="modal-title"><span class="icon-person"></span> Đăng nhập</h3>
+   <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Close">×</button>
+  </div>
+  <div class="modal-body">
+   <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+    <div class="form-group">
+     <label class="form-label">Email</label>
+     <input type="email" class="form-control" placeholder="email@example.com" required>
+    </div>
+    <div class="form-group">
+     <label class="form-label">Mật khẩu</label>
+     <input type="password" class="form-control" required>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
+      <input type="checkbox"> Ghi nhớ đăng nhập
+     </label>
+     <a href="#" style="color: var(--accent-primary); font-size: 14px; text-decoration: none;">
+      Quên mật khẩu?
+     </a>
+    </div>
+    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 16px;">
+     Đăng nhập
+    </button>
+    <div style="text-align: center; font-size: 14px;">
+     <span style="color: #64748b;">Chưa có tài khoản?</span>
+     <a href="#" style="color: var(--accent-primary); text-decoration: none; font-weight: 600;"
+      onclick="switchModal('loginModal', 'registerModal')">
+      Đăng ký ngay
+     </a>
+    </div>
+   </form>
+  </div>
+ </div>
+</div>
+<!-- ← đóng #loginModal đúng chỗ -->
+
+<!-- Modal: Đăng ký -->
+<div class="modal" id="registerModal">
+ <div class="modal-content">
+  <div class="modal-header">
+   <h3 class="modal-title"><span class="icon-person"></span> Đăng ký tài khoản</h3>
+   <button class="modal-close" onclick="closeModal('registerModal')" aria-label="Close">×</button>
+  </div>
+  <div class="modal-body">
+   <form id="registerForm" onsubmit="handleRegisterSubmit(event)">
+    <div class="form-group">
+     <label class="form-label">Họ tên *</label>
+     <input type="text" name="fullName" class="form-control"
+      placeholder="Nguyễn Văn A" required>
+    </div>
+    <div class="form-group">
+     <label class="form-label">Email *</label>
+     <input type="email" name="email" class="form-control"
+      placeholder="email@example.com" required>
+    </div>
+    <div class="form-group">
+     <label class="form-label">Số điện thoại *</label>
+     <input type="tel" name="phone" class="form-control"
+      placeholder="0901 234 567" required>
+    </div>
+    <div class="form-group">
+     <label class="form-label">Mật khẩu *</label>
+     <input type="password" name="password" class="form-control"
+      placeholder="Tối thiểu 6 ký tự" required>
+    </div>
+    <div class="form-group">
+     <label class="form-label">Xác nhận mật khẩu *</label>
+     <input type="password" name="confirmPassword" class="form-control"
+      placeholder="Nhập lại mật khẩu" required>
+    </div>
+    <div class="form-group">
+     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer;">
+      <input type="checkbox" name="agree" required>
+      Tôi đồng ý với
+      <a href="#" style="color: var(--accent-primary); text-decoration: none;">điều khoản sử dụng</a>
+     </label>
+    </div>
+
+    <!-- Thông báo lỗi -->
+    <div id="registerError" style="
+     display: none;
+     background: #fee2e2;
+     color: #dc2626;
+     padding: 10px 14px;
+     border-radius: 8px;
+     font-size: 14px;
+     margin-bottom: 12px;">
+    </div>
+
+    <button type="submit" id="registerSubmitBtn"
+     class="btn btn-primary" style="width: 100%; margin-bottom: 16px;">
+     Đăng ký
+    </button>
+
+    <div style="text-align: center; font-size: 14px;">
+     <span style="color: #64748b;">Đã có tài khoản?</span>
+     <a href="#" style="color: var(--accent-primary); text-decoration: none; font-weight: 600;"
+      onclick="switchModal('registerModal', 'loginModal')">
+      Đăng nhập ngay
+     </a>
+    </div>
+   </form>
+  </div>
+ </div>
+</div>

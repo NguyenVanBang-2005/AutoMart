@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}AutoMart - Mua Xe{% endblock %}
+
+{% block content %}
+<section class="section" id="cars">
+ <div class="container">
+  <div class="section-header">
+   <h2 class="section-title">Tìm xe của bạn</h2>
+   <p class="section-subtitle">Hàng nghìn xe chất lượng, giá tốt nhất thị trường</p>
+  </div>
+
+  <!-- Bộ lọc -->
+  <div class="search-box" style="margin-bottom: 40px;">
+   <h3 class="search-title"><span class="icon-search"></span> Lọc xe</h3>
+   <form id="searchForm" onsubmit="handleSearch(event)">
+    <div class="search-grid">
+     <div class="form-group">
+      <label class="form-label">Hãng xe</label>
+      <select class="form-control" id="brandSelect">
+       <option value="">Tất cả hãng xe</option>
+       <option>Toyota</option>
+       <option>Honda</option>
+       <option>Mazda</option>
+       <option>Hyundai</option>
+       <option>Kia</option>
+       <option>Ford</option>
+       <option>Mercedes</option>
+       <option>BMW</option>
+      </select>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Khoảng giá</label>
+      <select class="form-control">
+       <option value="">Tất cả mức giá</option>
+       <option>Dưới 300 triệu</option>
+       <option>300 - 500 triệu</option>
+       <option>500 - 800 triệu</option>
+       <option>800 triệu - 1 tỷ</option>
+       <option>Trên 1 tỷ</option>
+      </select>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Năm sản xuất</label>
+      <select class="form-control">
+       <option value="">Tất cả năm</option>
+       <option>2024</option>
+       <option>2023</option>
+       <option>2022</option>
+       <option>2021</option>
+       <option>2020</option>
+       <option>Trước 2020</option>
+      </select>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Loại xe</label>
+      <select class="form-control">
+       <option value="">Tất cả loại xe</option>
+       <option>Sedan</option>
+       <option>SUV/CUV</option>
+       <option>Hatchback</option>
+       <option>Pickup</option>
+       <option>MPV</option>
+      </select>
+     </div>
+     <div class="form-group form-group-full">
+      <button type="submit" class="btn btn-primary" style="width: 100%;">
+       <span class="icon-search"></span> Tìm kiếm xe
+      </button>
+     </div>
+    </div>
+   </form>
+  </div>
+
+  <!-- Danh sách xe -->
+  <div class="car-grid" id="carGrid"></div>
+  <div style="text-align: center; margin-top: 32px;">
+   <button class="btn btn-outline btn-large" onclick="showToast('Đang tải thêm xe...')">
+    <span class="icon-car"></span> Xem thêm xe
+   </button>
+  </div>
+ </div>
+</section>
+{% endblock %}

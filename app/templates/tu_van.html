@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}AutoMart - Tư Vấn{% endblock %}
+
+{% block content %}
+<section class="section">
+ <div class="container">
+  <div class="section-header">
+   <h2 class="section-title">Tư vấn mua xe</h2>
+   <p class="section-subtitle">Đội ngũ chuyên gia sẵn sàng tư vấn miễn phí cho bạn</p>
+  </div>
+
+  <!-- Dịch vụ tư vấn -->
+  <div class="services-grid" style="margin-bottom: 48px;">
+   <div class="service-card">
+    <div class="service-icon"><span class="icon-shield"></span></div>
+    <h3 class="service-title">Kiểm định xe</h3>
+    <p class="service-desc">Kiểm tra 150+ hạng mục, đảm bảo xe không lỗi ẩn trước khi mua</p>
+   </div>
+   <div class="service-card">
+    <div class="service-icon"><span class="icon-bank"></span></div>
+    <h3 class="service-title">Tư vấn vay vốn</h3>
+    <p class="service-desc">So sánh gói vay từ nhiều ngân hàng, chọn lãi suất tốt nhất cho bạn</p>
+   </div>
+   <div class="service-card">
+    <div class="service-icon"><span class="icon-refresh"></span></div>
+    <h3 class="service-title">Định giá xe cũ</h3>
+    <p class="service-desc">Định giá chính xác xe bạn đang có để tính toán chi phí đổi xe mới</p>
+   </div>
+   <div class="service-card">
+    <div class="service-icon"><span class="icon-wrench"></span></div>
+    <h3 class="service-title">Tư vấn bảo hành</h3>
+    <p class="service-desc">Hướng dẫn chọn gói bảo hành phù hợp với nhu cầu sử dụng</p>
+   </div>
+  </div>
+
+  <!-- Form đăng ký tư vấn -->
+  <div style="max-width: 560px; margin: 0 auto;">
+   <div class="search-box">
+    <h3 class="search-title"><span class="icon-person"></span> Đăng ký tư vấn miễn phí</h3>
+    <form id="consultForm" onsubmit="handleConsultSubmit(event)">
+     <div class="form-group">
+      <label class="form-label">Họ tên *</label>
+      <input type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Số điện thoại *</label>
+      <input type="tel" class="form-control" placeholder="0901 234 567" required>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Bạn cần tư vấn về</label>
+      <select class="form-control">
+       <option value="">Chọn chủ đề</option>
+       <option>Mua xe phù hợp ngân sách</option>
+       <option>Vay mua xe</option>
+       <option>Kiểm định xe trước khi mua</option>
+       <option>Đổi xe cũ lấy xe mới</option>
+       <option>Bảo hành & bảo hiểm</option>
+      </select>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Thời gian liên hệ mong muốn</label>
+      <select class="form-control">
+       <option value="">Bất kỳ lúc nào</option>
+       <option>Sáng (8:00 - 12:00)</option>
+       <option>Chiều (12:00 - 17:00)</option>
+       <option>Tối (17:00 - 20:00)</option>
+      </select>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Ghi chú thêm</label>
+      <textarea class="form-control" rows="3" placeholder="Mô tả nhu cầu của bạn..."></textarea>
+     </div>
+     <button type="submit" class="btn btn-primary" style="width: 100%;">
+      <span class="icon-check"></span> Đăng ký tư vấn
+     </button>
+    </form>
+   </div>
+  </div>
+
+ </div>
+</section>
+{% endblock %}
