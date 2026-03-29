@@ -63,7 +63,7 @@ def set_auth_cookie(response: Response, token: str):
         key=COOKIE_NAME,
         value=token,
         httponly=True,       # JS không đọc được
-        secure=False,        # True khi dùng HTTPS production
+        secure=True,        # True khi dùng HTTPS production
         samesite="lax",      # chống CSRF
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/"

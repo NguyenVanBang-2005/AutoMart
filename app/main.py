@@ -75,7 +75,7 @@ def mua_xe(request: Request):
     user = get_current_user_for_template(request)
     return templates.TemplateResponse(
         request=request,
-        name="index.html",
+        name="mua_xe.html",
         context={"current_user": user}
     )
 
@@ -84,7 +84,7 @@ def ban_xe(request: Request):
     user = get_current_user_for_template(request)
     return templates.TemplateResponse(
         request=request,
-        name="index.html",
+        name="ban_xe.html",
         context={"current_user": user}
     )
 
@@ -93,7 +93,7 @@ def lien_he(request: Request):
     user = get_current_user_for_template(request)
     return templates.TemplateResponse(
         request=request,
-        name="index.html",
+        name="lien_he.html",
         context={"current_user": user}
     )
 
@@ -102,6 +102,6 @@ def tu_van(request: Request):
     user = get_current_user_for_template(request)
     return templates.TemplateResponse(
         request=request,
-        name="index.html",
+        name="tu_van.html",
         context={"current_user": user}
     )

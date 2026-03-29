@@ -11,7 +11,7 @@ engine = create_engine(
     pool_timeout=30,        # giây chờ lấy kết nối trước khi báo lỗi
     pool_recycle=1800,      # tái sử dụng kết nối sau 30 phút (tránh timeout)
     pool_pre_ping=True,     # kiểm tra kết nối còn sống trước khi dùng
-    connect_args={"sslmode": "require"},
+    connect_args={"sslmode": "disable"},
 )
 
 
