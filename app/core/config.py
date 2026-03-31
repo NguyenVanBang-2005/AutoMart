@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     FRONTEND_URL: str = "http://localhost:3000"
+    ENVIRONMENT: str = "development"  # override bằng env var trên Railway
+    CLOUDINARY_CLOUD_NAME: str = "di0dg1uru"
+    CLOUDINARY_API_KEY: str = "186712837536447"
+    CLOUDINARY_API_SECRET: str = "aWoW4l--DYXBDx-FVpjQ0cDFXjk"
 
     class Config:
         env_file = ".env"

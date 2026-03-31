@@ -293,9 +293,25 @@ function showToast(message) {
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
+// ── Car Detail Modal ──────────────────────────────────
 function viewCar(id) {
-  const car = carsData.find(c => c.id === id);
-  if (car) showToast(`Đang xem ${car.brand} ${car.model}`);
+  const car = allCars.find(c => c.id === id);
+  if (!car) return;
+
+  // Điền thông tin vào modal
+  document.getElementById('carDetailTitle').textContent  = `${car.brand} ${car.model}`;
+  document.getElementById('carDetailPrice').textContent  = `${Number(car.price).toLocaleString('vi-VN')} triệu`;
+  document.getElementById('carDetailYear').textContent   = car.year;
+  document.getElementById('carDetailKm').textContent     = `${Number(car.km).toLocaleString('vi-VN')} km`;
+  document.getElementById('carDetailFuel').textContent   = car.fuel;
+  document.getElementById('carDetailTrans').textContent  = car.trans;
+  document.getElementById('carDetailLocation').textContent = car.location;
+
+  // Đổi màu ảnh theo xe
+  const img = document.getElementById('carDetailImage');
+  if (img) img.style.background = `linear-gradient(135deg, ${car.color} 0%, ${adjustColor(car.color, -20)} 100%)`;
+
+  openModal('carDetailModal');
 }
 
 function filterBrand(brand) {
@@ -432,19 +448,204 @@ function initMobileNav() {
   }
 }
 
+// ── Car State ────────────────────────────────────────
+let allCars = [];
+
+// ── API: Load xe ─────────────────────────────────────
+async function loadCarsFromAPI(filters = {}) {
+  try {
+    const params = new URLSearchParams();
+    if (filters.hang)    params.append('hang', filters.hang);
+    if (filters.nam)     params.append('nam', filters.nam);
+    if (filters.gia_min) params.append('gia_min', filters.gia_min);
+    if (filters.gia_max) params.append('gia_max', filters.gia_max);
+
+    const url = `${API_BASE}/cars${params.toString() ? '?' + params.toString() : ''}`;
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+
+    allCars = data.cars.map(car => ({
+      id: car.id,
+      brand: car.hang_xe || '',
+      model: car.dong_xe || '',
+      year: car.nam_san_xuat || 0,
+      price: car.gia || 0,
+      km: car.so_km || 0,
+      fuel: car.nhien_lieu || 'Xăng',
+      trans: car.hop_so || 'Tự động',
+      location: car.khu_vuc || '',
+      badge: car.badge || '',
+      color: car.color || '#6366f1'
+    }));
+    return allCars;
+  } catch (err) {
+    console.warn('Dùng dữ liệu mẫu:', err);
+    allCars = carsData; // dùng carsData sẵn có trong file cũ
+    return allCars;
+  }
+}
+
+// ── Render từ API data ────────────────────────────────
+function renderCarsData(cars) {
+  const grid = document.getElementById('carGrid');
+  if (!grid) return;
+
+  if (cars.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#64748b;">
+        <div style="font-size:48px;margin-bottom:16px;">🔍</div>
+        <h3>Không tìm thấy xe phù hợp</h3>
+        <button class="btn btn-primary" style="margin-top:16px"
+          onclick="loadCarsFromAPI().then(renderCarsData)">Xem tất cả xe</button>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = cars.map(car => `
+    <div class="car-card">
+      <div class="car-image" style="background:linear-gradient(135deg,${car.color} 0%,${adjustColor(car.color,-20)} 100%);">
+        <svg width="100" height="60" viewBox="0 0 100 60" fill="white" style="opacity:.9;">
+          <path d="M15 45 L20 30 L35 25 L45 15 L70 15 L80 25 L95 30 L95 45 Z" fill="rgba(255,255,255,0.9)"/>
+          <circle cx="28" cy="48" r="8" fill="rgba(255,255,255,0.7)"/>
+          <circle cx="28" cy="48" r="4" fill="rgba(0,0,0,0.3)"/>
+          <circle cx="78" cy="48" r="8" fill="rgba(255,255,255,0.7)"/>
+          <circle cx="78" cy="48" r="4" fill="rgba(0,0,0,0.3)"/>
+          <rect x="50" y="22" width="18" height="10" rx="2" fill="rgba(200,230,255,0.8)"/>
+        </svg>
+        ${car.badge ? `<span class="car-badge ${car.badge==='featured'?'car-badge-featured':''}">${car.badge==='featured'?'⭐ Nổi bật':'🆕 Mới'}</span>` : ''}
+      </div>
+      <div class="car-body">
+        <h3 class="car-title">${car.brand} ${car.model}</h3>
+        <div class="car-price">${Number(car.price).toLocaleString('vi-VN')} triệu</div>
+        <div class="car-specs">
+          <span class="car-spec"><span class="icon-calendar"></span> ${car.year}</span>
+          <span class="car-spec"><span class="icon-speedometer"></span> ${Number(car.km).toLocaleString('vi-VN')} km</span>
+          <span class="car-spec"><span class="icon-fuel"></span> ${car.fuel}</span>
+          <span class="car-spec"><span class="icon-gear"></span> ${car.trans}</span>
+        </div>
+        <div class="car-footer">
+          <span class="car-location"><span class="icon-location"></span> ${car.location}</span>
+          <button class="btn btn-primary btn-small" onclick="viewCar(${car.id})">Xem chi tiết</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Override filterBrand ──────────────────────────────
+function filterBrand(brand) {
+  const brandSelect = document.getElementById('brandSelect');
+  if (brandSelect) brandSelect.value = brand;
+
+  const filtered = allCars.filter(c => c.brand === brand);
+  if (filtered.length > 0) {
+    renderCarsData(filtered);
+    showToast(`Hiển thị ${filtered.length} xe ${brand}`);
+  } else {
+    loadCarsFromAPI({ hang: brand }).then(cars => {
+      renderCarsData(cars);
+      showToast(`Hiển thị ${cars.length} xe ${brand}`);
+    });
+  }
+  document.getElementById('carGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Override handleSearch ─────────────────────────────
+async function handleSearch(e) {
+  e.preventDefault();
+  const filters = {};
+  const brandSelect = document.getElementById('brandSelect');
+  const priceSelect = document.getElementById('priceSelect');
+  const yearSelect  = document.getElementById('yearSelect');
+
+  if (brandSelect?.value) filters.hang = brandSelect.value;
+  if (yearSelect?.value)  filters.nam  = parseInt(yearSelect.value);
+  if (priceSelect?.value) {
+    const [min, max] = priceSelect.value.split('-').map(Number);
+    if (min) filters.gia_min = min;
+    if (max) filters.gia_max = max;
+  }
+
+  showToast('Đang tìm kiếm...');
+  const cars = await loadCarsFromAPI(filters);
+  renderCarsData(cars);
+  showToast(`Tìm thấy ${cars.length} xe phù hợp`);
+  document.getElementById('carGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Tư vấn Form ───────────────────────────────────────
+async function handleTuVanSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  const data = Object.fromEntries(new FormData(form));
+
+  if (!data.ho_ten || !data.so_dien_thoai) {
+    showToast('Vui lòng điền họ tên và số điện thoại!');
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.classList.add('btn-loading'); }
+  try {
+    const res = await fetch(`${API_BASE}/tu-van`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (!res.ok) { showToast(result.detail || 'Gửi thất bại!'); return; }
+    showToast('Đăng ký tư vấn thành công!');
+    form.reset();
+  } catch { showToast('Không thể kết nối server!'); }
+  finally { if (btn) { btn.disabled = false; btn.classList.remove('btn-loading'); } }
+}
+
+// ── Liên hệ Form ──────────────────────────────────────
+async function handleLienHeSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  const data = Object.fromEntries(new FormData(form));
+
+  if (!data.ho_ten || !data.email || !data.noi_dung) {
+    showToast('Vui lòng điền đầy đủ thông tin!');
+    return;
+  }
+  if (btn) { btn.disabled = true; btn.classList.add('btn-loading'); }
+  try {
+    const res = await fetch(`${API_BASE}/lien-he`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (!res.ok) { showToast(result.detail || 'Gửi thất bại!'); return; }
+    showToast('Gửi liên hệ thành công!');
+    form.reset();
+  } catch { showToast('Không thể kết nối server!'); }
+  finally { if (btn) { btn.disabled = false; btn.classList.remove('btn-loading'); } }
+}
+
 // ── Init ─────────────────────────────────────────────
 async function init() {
-  renderCars();
+  const cars = await loadCarsFromAPI();
+  renderCarsData(cars);
   renderBrands();
   initMobileNav();
 
+  const searchForm = document.getElementById('searchForm');
+  if (searchForm) searchForm.addEventListener('submit', handleSearch);
+
+  const tuVanForm = document.getElementById('tuVanForm');
+  if (tuVanForm) tuVanForm.addEventListener('submit', handleTuVanSubmit);
+
+  const lienHeForm = document.getElementById('lienHeForm');
+  if (lienHeForm) lienHeForm.addEventListener('submit', handleLienHeSubmit);
+
   if (window.elementSdk) {
-    await window.elementSdk.init({
-      defaultConfig,
-      onConfigChange,
-      mapToCapabilities,
-      mapToEditPanelValues
-    });
+    await window.elementSdk.init({ defaultConfig, onConfigChange, mapToCapabilities, mapToEditPanelValues });
   } else {
     onConfigChange(defaultConfig);
   }

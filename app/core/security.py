@@ -1,6 +1,7 @@
 import hashlib
 import base64
 import bcrypt
+import os
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
@@ -58,12 +59,13 @@ def decode_token(token: str) -> dict:
 
 
 def set_auth_cookie(response: Response, token: str):
+    is_production = os.getenv("ENVIRONMENT", "development") == "production"
     """Gắn token vào httpOnly cookie"""
     response.set_cookie(
         key=COOKIE_NAME,
         value=token,
         httponly=True,       # JS không đọc được
-        secure=True,        # True khi dùng HTTPS production
+        secure=is_production,   # False khi local, True khi Railway
         samesite="lax",      # chống CSRF
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/"
