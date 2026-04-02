@@ -5,11 +5,11 @@ const defaultConfig = {
   hero_subtitle: 'Hàng nghìn xe đã qua sử dụng chất lượng cao, giá tốt nhất thị trường. Cam kết xe chính chủ, đảm bảo pháp lý 100%.',
   contact_phone: '1900 1234',
   contact_email: 'contact@automart.vn',
-  bg_primary: '#0f172a',
+  bg_primary: '#1a1a1a',
   bg_surface: '#ffffff',
-  text_primary: '#1e293b',
-  accent_primary: '#f97316',
-  accent_secondary: '#fb923c',
+  text_primary: '#1a1a1a',
+  accent_primary: '#c8a96e',
+  accent_secondary: '#d4b97e',
   font_family: 'Inter',
   font_size: 16
 };
@@ -151,7 +151,6 @@ async function handleRegisterSubmit(e) {
 
 // ── Sell Form ────────────────────────────────────────
 function tryOpenSellModal() {
-  // Kiểm tra đăng nhập bằng cách xem header có tên user không
   const isLoggedIn = document.querySelector('.nav-actions [onclick="handleLogout()"]') !== null;
   if (isLoggedIn) {
     openModal('sellModal');
@@ -184,7 +183,7 @@ async function handleSellSubmit(e) {
     const res = await fetch(`${API_BASE}/ban-xe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',  // ← gửi cookie thay Bearer token
+      credentials: 'include',
       body: JSON.stringify(payload)
     });
 
@@ -228,6 +227,22 @@ function showFormError(elementId, message) {
 function hideFormError(elementId) {
   const el = document.getElementById(elementId);
   if (el) el.style.display = 'none';
+}
+
+// ── Scroll Row ───────────────────────────────────────
+function scrollRow(rowId, dir) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  row.scrollBy({ left: dir * 260, behavior: 'smooth' });
+}
+
+// ── Newsletter Submit ────────────────────────────────
+function handleNewsletterSubmit(e) {
+  e.preventDefault();
+  const input = e.target.querySelector('input[type="email"]');
+  if (!input?.value) return;
+  showToast('Đăng ký nhận tin thành công!');
+  input.value = '';
 }
 
 // ── Render ───────────────────────────────────────────
@@ -276,6 +291,52 @@ function renderBrands() {
   `).join('');
 }
 
+// ── Shared car card HTML builder ─────────────────────
+function buildCarCard(car, isDeal = false) {
+  const badge = isDeal
+    ? `<span class="car-badge car-badge-deal">Ưu<br>đãi</span>`
+    : car.badge
+      ? `<span class="car-badge ${car.badge === 'featured' ? 'car-badge-featured' : 'car-badge-sale'}">${car.badge === 'featured' ? 'Nổi bật' : 'Mới'}</span>`
+      : '';
+
+  const imgContent = car.image_url
+    ? `<img src="${car.image_url}" alt="${car.brand} ${car.model}" loading="lazy">`
+    : `<svg viewBox="0 0 230 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;position:absolute;top:0;left:0;">
+        <rect width="230" height="160" fill="#d8d8d0"/>
+        <line x1="0" y1="0" x2="230" y2="160" stroke="#b0b0a8" stroke-width="1"/>
+        <line x1="230" y1="0" x2="0" y2="160" stroke="#b0b0a8" stroke-width="1"/>
+      </svg>`;
+
+  return `
+    <div class="car-card">
+      <div class="car-image">
+        ${imgContent}
+        ${badge}
+      </div>
+      <div class="car-body">
+        <h3 class="car-title">${car.brand} ${car.model}</h3>
+        <div class="car-price">${Number(car.price).toLocaleString('vi-VN')} triệu</div>
+        <div class="car-specs">
+          <span class="car-spec">📅 ${car.year}</span>
+          <span class="car-spec">⚡ ${Number(car.km).toLocaleString('vi-VN')} km</span>
+          <span class="car-spec">⛽ ${car.fuel}</span>
+          <span class="car-spec">⚙️ ${car.trans}</span>
+        </div>
+        <div class="car-footer">
+          <button class="btn-quote" onclick="viewCar(${car.id})">Nhận báo giá</button>
+          <button class="btn-trial" onclick="showToast('Đăng ký lái thử thành công!')">Đăng kí lái thử</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Render scroll rows (featured + deals) ────────────
+function renderScrollRow(rowId, cars, isDeal = false) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  row.innerHTML = cars.map(car => buildCarCard(car, isDeal)).join('');
+}
+
 // ── Utilities ────────────────────────────────────────
 function adjustColor(hex, percent) {
   const num = parseInt(hex.replace('#', ''), 16);
@@ -298,16 +359,14 @@ function viewCar(id) {
   const car = allCars.find(c => c.id === id);
   if (!car) return;
 
-  // Điền thông tin vào modal
-  document.getElementById('carDetailTitle').textContent  = `${car.brand} ${car.model}`;
-  document.getElementById('carDetailPrice').textContent  = `${Number(car.price).toLocaleString('vi-VN')} triệu`;
-  document.getElementById('carDetailYear').textContent   = car.year;
-  document.getElementById('carDetailKm').textContent     = `${Number(car.km).toLocaleString('vi-VN')} km`;
-  document.getElementById('carDetailFuel').textContent   = car.fuel;
-  document.getElementById('carDetailTrans').textContent  = car.trans;
+  document.getElementById('carDetailTitle').textContent   = `${car.brand} ${car.model}`;
+  document.getElementById('carDetailPrice').textContent   = `${Number(car.price).toLocaleString('vi-VN')} triệu`;
+  document.getElementById('carDetailYear').textContent    = car.year;
+  document.getElementById('carDetailKm').textContent      = `${Number(car.km).toLocaleString('vi-VN')} km`;
+  document.getElementById('carDetailFuel').textContent    = car.fuel;
+  document.getElementById('carDetailTrans').textContent   = car.trans;
   document.getElementById('carDetailLocation').textContent = car.location;
 
-  // Đổi màu ảnh theo xe
   const img = document.getElementById('carDetailImage');
   if (img) img.style.background = `linear-gradient(135deg, ${car.color} 0%, ${adjustColor(car.color, -20)} 100%)`;
 
@@ -317,7 +376,18 @@ function viewCar(id) {
 function filterBrand(brand) {
   const brandSelect = document.getElementById('brandSelect');
   if (brandSelect) brandSelect.value = brand;
-  showToast(`Đang lọc xe ${brand}`);
+
+  const filtered = allCars.filter(c => c.brand === brand);
+  if (filtered.length > 0) {
+    renderCarsData(filtered);
+    showToast(`Hiển thị ${filtered.length} xe ${brand}`);
+  } else {
+    loadCarsFromAPI({ hang: brand }).then(cars => {
+      renderCarsData(cars);
+      showToast(`Hiển thị ${cars.length} xe ${brand}`);
+    });
+  }
+  document.getElementById('carGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function handleSearch(e) {
@@ -336,33 +406,36 @@ async function onConfigChange(config) {
   if (siteLogo) siteLogo.innerHTML = logoHTML;
   if (footerBrand) footerBrand.innerHTML = logoHTML;
 
-  const heroTitle = document.getElementById('heroTitle');
+  const heroTitle    = document.getElementById('heroTitle');
   const heroSubtitle = document.getElementById('heroSubtitle');
   const contactPhone = document.getElementById('contactPhone');
   const contactEmail = document.getElementById('contactEmail');
-  if (heroTitle) heroTitle.textContent = config.hero_title || defaultConfig.hero_title;
+  if (heroTitle)    heroTitle.textContent    = config.hero_title    || defaultConfig.hero_title;
   if (heroSubtitle) heroSubtitle.textContent = config.hero_subtitle || defaultConfig.hero_subtitle;
   if (contactPhone) contactPhone.textContent = config.contact_phone || defaultConfig.contact_phone;
   if (contactEmail) contactEmail.textContent = config.contact_email || defaultConfig.contact_email;
 
   const root = document.documentElement;
-  root.style.setProperty('--bg-primary', config.bg_primary || defaultConfig.bg_primary);
-  root.style.setProperty('--bg-surface', config.bg_surface || defaultConfig.bg_surface);
-  root.style.setProperty('--text-primary', config.text_primary || defaultConfig.text_primary);
-  root.style.setProperty('--accent-primary', config.accent_primary || defaultConfig.accent_primary);
-  root.style.setProperty('--accent-secondary', config.accent_secondary || defaultConfig.accent_secondary);
+  root.style.setProperty('--bg-primary',       config.bg_primary       || defaultConfig.bg_primary);
+  root.style.setProperty('--bg-surface',        config.bg_surface       || defaultConfig.bg_surface);
+  root.style.setProperty('--text-primary',      config.text_primary     || defaultConfig.text_primary);
+  root.style.setProperty('--accent-primary',    config.accent_primary   || defaultConfig.accent_primary);
+  root.style.setProperty('--accent-secondary',  config.accent_secondary || defaultConfig.accent_secondary);
+  // Các biến bổ sung — không override bằng config cũ, giữ từ CSS
+  root.style.setProperty('--accent-dark',   '#a8893e');
+  root.style.setProperty('--price-color',   '#c8722a');
 
   document.body.style.fontFamily = `${config.font_family || defaultConfig.font_family}, -apple-system, BlinkMacSystemFont, sans-serif`;
-  document.body.style.fontSize = `${config.font_size || defaultConfig.font_size}px`;
+  document.body.style.fontSize   = `${config.font_size   || defaultConfig.font_size}px`;
 }
 
 function mapToCapabilities(config) {
   return {
     recolorables: [
-      { get: () => config.bg_primary || defaultConfig.bg_primary, set: (v) => { config.bg_primary = v; window.elementSdk.setConfig({ bg_primary: v }); } },
-      { get: () => config.bg_surface || defaultConfig.bg_surface, set: (v) => { config.bg_surface = v; window.elementSdk.setConfig({ bg_surface: v }); } },
-      { get: () => config.text_primary || defaultConfig.text_primary, set: (v) => { config.text_primary = v; window.elementSdk.setConfig({ text_primary: v }); } },
-      { get: () => config.accent_primary || defaultConfig.accent_primary, set: (v) => { config.accent_primary = v; window.elementSdk.setConfig({ accent_primary: v }); } },
+      { get: () => config.bg_primary       || defaultConfig.bg_primary,       set: (v) => { config.bg_primary       = v; window.elementSdk.setConfig({ bg_primary: v }); } },
+      { get: () => config.bg_surface       || defaultConfig.bg_surface,       set: (v) => { config.bg_surface       = v; window.elementSdk.setConfig({ bg_surface: v }); } },
+      { get: () => config.text_primary     || defaultConfig.text_primary,     set: (v) => { config.text_primary     = v; window.elementSdk.setConfig({ text_primary: v }); } },
+      { get: () => config.accent_primary   || defaultConfig.accent_primary,   set: (v) => { config.accent_primary   = v; window.elementSdk.setConfig({ accent_primary: v }); } },
       { get: () => config.accent_secondary || defaultConfig.accent_secondary, set: (v) => { config.accent_secondary = v; window.elementSdk.setConfig({ accent_secondary: v }); } }
     ],
     borderables: [],
@@ -379,44 +452,33 @@ function mapToCapabilities(config) {
 
 function mapToEditPanelValues(config) {
   return new Map([
-    ['site_name', config.site_name || defaultConfig.site_name],
-    ['hero_title', config.hero_title || defaultConfig.hero_title],
-    ['hero_subtitle', config.hero_subtitle || defaultConfig.hero_subtitle],
-    ['contact_phone', config.contact_phone || defaultConfig.contact_phone],
-    ['contact_email', config.contact_email || defaultConfig.contact_email]
+    ['site_name',      config.site_name      || defaultConfig.site_name],
+    ['hero_title',     config.hero_title     || defaultConfig.hero_title],
+    ['hero_subtitle',  config.hero_subtitle  || defaultConfig.hero_subtitle],
+    ['contact_phone',  config.contact_phone  || defaultConfig.contact_phone],
+    ['contact_email',  config.contact_email  || defaultConfig.contact_email]
   ]);
 }
 
 // ── Mobile Nav Toggle ────────────────────────────────
 function initMobileNav() {
   const menuToggle = document.getElementById('menuToggle');
-  const navMenu = document.getElementById('navMenu');
+  const navMenu    = document.getElementById('navMenu');
   const navActions = document.querySelector('.nav-actions');
 
   if (!menuToggle || !navMenu) return;
 
-  // Tạo mobile actions item — clone từ nav-actions
   let mobileActions = document.getElementById('mobileNavActions');
   if (!mobileActions) {
     mobileActions = document.createElement('li');
     mobileActions.id = 'mobileNavActions';
-    mobileActions.style.cssText = `
-      border-top: 1px solid rgba(255,255,255,0.15);
-      padding-top: 12px;
-      margin-top: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    `;
-    // Clone nội dung từ nav-actions
     mobileActions.innerHTML = navActions.innerHTML;
     navMenu.appendChild(mobileActions);
   }
 
   menuToggle.addEventListener('click', (e) => {
     e.stopPropagation();
-    const isOpen = navMenu.classList.contains('open');
-    isOpen ? closeMenu() : openMenu();
+    navMenu.classList.contains('open') ? closeMenu() : openMenu();
   });
 
   document.addEventListener('click', (e) => {
@@ -428,14 +490,11 @@ function initMobileNav() {
   });
 
   function openMenu() {
-    // Sync lại nội dung nav-actions (vì Jinja2 render server-side)
     mobileActions.innerHTML = navActions.innerHTML;
-    // Đảm bảo các btn trong mobile full width
     mobileActions.querySelectorAll('.btn').forEach(btn => {
       btn.style.width = '100%';
       btn.style.justifyContent = 'center';
     });
-
     navMenu.classList.add('open');
     menuToggle.textContent = '✕';
     menuToggle.setAttribute('aria-expanded', 'true');
@@ -466,22 +525,22 @@ async function loadCarsFromAPI(filters = {}) {
     const data = await res.json();
 
     allCars = data.cars.map(car => ({
-      id: car.id,
-      brand: car.hang_xe || '',
-      model: car.dong_xe || '',
-      year: car.nam_san_xuat || 0,
-      price: car.gia || 0,
-      km: car.so_km || 0,
-      fuel: car.nhien_lieu || 'Xăng',
-      trans: car.hop_so || 'Tự động',
-      location: car.khu_vuc || '',
-      badge: car.badge || '',
-      color: car.color || '#6366f1'
+      id:    car.id,
+      brand: car.hang_xe       || '',
+      model: car.dong_xe       || '',
+      year:  car.nam_san_xuat  || 0,
+      price: car.gia           || 0,
+      km:    car.so_km         || 0,
+      fuel:  car.nhien_lieu    || 'Xăng',
+      trans: car.hop_so        || 'Tự động',
+      location: car.khu_vuc   || '',
+      badge: car.badge         || '',
+      color: car.color         || '#6366f1'
     }));
     return allCars;
   } catch (err) {
     console.warn('Dùng dữ liệu mẫu:', err);
-    allCars = carsData; // dùng carsData sẵn có trong file cũ
+    allCars = carsData;
     return allCars;
   }
 }
@@ -493,7 +552,7 @@ function renderCarsData(cars) {
 
   if (cars.length === 0) {
     grid.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#64748b;">
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#888880;">
         <div style="font-size:48px;margin-bottom:16px;">🔍</div>
         <h3>Không tìm thấy xe phù hợp</h3>
         <button class="btn btn-primary" style="margin-top:16px"
@@ -502,53 +561,7 @@ function renderCarsData(cars) {
     return;
   }
 
-  grid.innerHTML = cars.map(car => `
-    <div class="car-card">
-      <div class="car-image" style="background:linear-gradient(135deg,${car.color} 0%,${adjustColor(car.color,-20)} 100%);">
-        <svg width="100" height="60" viewBox="0 0 100 60" fill="white" style="opacity:.9;">
-          <path d="M15 45 L20 30 L35 25 L45 15 L70 15 L80 25 L95 30 L95 45 Z" fill="rgba(255,255,255,0.9)"/>
-          <circle cx="28" cy="48" r="8" fill="rgba(255,255,255,0.7)"/>
-          <circle cx="28" cy="48" r="4" fill="rgba(0,0,0,0.3)"/>
-          <circle cx="78" cy="48" r="8" fill="rgba(255,255,255,0.7)"/>
-          <circle cx="78" cy="48" r="4" fill="rgba(0,0,0,0.3)"/>
-          <rect x="50" y="22" width="18" height="10" rx="2" fill="rgba(200,230,255,0.8)"/>
-        </svg>
-        ${car.badge ? `<span class="car-badge ${car.badge==='featured'?'car-badge-featured':''}">${car.badge==='featured'?'⭐ Nổi bật':'🆕 Mới'}</span>` : ''}
-      </div>
-      <div class="car-body">
-        <h3 class="car-title">${car.brand} ${car.model}</h3>
-        <div class="car-price">${Number(car.price).toLocaleString('vi-VN')} triệu</div>
-        <div class="car-specs">
-          <span class="car-spec"><span class="icon-calendar"></span> ${car.year}</span>
-          <span class="car-spec"><span class="icon-speedometer"></span> ${Number(car.km).toLocaleString('vi-VN')} km</span>
-          <span class="car-spec"><span class="icon-fuel"></span> ${car.fuel}</span>
-          <span class="car-spec"><span class="icon-gear"></span> ${car.trans}</span>
-        </div>
-        <div class="car-footer">
-          <span class="car-location"><span class="icon-location"></span> ${car.location}</span>
-          <button class="btn btn-primary btn-small" onclick="viewCar(${car.id})">Xem chi tiết</button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-// ── Override filterBrand ──────────────────────────────
-function filterBrand(brand) {
-  const brandSelect = document.getElementById('brandSelect');
-  if (brandSelect) brandSelect.value = brand;
-
-  const filtered = allCars.filter(c => c.brand === brand);
-  if (filtered.length > 0) {
-    renderCarsData(filtered);
-    showToast(`Hiển thị ${filtered.length} xe ${brand}`);
-  } else {
-    loadCarsFromAPI({ hang: brand }).then(cars => {
-      renderCarsData(cars);
-      showToast(`Hiển thị ${cars.length} xe ${brand}`);
-    });
-  }
-  document.getElementById('carGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  grid.innerHTML = cars.map(car => buildCarCard(car, false)).join('');
 }
 
 // ── Override handleSearch ─────────────────────────────
@@ -578,7 +591,7 @@ async function handleSearch(e) {
 async function handleTuVanSubmit(e) {
   e.preventDefault();
   const form = e.target;
-  const btn = form.querySelector('button[type="submit"]');
+  const btn  = form.querySelector('button[type="submit"]');
   const data = Object.fromEntries(new FormData(form));
 
   if (!data.ho_ten || !data.so_dien_thoai) {
@@ -605,7 +618,7 @@ async function handleTuVanSubmit(e) {
 async function handleLienHeSubmit(e) {
   e.preventDefault();
   const form = e.target;
-  const btn = form.querySelector('button[type="submit"]');
+  const btn  = form.querySelector('button[type="submit"]');
   const data = Object.fromEntries(new FormData(form));
 
   if (!data.ho_ten || !data.email || !data.noi_dung) {
@@ -631,6 +644,16 @@ async function handleLienHeSubmit(e) {
 // ── Init ─────────────────────────────────────────────
 async function init() {
   const cars = await loadCarsFromAPI();
+
+  // Render scroll rows (trang chủ)
+  renderScrollRow('featuredRow', cars, false);
+  renderScrollRow('dealsRow', cars, true);
+
+  // Set tháng hiện tại cho "Ưu đãi tháng X"
+  const dealMonth = document.getElementById('dealMonth');
+  if (dealMonth) dealMonth.textContent = new Date().getMonth() + 1;
+
+  // Render grid (mua_xe)
   renderCarsData(cars);
   renderBrands();
   initMobileNav();
@@ -666,7 +689,6 @@ init();
     iframe.style.visibility = 'hidden';
     document.body.appendChild(iframe);
 
-    // challenge nằm trong scope, truy cập được iframe
     function challenge() {
       const doc = iframe.contentDocument || iframe.contentWindow.document;
       if (doc) {
