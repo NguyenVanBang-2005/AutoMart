@@ -143,112 +143,265 @@
 </div>
 
 <!-- Modal: Đăng nhập -->
+<!-- Modal: Đăng nhập -->
 <div class="modal" id="loginModal">
- <div class="modal-content">
-  <div class="modal-header">
-   <h3 class="modal-title"><span class="icon-person"></span> Đăng nhập</h3>
-   <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Close">×</button>
+  <div class="modal-content" style="max-width:420px;">
+    <div class="modal-header" style="border-bottom:none; padding-bottom:0;">
+      <button class="modal-close" onclick="closeModal('loginModal')" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:8px;">
+
+      <!-- Title -->
+      <h3 style="text-align:center; font-size:18px; font-weight:700; margin-bottom:20px; color:var(--text-primary);">
+        Chào mừng bạn đến với AutoMart
+      </h3>
+
+      <!-- Tabs -->
+      <div style="display:flex; background:#f1f5f9; border-radius:10px; padding:4px; margin-bottom:24px;">
+        <button id="loginTabRegister" onclick="switchModal('loginModal','registerModal')"
+          style="flex:1; padding:10px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;
+                 background:transparent; color:#64748b; transition:all .2s;">
+          Tạo tài khoản
+        </button>
+        <button id="loginTabLogin"
+          style="flex:1; padding:10px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;
+                 background:var(--accent-primary); color:#fff; transition:all .2s;">
+          Đăng nhập
+        </button>
+      </div>
+
+      <!-- Panel 1: Social login (mặc định) -->
+      <div id="loginSocialPanel">
+        <button onclick="handleSocialLogin('facebook')"
+          style="width:100%; display:flex; align-items:center; gap:12px; padding:13px 16px;
+                 border:1.5px solid #e2e8f0; border-radius:10px; background:#fff;
+                 font-size:14px; font-weight:600; cursor:pointer; margin-bottom:12px;
+                 transition:border-color .2s;"
+          onmouseover="this.style.borderColor='#c8a96e'"
+          onmouseout="this.style.borderColor='#e2e8f0'">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+          </svg>
+          Đăng nhập bằng Facebook
+        </button>
+
+        <button onclick="handleSocialLogin('google')"
+          style="width:100%; display:flex; align-items:center; gap:12px; padding:13px 16px;
+                 border:1.5px solid #e2e8f0; border-radius:10px; background:#fff;
+                 font-size:14px; font-weight:600; cursor:pointer; margin-bottom:12px;
+                 transition:border-color .2s;"
+          onmouseover="this.style.borderColor='#c8a96e'"
+          onmouseout="this.style.borderColor='#e2e8f0'">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+          Đăng nhập bằng Google
+        </button>
+
+        <div style="text-align:center;">
+          <a href="#" onclick="switchLoginPanel('email')"
+            style="color:var(--accent-primary); font-size:14px; font-weight:600; text-decoration:none;">
+            Cách khác
+          </a>
+        </div>
+      </div>
+
+      <!-- Panel 2: Email/Password login -->
+      <div id="loginEmailPanel" style="display:none;">
+        <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+          <div class="form-group">
+            <label style="font-size:13px; font-weight:600; color:#374151; display:block; margin-bottom:8px;">
+              Số điện thoại
+            </label>
+            <input type="email" class="form-control" placeholder="Số điện thoại" required
+              style="margin-bottom:12px;">
+          </div>
+          <div class="form-group">
+            <label style="font-size:13px; font-weight:600; color:#374151; display:block; margin-bottom:8px;">
+              Mật khẩu
+            </label>
+            <input type="password" class="form-control" placeholder="Mật khẩu" required
+              style="margin-bottom:16px;">
+          </div>
+
+          <div id="loginError" style="display:none; background:#fee2e2; color:#dc2626;
+            padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:12px;"></div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-bottom:16px;">
+            Xác nhận
+          </button>
+
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <a href="#" style="color:var(--accent-primary); font-size:13px; text-decoration:none;">
+              Quên mật khẩu?
+            </a>
+            <a href="#" onclick="switchLoginPanel('social')"
+              style="color:var(--accent-primary); font-size:13px; font-weight:600; text-decoration:none;">
+              Cách khác
+            </a>
+          </div>
+        </form>
+      </div>
+
+    </div>
   </div>
-  <div class="modal-body">
-   <form id="loginForm" onsubmit="handleLoginSubmit(event)">
-    <div class="form-group">
-     <label class="form-label">Email</label>
-     <input type="email" class="form-control" placeholder="email@example.com" required>
-    </div>
-    <div class="form-group">
-     <label class="form-label">Mật khẩu</label>
-     <input type="password" class="form-control" required>
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
-      <input type="checkbox"> Ghi nhớ đăng nhập
-     </label>
-     <a href="#" style="color: var(--accent-primary); font-size: 14px; text-decoration: none;">
-      Quên mật khẩu?
-     </a>
-    </div>
-    <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 16px;">
-     Đăng nhập
-    </button>
-    <div style="text-align: center; font-size: 14px;">
-     <span style="color: #64748b;">Chưa có tài khoản?</span>
-     <a href="#" style="color: var(--accent-primary); text-decoration: none; font-weight: 600;"
-      onclick="switchModal('loginModal', 'registerModal')">
-      Đăng ký ngay
-     </a>
-    </div>
-   </form>
-  </div>
- </div>
 </div>
 <!-- ← đóng #loginModal đúng chỗ -->
 
 <!-- Modal: Đăng ký -->
+<!-- Modal: Đăng ký / Đăng nhập (tabbed) -->
 <div class="modal" id="registerModal">
- <div class="modal-content">
-  <div class="modal-header">
-   <h3 class="modal-title"><span class="icon-person"></span> Đăng ký tài khoản</h3>
-   <button class="modal-close" onclick="closeModal('registerModal')" aria-label="Close">×</button>
+  <div class="modal-content" style="max-width:420px;">
+    <div class="modal-header" style="border-bottom:none; padding-bottom:0;">
+      <button class="modal-close" onclick="closeModal('registerModal')" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body" style="padding-top:8px;">
+
+      <!-- Title -->
+      <h3 style="text-align:center; font-size:18px; font-weight:700; margin-bottom:20px; color:var(--text-primary);">
+        Chào mừng bạn đến với AutoMart
+      </h3>
+
+      <!-- Tabs -->
+      <div style="display:flex; background:#f1f5f9; border-radius:10px; padding:4px; margin-bottom:24px;">
+        <button id="tabRegister" onclick="switchRegisterTab('register')"
+          style="flex:1; padding:10px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;
+                 background:var(--accent-primary); color:#fff; transition:all .2s;">
+          Tạo tài khoản
+        </button>
+        <button id="tabLogin" onclick="switchRegisterTab('login')"
+          style="flex:1; padding:10px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;
+                 background:transparent; color:#64748b; transition:all .2s;">
+          Đăng nhập
+        </button>
+      </div>
+
+      <!-- ── REGISTER STEPS ── -->
+      <div id="registerSteps">
+
+        <!-- Step 1: Số điện thoại -->
+          <div id="regStep1">
+              <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:8px;">
+                Email *
+              </label>
+              <input id="regEmail" type="email" class="form-control"
+                placeholder="email@example.com" style="margin-bottom:12px;">
+
+              <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:8px;">
+                Số điện thoại *
+              </label>
+              <input id="regPhone" type="tel" class="form-control"
+                placeholder="Nhập số điện thoại của bạn" style="margin-bottom:16px;"
+                oninput="this.value=this.value.replace(/\D/g,'')">
+
+              <div id="regStep1Error" style="display:none;background:#fee2e2;color:#dc2626;
+                padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;"></div>
+
+              <button onclick="regGoStep2()"
+                class="btn btn-primary" style="width:100%;margin-bottom:16px;">
+                Tiếp tục
+              </button>
+
+              <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#64748b;cursor:pointer;">
+                <input type="checkbox" id="regAgree" style="margin-top:2px;accent-color:var(--accent-primary);">
+                <span>
+                  Tôi đã đọc, hiểu và đồng ý với
+                  <a href="#" style="color:var(--accent-primary);text-decoration:none;">Chính sách bảo mật</a>
+                  và
+                  <a href="#" style="color:var(--accent-primary);text-decoration:none;">Quy chế hoạt động</a>
+                  của AutoMart
+                </span>
+              </label>
+        </div>
+
+        <!-- Step 2: Mật khẩu -->
+        <div id="regStep2" style="display:none;">
+          <label style="font-size:13px; font-weight:600; color:#374151; display:block; margin-bottom:8px;">
+            Mật khẩu
+          </label>
+          <input id="regPassword" type="password" class="form-control"
+            placeholder="Mật khẩu" style="margin-bottom:12px;">
+
+          <label style="font-size:13px; font-weight:600; color:#374151; display:block; margin-bottom:8px;">
+            Xác nhận mật khẩu
+          </label>
+          <input id="regConfirmPassword" type="password" class="form-control"
+            placeholder="Xác nhận mật khẩu" style="margin-bottom:16px;">
+
+          <div id="regStep2Error" style="display:none; background:#fee2e2; color:#dc2626;
+            padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:12px;"></div>
+
+          <button onclick="regGoStep3()"
+            class="btn btn-primary" style="width:100%;">
+            Xác nhận
+          </button>
+        </div>
+
+        <!-- Step 3: OTP -->
+        <div id="regStep3" style="display:none;">
+          <p style="font-size:13px; font-weight:600; color:#374151; margin-bottom:4px;">
+            Xác thực OTP
+          </p>
+          <p style="font-size:12px; color:#64748b; margin-bottom:16px;">
+            Mã OTP đã được gửi về số điện thoại của bạn.
+            <a href="#" id="regResendOtp" onclick="regResendOTP(event)"
+              style="color:var(--accent-primary); text-decoration:none;">Thử lại</a>
+          </p>
+
+          <!-- 5 ô OTP -->
+          <div style="display:flex; gap:10px; justify-content:center; margin-bottom:20px;">
+            <input type="text" maxlength="1" class="otp-box" data-index="0"
+              style="width:48px; height:52px; text-align:center; font-size:20px; font-weight:700;
+                     border:2px solid #e2e8f0; border-radius:10px; outline:none;">
+            <input type="text" maxlength="1" class="otp-box" data-index="1"
+              style="width:48px; height:52px; text-align:center; font-size:20px; font-weight:700;
+                     border:2px solid #e2e8f0; border-radius:10px; outline:none;">
+            <input type="text" maxlength="1" class="otp-box" data-index="2"
+              style="width:48px; height:52px; text-align:center; font-size:20px; font-weight:700;
+                     border:2px solid #e2e8f0; border-radius:10px; outline:none;">
+            <input type="text" maxlength="1" class="otp-box" data-index="3"
+              style="width:48px; height:52px; text-align:center; font-size:20px; font-weight:700;
+                     border:2px solid #e2e8f0; border-radius:10px; outline:none;">
+            <input type="text" maxlength="1" class="otp-box" data-index="4"
+              style="width:48px; height:52px; text-align:center; font-size:20px; font-weight:700;
+                     border:2px solid #e2e8f0; border-radius:10px; outline:none;">
+          </div>
+
+          <div id="regStep3Error" style="display:none; background:#fee2e2; color:#dc2626;
+            padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:12px;"></div>
+
+          <button onclick="regSubmitOTP()"
+            class="btn btn-primary" style="width:100%;">
+            Tiếp tục
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ── LOGIN PANEL ── -->
+      <div id="loginPanel" style="display:none;">
+        <form id="loginFormTabbed" onsubmit="handleLoginSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" placeholder="email@example.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mật khẩu</label>
+            <input type="password" class="form-control" required>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px;">
+              <input type="checkbox"> Ghi nhớ đăng nhập
+            </label>
+            <a href="#" style="color:var(--accent-primary); font-size:13px; text-decoration:none;">Quên mật khẩu?</a>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;">Đăng nhập</button>
+        </form>
+      </div>
+
+    </div>
   </div>
-  <div class="modal-body">
-   <form id="registerForm" onsubmit="handleRegisterSubmit(event)">
-    <div class="form-group">
-     <label class="form-label">Họ tên *</label>
-     <input type="text" name="fullName" class="form-control"
-      placeholder="Nguyễn Văn A" required>
-    </div>
-    <div class="form-group">
-     <label class="form-label">Email *</label>
-     <input type="email" name="email" class="form-control"
-      placeholder="email@example.com" required>
-    </div>
-    <div class="form-group">
-     <label class="form-label">Số điện thoại *</label>
-     <input type="tel" name="phone" class="form-control"
-      placeholder="0901 234 567" required>
-    </div>
-    <div class="form-group">
-     <label class="form-label">Mật khẩu *</label>
-     <input type="password" name="password" class="form-control"
-      placeholder="Tối thiểu 6 ký tự" required>
-    </div>
-    <div class="form-group">
-     <label class="form-label">Xác nhận mật khẩu *</label>
-     <input type="password" name="confirmPassword" class="form-control"
-      placeholder="Nhập lại mật khẩu" required>
-    </div>
-    <div class="form-group">
-     <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer;">
-      <input type="checkbox" name="agree" required>
-      Tôi đồng ý với
-      <a href="#" style="color: var(--accent-primary); text-decoration: none;">điều khoản sử dụng</a>
-     </label>
-    </div>
-
-    <!-- Thông báo lỗi -->
-    <div id="registerError" style="
-     display: none;
-     background: #fee2e2;
-     color: #dc2626;
-     padding: 10px 14px;
-     border-radius: 8px;
-     font-size: 14px;
-     margin-bottom: 12px;">
-    </div>
-
-    <button type="submit" id="registerSubmitBtn"
-     class="btn btn-primary" style="width: 100%; margin-bottom: 16px;">
-     Đăng ký
-    </button>
-
-    <div style="text-align: center; font-size: 14px;">
-     <span style="color: #64748b;">Đã có tài khoản?</span>
-     <a href="#" style="color: var(--accent-primary); text-decoration: none; font-weight: 600;"
-      onclick="switchModal('registerModal', 'loginModal')">
-      Đăng nhập ngay
-     </a>
-    </div>
-   </form>
-  </div>
- </div>
 </div>

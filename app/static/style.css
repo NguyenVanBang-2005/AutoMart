@@ -506,23 +506,23 @@ textarea.form-control { resize: vertical; }
 /* ══════════════════════════════════════════════════
    ICONS
    ══════════════════════════════════════════════════ */
-.icon-search::before      { content: '🔍'; }
-.icon-car::before         { content: '🚗'; }
-.icon-calendar::before    { content: '📅'; }
-.icon-speedometer::before { content: '⚡'; }
-.icon-fuel::before        { content: '⛽'; }
-.icon-gear::before        { content: '⚙️'; }
-.icon-location::before    { content: '📍'; }
-.icon-shield::before      { content: '🛡️'; }
-.icon-bank::before        { content: '🏦'; }
-.icon-refresh::before     { content: '🔄'; }
-.icon-wrench::before      { content: '🔧'; }
-.icon-check::before       { content: '✓'; }
-.icon-phone::before       { content: '📞'; }
-.icon-email::before       { content: '✉️'; }
-.icon-clock::before       { content: '🕐'; }
-.icon-megaphone::before   { content: '📢'; }
-.icon-person::before      { content: '👤'; }
+.icon-search::before      { content: ''; }
+.icon-car::before         { content: ''; }
+.icon-calendar::before    { content: ''; }
+.icon-speedometer::before { content: ''; }
+.icon-fuel::before        { content: ''; }
+.icon-gear::before        { content: ''; }
+.icon-location::before    { content: ''; }
+.icon-shield::before      { content: ''; }
+.icon-bank::before        { content: ''; }
+.icon-refresh::before     { content: ''; }
+.icon-wrench::before      { content: ''; }
+.icon-check::before       { content: ''; }
+.icon-phone::before       { content: ''; }
+.icon-email::before       { content: ''; }
+.icon-clock::before       { content: ''; }
+.icon-megaphone::before   { content: ''; }
+.icon-person::before      { content: ''; }
 
 /* ══════════════════════════════════════════════════
    RESPONSIVE

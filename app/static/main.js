@@ -18,23 +18,86 @@ const API_BASE = `${window.location.origin}/api/v1`;
 
 // ── Car & Brand Data ─────────────────────────────────
 const carsData = [
-  { id: 1, brand: 'Toyota', model: 'Camry 2.5Q', year: 2022, price: 985, km: 25000, fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM', badge: 'featured', color: '#6366f1' },
-  { id: 2, brand: 'Honda', model: 'Civic RS', year: 2023, price: 789, km: 12000, fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội', badge: 'new', color: '#0ea5e9' },
-  { id: 3, brand: 'Mazda', model: 'CX-5 Premium', year: 2022, price: 825, km: 35000, fuel: 'Xăng', trans: 'Tự động', location: 'Đà Nẵng', badge: '', color: '#ef4444' },
-  { id: 4, brand: 'Hyundai', model: 'Tucson 2.0', year: 2023, price: 845, km: 18000, fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM', badge: 'featured', color: '#10b981' },
-  { id: 5, brand: 'Kia', model: 'Seltos 1.4 Turbo', year: 2022, price: 625, km: 28000, fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội', badge: '', color: '#8b5cf6' },
-  { id: 6, brand: 'Ford', model: 'Ranger Wildtrak', year: 2023, price: 920, km: 15000, fuel: 'Dầu', trans: 'Tự động', location: 'TP.HCM', badge: 'new', color: '#3b82f6' }
+  // ── Toyota ───────────────────────────────────────────
+  { id: 1,  brand: 'Toyota', model: 'Camry 2.0E SX',          year: 2019, price: 850,  km: 45000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: 'featured', color: '#6366f1' },
+  { id: 2,  brand: 'Toyota', model: 'Veloz Cross 2022 CVT Top', year: 2022, price: 720, km: 80000, fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#6366f1' },
+  { id: 3,  brand: 'Toyota', model: 'YARIS 2015 Bản G',        year: 2015, price: 380,  km: 60000,  fuel: 'Xăng', trans: 'Tự động', location: 'Đà Nẵng', badge: '',         color: '#6366f1' },
+  { id: 4,  brand: 'Toyota', model: 'Land Cruiser V8 2011',    year: 2011, price: 1850, km: 90000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: 'featured', color: '#6366f1' },
+  { id: 5,  brand: 'Toyota', model: 'Fortuner 2.7V 4x2 AT',   year: 2016, price: 650,  km: 75000,  fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#6366f1' },
+  { id: 6,  brand: 'Toyota', model: 'Innova 2.0E',             year: 2017, price: 480,  km: 98000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#6366f1' },
+
+  // ── Honda ────────────────────────────────────────────
+  { id: 7,  brand: 'Honda',  model: 'CR-V 2.4 Màu Trắng',     year: 2016, price: 560,  km: 65000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#0ea5e9' },
+  { id: 8,  brand: 'Honda',  model: 'Civic 2020 1.5RS',        year: 2020, price: 680,  km: 35000,  fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: 'new',      color: '#0ea5e9' },
+  { id: 9,  brand: 'Honda',  model: 'City 2025 L 1.5 AT',      year: 2025, price: 520,  km: 7000,   fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: 'new',      color: '#0ea5e9' },
+  { id: 10, brand: 'Honda',  model: 'CRV-L 2024',              year: 2024, price: 1050, km: 8000,   fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: 'featured', color: '#0ea5e9' },
+  { id: 11, brand: 'Honda',  model: 'Civic 2008 Bắc 150.000km', year: 2008, price: 220, km: 150000, fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#0ea5e9' },
+
+  // ── Mazda ────────────────────────────────────────────
+  { id: 12, brand: 'Mazda',  model: 'CX-5 2.0 Premium SX',    year: 2021, price: 750,  km: 30000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: 'featured', color: '#ef4444' },
+  { id: 13, brand: 'Mazda',  model: 'CX5 2.5 2019 Màu Đỏ',    year: 2019, price: 680,  km: 45000,  fuel: 'Xăng', trans: 'Tự động', location: 'Đà Nẵng', badge: '',         color: '#ef4444' },
+  { id: 14, brand: 'Mazda',  model: 'Mazda2 2011 Trắng',       year: 2011, price: 220,  km: 92000,  fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#ef4444' },
+  { id: 15, brand: 'Mazda',  model: '3 Sport 2020 1.5L Luxury', year: 2020, price: 560, km: 28000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#ef4444' },
+  { id: 16, brand: 'Mazda',  model: '2 2018 1.5 AT Sedan',     year: 2018, price: 360,  km: 60000,  fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#ef4444' },
+  { id: 17, brand: 'Mazda',  model: '6 2014 2.0 AT',           year: 2014, price: 420,  km: 85000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#ef4444' },
+
+  // ── Hyundai ──────────────────────────────────────────
+  { id: 18, brand: 'Hyundai', model: 'Tucson ĐK T1221 Siêu Mới', year: 2021, price: 750, km: 15000, fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM', badge: 'featured', color: '#10b981' },
+  { id: 19, brand: 'Hyundai', model: 'Santa Fe 2016 2.4L 4WD',  year: 2016, price: 620,  km: 98000,  fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#10b981' },
+  { id: 20, brand: 'Hyundai', model: 'Grand i10 2025 1.2 MT',   year: 2025, price: 360,  km: 5000,   fuel: 'Xăng', trans: 'Số sàn',  location: 'TP.HCM',  badge: 'new',      color: '#10b981' },
+  { id: 21, brand: 'Hyundai', model: 'Avante 2011 1.6L Đen',    year: 2011, price: 270,  km: 95000,  fuel: 'Xăng', trans: 'Tự động', location: 'Đà Nẵng', badge: '',         color: '#10b981' },
+  { id: 22, brand: 'Hyundai', model: 'Stargazer 2022 1.5 AT',   year: 2022, price: 480,  km: 22000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#10b981' },
+  { id: 23, brand: 'Hyundai', model: 'SANTAFE Full Dầu T1221',  year: 2021, price: 890,  km: 30000,  fuel: 'Dầu',  trans: 'Tự động', location: 'Hà Nội',  badge: 'featured', color: '#10b981' },
+
+  // ── Kia ──────────────────────────────────────────────
+  { id: 24, brand: 'Kia',    model: 'K5',                       year: 2023, price: 750,  km: 8000,   fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#8b5cf6' },
+  { id: 25, brand: 'Kia',    model: 'K3 1.6 Premium 2022',      year: 2022, price: 520,  km: 58000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#8b5cf6' },
+  { id: 26, brand: 'Kia',    model: 'Sorento 2021 Máy Dầu',     year: 2021, price: 850,  km: 40000,  fuel: 'Dầu',  trans: 'Tự động', location: 'Hà Nội',  badge: 'featured', color: '#8b5cf6' },
+  { id: 27, brand: 'Kia',    model: 'Sonet Màu Đỏ',             year: 2022, price: 480,  km: 15000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: 'new',      color: '#8b5cf6' },
+  { id: 28, brand: 'Kia',    model: 'Morning Van 2016 Xanh Nhạt', year: 2016, price: 220, km: 65000, fuel: 'Xăng', trans: 'Số sàn',  location: 'Đà Nẵng', badge: '',         color: '#8b5cf6' },
+
+  // ── Ford ─────────────────────────────────────────────
+  { id: 29, brand: 'Ford',   model: 'Ranger 2016 Wildtrak 3.2 4x4', year: 2016, price: 580, km: 120000, fuel: 'Dầu', trans: 'Tự động', location: 'TP.HCM', badge: '',        color: '#3b82f6' },
+  { id: 30, brand: 'Ford',   model: 'Territory 2023 Titanium X',  year: 2023, price: 820,  km: 52000,  fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: 'new',      color: '#3b82f6' },
+  { id: 31, brand: 'Ford',   model: 'EcoSport 2019 Đỏ Ruby',      year: 2019, price: 420,  km: 45000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#3b82f6' },
+  { id: 32, brand: 'Ford',   model: 'Focus 2.0 Titanium 2013',    year: 2013, price: 320,  km: 90000,  fuel: 'Xăng', trans: 'Tự động', location: 'Đà Nẵng', badge: '',         color: '#3b82f6' },
+  { id: 33, brand: 'Ford',   model: 'Escape 2007 Vàng Cát',       year: 2007, price: 180,  km: 120000, fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#3b82f6' },
+  { id: 34, brand: 'Ford',   model: 'Everest Titanium 2.0L 4x2AT', year: 2023, price: 950, km: 18000,  fuel: 'Dầu',  trans: 'Tự động', location: 'TP.HCM',  badge: 'featured', color: '#3b82f6' },
+
+  // ── BMW ──────────────────────────────────────────────
+  { id: 35, brand: 'BMW',    model: 'X1 sDrive20i 2017',         year: 2017, price: 780,  km: 65000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#f59e0b' },
+  { id: 36, brand: 'BMW',    model: '330i M Sport 2024',         year: 2024, price: 1850, km: 8000,   fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: 'new',      color: '#f59e0b' },
+  { id: 37, brand: 'BMW',    model: '328i Model 2015 up M3',     year: 2015, price: 950,  km: 75000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#f59e0b' },
+  { id: 38, brand: 'BMW',    model: 'X1 Nhập Mỹ 2019 52000km',  year: 2019, price: 1050, km: 52000,  fuel: 'Xăng', trans: 'Tự động', location: 'Đà Nẵng', badge: 'featured', color: '#f59e0b' },
+  { id: 39, brand: 'BMW',    model: '320i Sport Line 2022',      year: 2022, price: 1380, km: 28000,  fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#f59e0b' },
+  { id: 40, brand: 'BMW',    model: 'X3 xDrive20i CUV 2014',    year: 2014, price: 820,  km: 88000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#f59e0b' },
+
+  // ── Mercedes-Benz ────────────────────────────────────
+  { id: 41, brand: 'Benz',   model: 'C300 AMG sx 2015',         year: 2015, price: 980,  km: 70000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: 'featured', color: '#64748b' },
+  { id: 42, brand: 'Benz',   model: 'CLA 200 2015 đk 2016',     year: 2015, price: 750,  km: 55000,  fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#64748b' },
+  { id: 43, brand: 'Benz',   model: 'C200 2016 đăng ký 2017',   year: 2016, price: 850,  km: 60000,  fuel: 'Xăng', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#64748b' },
+  { id: 44, brand: 'Benz',   model: 'GL V8 4Matic 2011',        year: 2011, price: 1050, km: 95000,  fuel: 'Xăng', trans: 'Tự động', location: 'Đà Nẵng', badge: '',         color: '#64748b' },
+  { id: 45, brand: 'Benz',   model: 'E280 2005 Đen 160.000km',  year: 2005, price: 380,  km: 160000, fuel: 'Xăng', trans: 'Tự động', location: 'Hà Nội',  badge: '',         color: '#64748b' },
+  { id: 46, brand: 'Benz',   model: 'Sprinter 2010',             year: 2010, price: 420,  km: 180000, fuel: 'Dầu',  trans: 'Số sàn',  location: 'TP.HCM',  badge: '',         color: '#64748b' },
+
+  // ── Vinfast ──────────────────────────────────────────
+  { id: 47, brand: 'Vinfast', model: 'VF8 Plus 2023',            year: 2023, price: 850,  km: 15000,  fuel: 'Điện', trans: 'Tự động', location: 'Hà Nội',  badge: 'featured', color: '#06b6d4' },
+  { id: 48, brand: 'Vinfast', model: 'VF5 2025 Plus 39000km',    year: 2025, price: 420,  km: 39000,  fuel: 'Điện', trans: 'Tự động', location: 'TP.HCM',  badge: '',         color: '#06b6d4' },
+  { id: 49, brand: 'Vinfast', model: 'VF6 Plus Full Option 2024', year: 2024, price: 680, km: 12000,  fuel: 'Điện', trans: 'Tự động', location: 'Hà Nội',  badge: 'new',      color: '#06b6d4' },
+  { id: 50, brand: 'Vinfast', model: 'VF3 Xám Xi Măng',          year: 2024, price: 320,  km: 8000,   fuel: 'Điện', trans: 'Tự động', location: 'TP.HCM',  badge: 'new',      color: '#06b6d4' },
+  { id: 51, brand: 'Vinfast', model: 'Limo Green 2026 0km',      year: 2026, price: 1200, km: 0,      fuel: 'Điện', trans: 'Tự động', location: 'Hà Nội',  badge: 'new',      color: '#06b6d4' },
 ];
 
 const brandsData = [
-  { name: 'Toyota', icon: '🚗' },
-  { name: 'Honda', icon: '🏎️' },
-  { name: 'Mazda', icon: '🚙' },
-  { name: 'Hyundai', icon: '🚐' },
-  { name: 'Kia', icon: '🚕' },
-  { name: 'Ford', icon: '🛻' },
-  { name: 'Mercedes', icon: '🚘' },
-  { name: 'BMW', icon: '🏁' }
+  { name: 'Toyota',  icon: '' },
+  { name: 'Honda',   icon: '' },
+  { name: 'Mazda',   icon: '' },
+  { name: 'Hyundai', icon: '' },
+  { name: 'Kia',     icon: '' },
+  { name: 'Ford',    icon: '' },
+  { name: 'BMW',     icon: '' },
+  { name: 'Benz',    icon: '' },
+  { name: 'Vinfast', icon: '' },
 ];
 
 // ── Auth (HttpOnly Cookie) ───────────────────────────
@@ -56,7 +119,8 @@ async function handleLoginSubmit(e) {
   const password = form.querySelector('input[type="password"]').value;
 
   if (!email || password.length < 6) {
-    showToast('Email hoặc mật khẩu không hợp lệ!');
+    const errEl = document.getElementById('loginError');
+    if (errEl) { errEl.textContent = 'Email hoặc mật khẩu không hợp lệ!'; errEl.style.display = 'block'; }
     return;
   }
 
@@ -134,7 +198,7 @@ async function handleRegisterSubmit(e) {
       return;
     }
 
-    showToast(`Chào mừng ${result.user.ho_ten}! 🎉`);
+    showToast(`Chào mừng ${result.user.ho_ten}!`);
     closeModal('registerModal');
     form.reset();
     hideFormError('registerError');
@@ -260,7 +324,7 @@ function renderCars() {
           <circle cx="78" cy="48" r="4" fill="rgba(0,0,0,0.3)"/>
           <rect x="50" y="22" width="18" height="10" rx="2" fill="rgba(200,230,255,0.8)"/>
         </svg>
-        ${car.badge ? `<span class="car-badge ${car.badge === 'featured' ? 'car-badge-featured' : ''}">${car.badge === 'featured' ? '⭐ Nổi bật' : '🆕 Mới'}</span>` : ''}
+        ${car.badge ? `<span class="car-badge ${car.badge === 'featured' ? 'car-badge-featured' : ''}">${car.badge === 'featured' ? 'Nổi bật' : 'Mới'}</span>` : ''}
       </div>
       <div class="car-body">
         <h3 class="car-title">${car.brand} ${car.model}</h3>
@@ -317,10 +381,10 @@ function buildCarCard(car, isDeal = false) {
         <h3 class="car-title">${car.brand} ${car.model}</h3>
         <div class="car-price">${Number(car.price).toLocaleString('vi-VN')} triệu</div>
         <div class="car-specs">
-          <span class="car-spec">📅 ${car.year}</span>
-          <span class="car-spec">⚡ ${Number(car.km).toLocaleString('vi-VN')} km</span>
-          <span class="car-spec">⛽ ${car.fuel}</span>
-          <span class="car-spec">⚙️ ${car.trans}</span>
+          <span class="car-spec"><strong>Năm Sản Xuất:</strong>  ${car.year}</span>
+          <span class="car-spec"><strong>ODO: </strong> ${Number(car.km).toLocaleString('vi-VN')} km</span>
+          <span class="car-spec"><strong>Loại Máy: </strong>Máy ${car.fuel}</span>
+          <span class="car-spec"><strong>Hộp Số: </strong>${car.trans}</span>
         </div>
         <div class="car-footer">
           <button class="btn-quote" onclick="viewCar(${car.id})">Nhận báo giá</button>
@@ -525,17 +589,18 @@ async function loadCarsFromAPI(filters = {}) {
     const data = await res.json();
 
     allCars = data.cars.map(car => ({
-      id:    car.id,
-      brand: car.hang_xe       || '',
-      model: car.dong_xe       || '',
-      year:  car.nam_san_xuat  || 0,
-      price: car.gia           || 0,
-      km:    car.so_km         || 0,
-      fuel:  car.nhien_lieu    || 'Xăng',
-      trans: car.hop_so        || 'Tự động',
-      location: car.khu_vuc   || '',
-      badge: car.badge         || '',
-      color: car.color         || '#6366f1'
+      id:        car.id,
+      brand:     car.hang      || '',
+      model:     car.dong      || '',
+      year:      car.nam       || 0,
+      price:     car.gia       || 0,
+      km:        car.km        || 0,
+      fuel:      car.nhien_lieu || 'Xăng',
+      trans:     car.hop_so    || 'Tự động',
+      location:  car.khu_vuc  || '',
+      badge:     car.badge     || '',
+      color:     car.color     || '#6366f1',
+      image_url: car.anh       || ''
     }));
     return allCars;
   } catch (err) {
@@ -671,6 +736,202 @@ async function init() {
     await window.elementSdk.init({ defaultConfig, onConfigChange, mapToCapabilities, mapToEditPanelValues });
   } else {
     onConfigChange(defaultConfig);
+  }
+}
+
+// ── Register Flow (multi-step) ────────────────────────
+
+// Dữ liệu tạm trong flow đăng ký
+let _regData = { ho_ten: '', email: '', phone: '', password: '' };
+
+function switchRegisterTab(tab) {
+  const isRegister = tab === 'register';
+  document.getElementById('registerSteps').style.display = isRegister ? 'block' : 'none';
+  document.getElementById('loginPanel').style.display    = isRegister ? 'none'  : 'block';
+
+  const tabReg = document.getElementById('tabRegister');
+  const tabLog = document.getElementById('tabLogin');
+  tabReg.style.background = isRegister ? 'var(--accent-primary)' : 'transparent';
+  tabReg.style.color       = isRegister ? '#fff'    : '#64748b';
+  tabLog.style.background  = isRegister ? 'transparent' : 'var(--accent-primary)';
+  tabLog.style.color        = isRegister ? '#64748b' : '#fff';
+
+  // Reset về step 1 nếu chuyển sang tab register
+  if (isRegister) regShowStep(1);
+}
+
+function regShowStep(step) {
+  [1, 2, 3].forEach(s => {
+    const el = document.getElementById(`regStep${s}`);
+    if (el) el.style.display = s === step ? 'block' : 'none';
+  });
+  // Clear errors
+  ['regStep2Error', 'regStep3Error'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+}
+
+function regGoStep2() {
+  const email  = document.getElementById('regEmail').value.trim();
+  const phone  = document.getElementById('regPhone').value.trim();
+  const agreed = document.getElementById('regAgree').checked;
+
+  if (!email || !email.includes('@')) {
+    showToast('Vui lòng nhập email hợp lệ!');
+    return;
+  }
+  if (!phone || phone.length < 9) {
+    showToast('Vui lòng nhập số điện thoại hợp lệ!');
+    return;
+  }
+  if (!agreed) {
+    showToast('Vui lòng đồng ý với điều khoản!');
+    return;
+  }
+  _regData.email = email;
+  _regData.phone = phone;
+  regShowStep(2);
+}
+
+async function regGoStep3() {
+  const pw    = document.getElementById('regPassword').value;
+  const pw2   = document.getElementById('regConfirmPassword').value;
+  const errEl = document.getElementById('regStep2Error');
+  if (pw.length < 6) {
+    errEl.textContent = 'Mật khẩu phải có ít nhất 6 ký tự!';
+    errEl.style.display = 'block'; return;
+  }
+  if (pw !== pw2) {
+    errEl.textContent = 'Mật khẩu xác nhận không khớp!';
+    errEl.style.display = 'block'; return;
+  }
+  errEl.style.display = 'none';
+  _regData.password = pw;
+
+  try {
+    const res = await fetch(`${API_BASE}/users/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: _regData.email })
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      errEl.textContent = result.detail || 'Gửi OTP thất bại!';
+      errEl.style.display = 'block'; return;
+    }
+    regShowStep(3);
+    initOTPBoxes();
+    showToast(`Đã gửi OTP đến ${_regData.email}`);
+  } catch {
+    errEl.textContent = 'Không thể kết nối server!';
+    errEl.style.display = 'block';
+  }
+}
+
+async function regSubmitOTP() {
+  const boxes = document.querySelectorAll('.otp-box');
+  const otp = Array.from(boxes).map(b => b.value).join('');
+  const errEl = document.getElementById('regStep3Error');
+
+  if (otp.length < 5) {
+    errEl.textContent = 'Vui lòng nhập đủ 5 chữ số OTP!';
+    errEl.style.display = 'block'; return;
+  }
+  errEl.style.display = 'none';
+
+  // Gọi API đăng ký thật
+  try {
+    const res = await fetch(`${API_BASE}/users/register-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        ho_ten:        _regData.ho_ten || 'Người dùng',
+        email:         _regData.email,
+        so_dien_thoai: _regData.phone,
+        password:      _regData.password,
+        otp:           otp
+      })
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      errEl.textContent = result.detail || 'Xác thực OTP thất bại!';
+      errEl.style.display = 'block'; return;
+    }
+    showToast('Đăng ký thành công!');
+    closeModal('registerModal');
+    _regData = { ho_ten: '', email: '', phone: '', password: '' };
+    setTimeout(() => window.location.reload(), 800);
+
+  } catch {
+    errEl.textContent = 'Không thể kết nối server!';
+    errEl.style.display = 'block';
+  }
+}
+
+async function regResendOTP(e) {
+  e.preventDefault();
+  try {
+    await fetch(`${API_BASE}/users/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: _regData.email })
+    });
+    showToast(`Đã gửi lại OTP đến ${_regData.email}`);
+  } catch {
+    showToast('Gửi lại OTP thất bại!');
+  }
+}
+
+// Reset về step 1 mỗi khi mở modal registerModal
+const _origOpenModal = openModal;
+window.openModal = function(modalId) {
+  _origOpenModal(modalId);
+  if (modalId === 'registerModal') {
+    switchRegisterTab('register');
+  }
+};
+
+// ── Login Modal Helpers ───────────────────────────────
+function switchLoginPanel(panel) {
+  const social = document.getElementById('loginSocialPanel');
+  const email  = document.getElementById('loginEmailPanel');
+  if (!social || !email) return;
+  if (panel === 'social') {
+    social.style.display = 'block';
+    email.style.display  = 'none';
+  } else {
+    social.style.display = 'none';
+    email.style.display  = 'block';
+  }
+}
+
+// Reset về social panel mỗi khi mở loginModal
+const _origOpenModalLogin = window.openModal;
+window.openModal = function(modalId) {
+  _origOpenModalLogin(modalId);
+  if (modalId === 'loginModal') {
+    switchLoginPanel('social');
+    const err = document.getElementById('loginError');
+    if (err) err.style.display = 'none';
+  }
+  if (modalId === 'registerModal') {
+    switchRegisterTab('register');
+  }
+};
+
+function handleSocialLogin(provider) {
+  const urls = {
+    google:   `${API_BASE}/auth/google`,
+    facebook: `${API_BASE}/auth/facebook`,
+    twitter:  `${API_BASE}/auth/twitter`,
+  };
+  const url = urls[provider];
+  if (url) {
+    window.location.href = url;
+  } else {
+    showToast('Tính năng đang được phát triển!');
   }
 }
 

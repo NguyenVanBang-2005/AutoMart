@@ -5,6 +5,15 @@ from pydantic_settings import BaseSettings
 load_dotenv()
 
 class Settings(BaseSettings):
+    gmail_user: str = ""
+    gmail_app_password: str = ""
+
+    # OAuth
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    FACEBOOK_CLIENT_ID: str = ""
+    FACEBOOK_CLIENT_SECRET: str = ""
+
     APP_NAME: str = "AutoMart"
     DEBUG: bool = True
     DATABASE_URL: str = "postgresql://Bang:trungHoang%402005@localhost:5432/automartdb"

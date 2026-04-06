@@ -47,3 +47,14 @@ class TokenOut(SQLModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
+
+# ── OTP Register schemas ─────────────────────────────
+class SendOTPRequest(SQLModel):
+    email: str
+
+class RegisterWithOTP(SQLModel):
+    ho_ten: str
+    email: str
+    so_dien_thoai: str
+    password: str
+    otp: str
