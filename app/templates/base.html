@@ -10,6 +10,7 @@
   <style>@view-transition { navigation: auto; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   {% block extra_head %}{% endblock %}
  </head>
  <body class="h-full">
@@ -20,7 +21,34 @@
    {% include 'partials/modals.html' %}
    {% include 'partials/toast.html' %}
   </div>
+  <!--AI assistant-->
+  <a href="/tu-van"
+     style="position:fixed; bottom:84px; left:24px; z-index:999;
+            width:80px; height:80px; border-radius:50%;
+            background:var(--accent-primary); color:#fff;
+            display:flex; align-items:center; justify-content:center;
+            box-shadow:0 4px 16px rgba(200,169,110,0.5);
+            text-decoration:none; transition:all 0.25s;"
+     title="Trợ lý AI"
+     onmouseover="this.style.transform='scale(1.1)'"
+     onmouseout="this.style.transform='scale(1)'">
+    AI Agent
+  </a>
+  <!-- Nút hướng dẫn cố định -->
+  <a href="/huong-dan"
+     style="position:fixed; bottom:28px; left:24px; z-index:999;
+            width:44px; height:44px; border-radius:50%;
+            background:var(--accent-primary); color:#fff;
+            display:flex; align-items:center; justify-content:center;
+            box-shadow:0 4px 16px rgba(200,169,110,0.5);
+            text-decoration:none; transition:all 0.25s;"
+     title="Hướng dẫn khách hàng"
+     onmouseover="this.style.transform='scale(1.1)'"
+     onmouseout="this.style.transform='scale(1)'">
+    <i data-lucide="help-circle" style="width:22px; height:22px;"></i>
+  </a>
   <script src="{{ url_for('static', path='main.js') }}"></script>
+  <script>lucide.createIcons();</script>
   {% block extra_scripts %}{% endblock %}
  </body>
 </html>

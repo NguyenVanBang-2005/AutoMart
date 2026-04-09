@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% block title %}{{ tin.hang_xe }} {{ tin.dong_xe }} - Bán xe - AutoMart{% endblock %}
+
+{% block content %}
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<section class="section" style="padding-top:32px;">
+  <div class="container" style="max-width:1100px;">
+
+    <!-- Breadcrumb -->
+    <div style="font-size:13px;color:#888;margin-bottom:20px;">
+      <a href="/" style="color:var(--accent-primary);text-decoration:none;">Trang chủ</a>
+      <span style="margin:0 6px;">›</span>
+      <a href="/danh-sach-ban-xe" style="color:var(--accent-primary);text-decoration:none;">Tin bán xe</a>
+      <span style="margin:0 6px;">›</span>
+      <span>{{ tin.hang_xe }} {{ tin.dong_xe }}</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 360px;gap:32px;align-items:start;">
+
+      <!-- CỘT TRÁI -->
+      <div>
+
+        <!-- Ảnh placeholder -->
+        <div style="border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#6366f1,#4f46e5);
+          margin-bottom:20px;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;">
+          <i data-lucide="car" style="width:100px;height:100px;color:rgba(255,255,255,.3);"></i>
+        </div>
+
+        <!-- Tên + giá -->
+        <h1 style="font-size:26px;font-weight:700;margin-bottom:8px;">
+          {{ tin.hang_xe }} {{ tin.dong_xe }} {{ tin.nam_san_xuat }}
+        </h1>
+        <div style="font-size:28px;font-weight:800;color:var(--accent-primary);margin-bottom:24px;">
+          {{ "{:,}".format(tin.gia_mong_muon) }} triệu
+        </div>
+
+        <!-- Thông số -->
+        <div style="background:#f8f8f6;border-radius:14px;padding:24px;margin-bottom:24px;">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+            <i data-lucide="clipboard-list" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+            Thông số xe
+          </h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            {% set specs = [
+              ('car',       'Hãng xe',       tin.hang_xe),
+              ('tag',       'Dòng xe',       tin.dong_xe),
+              ('calendar',  'Năm sản xuất',  tin.nam_san_xuat),
+              ('gauge',     'Số km',         "{:,}".format(tin.so_km) ~ ' km'),
+              ('map-pin',   'Khu vực',       tin.khu_vuc),
+              ('clock',     'Ngày đăng',     tin.created_at.strftime('%d/%m/%Y')),
+            ] %}
+            {% for icon, label, val in specs %}
+            <div style="display:flex;flex-direction:column;gap:6px;padding:12px;background:#fff;border-radius:10px;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <i data-lucide="{{ icon }}" style="width:13px;height:13px;color:var(--accent-primary);"></i>
+                <span style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.4px;">{{ label }}</span>
+              </div>
+              <span style="font-size:14px;font-weight:600;">{{ val }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Mô tả -->
+        {% if tin.mo_ta %}
+        <div style="background:#f8f8f6;border-radius:14px;padding:24px;margin-bottom:24px;">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+            <i data-lucide="file-text" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+            Mô tả hiện trạng xe
+          </h3>
+          <p style="line-height:1.75;color:#444;white-space:pre-wrap;font-size:14px;">{{ tin.mo_ta }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Chat với người bán -->
+        <div style="background:#f8f8f6;border-radius:14px;padding:24px;">
+          <h3 style="font-size:16px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+            <i data-lucide="message-circle" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+            Chat với người bán
+          </h3>
+          <p style="font-size:13px;color:#888;margin-bottom:16px;">Đặt câu hỏi trực tiếp cho <strong>{{ tin.ho_ten }}</strong></p>
+
+          <div id="sellerMessages" style="min-height:140px;max-height:300px;overflow-y:auto;
+            display:flex;flex-direction:column;gap:10px;margin-bottom:12px;
+            background:#fff;border-radius:10px;padding:12px;"></div>
+
+          <div style="display:flex;gap:8px;">
+            <input id="sellerInput" type="text"
+              placeholder="Nhắn tin cho {{ tin.ho_ten }}..."
+              style="flex:1;border:1.5px solid #e2e2da;border-radius:10px;padding:10px 14px;
+              font-size:14px;font-family:inherit;outline:none;"
+              onkeydown="if(event.key==='Enter') sellerSend()"
+              onfocus="this.style.borderColor='var(--accent-primary)'"
+              onblur="this.style.borderColor='#e2e2da'">
+            <button onclick="sellerSend()" style="width:42px;height:42px;
+              background:var(--accent-primary);border:none;border-radius:10px;
+              cursor:pointer;display:flex;align-items:center;justify-content:center;">
+              <i data-lucide="send" style="width:18px;height:18px;color:#fff;"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CỘT PHẢI -->
+      <div style="position:sticky;top:80px;">
+
+        <!-- Thông tin người bán -->
+        <div style="background:#fff;border:2px solid var(--accent-primary);border-radius:16px;padding:24px;margin-bottom:16px;">
+          <div style="font-size:13px;color:#888;margin-bottom:12px;font-weight:600;">NGƯỜI BÁN</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+            <div style="width:48px;height:48px;border-radius:50%;background:var(--accent-primary);
+              display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i data-lucide="user" style="width:24px;height:24px;color:#fff;"></i>
+            </div>
+            <div>
+              <div style="font-size:16px;font-weight:700;">{{ tin.ho_ten }}</div>
+              <div style="font-size:12px;color:#888;">Thành viên AutoMart</div>
+            </div>
+          </div>
+          <a href="tel:{{ tin.so_dien_thoai }}"
+            style="width:100%;padding:13px;background:var(--accent-primary);color:#fff;border:none;
+            border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;
+            display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+            <i data-lucide="phone" style="width:16px;height:16px;"></i>
+            {{ tin.so_dien_thoai }}
+          </a>
+          <button onclick="document.getElementById('sellerInput').focus()"
+            style="width:100%;padding:11px;background:transparent;color:var(--accent-primary);
+            border:2px solid var(--accent-primary);border-radius:10px;font-size:14px;font-weight:600;
+            cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
+            Nhắn tin
+          </button>
+        </div>
+
+        {% if is_owner %}
+        <div style="background:#fff3cd;border:1px solid #f0d080;border-radius:14px;padding:16px;margin-bottom:16px;">
+          <div style="font-size:12px;font-weight:700;color:#856404;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <i data-lucide="shield-check" style="width:14px;height:14px;"></i>
+            Đây là tin của bạn
+          </div>
+          <a href="/ban-xe/{{ tin.id }}/sua"
+            style="width:100%;padding:10px;background:#fff;color:var(--accent-primary);border:2px solid var(--accent-primary);
+            border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:6px;
+            text-decoration:none;margin-bottom:8px;">
+            <i data-lucide="pencil" style="width:15px;height:15px;"></i>
+            Chỉnh sửa tin
+          </a>
+          <button onclick="confirmDelete({{ tin.id }})"
+            style="width:100%;padding:10px;background:#fee2e2;color:#dc2626;border:2px solid #fca5a5;
+            border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:6px;">
+            <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+            Xóa tin
+          </button>
+        </div>
+        {% endif %}
+
+        <!-- Thông tin liên hệ -->
+        <div style="background:#f8f8f6;border-radius:14px;padding:20px;margin-bottom:16px;">
+          <div style="font-weight:700;margin-bottom:12px;">Thông tin xe</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="map-pin" style="width:15px;height:15px;color:var(--accent-primary);flex-shrink:0;"></i>
+              {{ tin.khu_vuc }}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="calendar" style="width:15px;height:15px;color:var(--accent-primary);flex-shrink:0;"></i>
+              Năm {{ tin.nam_san_xuat }}
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <i data-lucide="gauge" style="width:15px;height:15px;color:var(--accent-primary);flex-shrink:0;"></i>
+              {{ "{:,}".format(tin.so_km) }} km
+            </div>
+          </div>
+        </div>
+
+        <!-- Báo cáo -->
+        <div style="text-align:center;">
+          <button onclick="showToast('Đã gửi báo cáo!')"
+            style="background:none;border:none;color:#aaa;font-size:12px;cursor:pointer;
+            display:flex;align-items:center;gap:4px;margin:0 auto;font-family:inherit;">
+            <i data-lucide="flag" style="width:13px;height:13px;"></i>
+            Báo cáo tin đăng
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+<script>
+async function confirmDelete(tinId) {
+  if (!confirm('Bạn có chắc muốn xóa tin này không?')) return;
+  try {
+    const res = await fetch(`/api/v1/ban-xe/${tinId}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    const data = await res.json();
+    if (!res.ok) { showToast(data.detail || 'Xóa thất bại!'); return; }
+    showToast('Đã xóa tin!');
+    setTimeout(() => window.location.href = '/danh-sach-ban-xe', 1000);
+  } catch {
+    showToast('Không thể kết nối server!');
+  }
+}
+</script>
+<script src="/static/js/chi_tiet_ban_xe.js"></script>
+<script>lucide.createIcons();</script>
+{% endblock %}

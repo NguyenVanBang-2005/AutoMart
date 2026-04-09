@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+
+{% block title %}AutoMart - Dịch Vụ{% endblock %}
+
+{% block content %}
+
+<!-- ══ HERO ══ -->
+<section style="background:#2a2a2a; padding:48px 24px; text-align:center;">
+  <div class="container">
+    <h1 style="font-size:32px; font-weight:800; color:#fff; margin-bottom:12px;">Dịch vụ của AutoMart</h1>
+    <p style="color:rgba(255,255,255,0.65); font-size:15px;">Trải nghiệm lái thử miễn phí & hỗ trợ khách hàng tận tâm</p>
+  </div>
+</section>
+
+<!-- ══ TAB NAV ══ -->
+<section style="background:#fff; border-bottom:1px solid #eaeae0; position:sticky; top:68px; z-index:100;">
+  <div class="container">
+    <div style="display:flex; gap:0;">
+      <button id="tabLaiThu" onclick="switchTab('lai-thu')"
+        style="padding:16px 32px; font-size:15px; font-weight:700; border:none; background:transparent; cursor:pointer; border-bottom:3px solid var(--accent-primary); color:var(--accent-primary);">
+        <i data-lucide="car" style="width:16px; height:16px; vertical-align:middle; margin-right:6px;"></i>
+        Đăng ký lái thử
+      </button>
+      <button id="tabHoTro" onclick="switchTab('ho-tro')"
+        style="padding:16px 32px; font-size:15px; font-weight:600; border:none; background:transparent; cursor:pointer; border-bottom:3px solid transparent; color:#888;">
+        <i data-lucide="headphones" style="width:16px; height:16px; vertical-align:middle; margin-right:6px;"></i>
+        Hỗ trợ khách hàng
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ĐĂNG KÝ LÁI THỬ ══ -->
+<div id="panelLaiThu">
+
+  <section class="section section-gray" style="padding:40px 24px;">
+    <div class="container" style="max-width:860px;">
+      <div style="background:#fff; border-radius:14px; padding:28px; border:1px solid #eaeae0; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+          <div>
+            <h2 style="font-size:20px; font-weight:800;">Trải nghiệm lái thử miễn phí</h2>
+            <p style="font-size:13px; color:#64748b; margin-top:4px;">Lái thử trực tiếp tại showroom — hoàn toàn miễn phí, không ràng buộc</p>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:16px;">
+          <div style="text-align:center; padding:16px; background:#f5f5f0; border-radius:10px;">
+            <i data-lucide="timer" style="width:24px; height:24px; color:var(--accent-primary); margin-bottom:8px;"></i>
+            <div style="font-size:13px; font-weight:700;">30 phút</div>
+            <div style="font-size:12px; color:#888; margin-top:4px;">Thời gian lái thử tiêu chuẩn</div>
+          </div>
+          <div style="text-align:center; padding:16px; background:#f5f5f0; border-radius:10px;">
+            <i data-lucide="map-pin" style="width:24px; height:24px; color:var(--accent-primary); margin-bottom:8px;"></i>
+            <div style="font-size:13px; font-weight:700;">Tại showroom</div>
+            <div style="font-size:12px; color:#888; margin-top:4px;">Địa chỉ gần nhất với bạn</div>
+          </div>
+          <div style="text-align:center; padding:16px; background:#f5f5f0; border-radius:10px;">
+            <i data-lucide="gift" style="width:24px; height:24px; color:var(--accent-primary); margin-bottom:8px;"></i>
+            <div style="font-size:13px; font-weight:700;">Miễn phí</div>
+            <div style="font-size:12px; color:#888; margin-top:4px;">Không mất phí, không ràng buộc</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-white" style="padding:40px 24px;">
+    <div class="container" style="max-width:860px;">
+      {% block extra_head %}
+        <style>
+          @media (max-width: 768px) {
+            #panelLaiThu .form-notes-grid {
+              grid-template-columns: 1fr !important;
+            }
+          }
+        </style>
+      {% endblock %}
+      <div class="form-notes-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:32px;">
+        <!-- Form -->
+        <div class="search-box">
+          <h3 class="search-title">
+            <i data-lucide="calendar-check" style="width:18px; height:18px;"></i>
+            Đặt lịch lái thử
+          </h3>
+          <form id="laiThuForm" onsubmit="handleLaiThuSubmit(event)">
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              <div class="form-group">
+                <label class="form-label">Họ tên *</label>
+                <input type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Số điện thoại *</label>
+                <input type="tel" class="form-control" placeholder="0901 234 567" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Xe muốn lái thử *</label>
+                <select class="form-control" required>
+                  <option value="">Chọn hãng xe</option>
+                  <option>Toyota</option><option>Honda</option><option>Mazda</option>
+                  <option>Hyundai</option><option>Kia</option><option>Ford</option>
+                  <option>BMW</option><option>Vinfast</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Showroom *</label>
+                <select class="form-control" required>
+                  <option value="">Chọn showroom</option>
+                  <option>Hà Nội — 36 Hà Kế Tấn</option>
+                  <option>TP.HCM — 123 Nguyễn Văn Linh</option>
+                  <option>Đà Nẵng — 45 Trần Phú</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ngày lái thử *</label>
+                <input type="date" class="form-control" id="dateInput" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Khung giờ *</label>
+                <select class="form-control" required>
+                  <option value="">Chọn khung giờ</option>
+                  <option>8:00 – 9:00</option><option>9:00 – 10:00</option>
+                  <option>10:00 – 11:00</option><option>13:00 – 14:00</option>
+                  <option>14:00 – 15:00</option><option>15:00 – 16:00</option>
+                  <option>16:00 – 17:00</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:13px;">
+                <i data-lucide="calendar-check" style="width:16px; height:16px;"></i>
+                Đặt lịch lái thử
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Lưu ý -->
+        <div style="display:flex; flex-direction:column; gap:16px;">
+          <h3 style="font-size:17px; font-weight:700;">Lưu ý khi lái thử</h3>
+
+          <div style="background:#f5efe0; border-radius:12px; padding:20px;">
+            <div style="font-size:13px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <i data-lucide="check-circle" style="width:16px; height:16px; color:var(--accent-primary);"></i>
+              Được phép
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px; font-size:13px; color:#555;">
+              <div style="display:flex; gap:8px; align-items:center;">
+                <i data-lucide="check" style="width:14px; height:14px; color:var(--accent-primary); flex-shrink:0;"></i>
+                Lái trên đường thực tế trong khu vực quy định
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <i data-lucide="check" style="width:14px; height:14px; color:var(--accent-primary); flex-shrink:0;"></i>
+                Kiểm tra đầy đủ tính năng, nội thất xe
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <i data-lucide="check" style="width:14px; height:14px; color:var(--accent-primary); flex-shrink:0;"></i>
+                Đặt câu hỏi tư vấn trực tiếp với nhân viên
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <i data-lucide="check" style="width:14px; height:14px; color:var(--accent-primary); flex-shrink:0;"></i>
+                Mang theo người thân cùng trải nghiệm
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#fef2f2; border-radius:12px; padding:20px;">
+            <div style="font-size:13px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px; color:#b91c1c;">
+              <i data-lucide="alert-circle" style="width:16px; height:16px; color:#b91c1c;"></i>
+              Lưu ý bắt buộc
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px; font-size:13px; color:#555;">
+              <div style="display:flex; gap:8px; align-items:center;">
+                <i data-lucide="x" style="width:14px; height:14px; color:#b91c1c; flex-shrink:0;"></i>
+                Phải mang theo CCCD/CMND bản gốc
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <i data-lucide="x" style="width:14px; height:14px; color:#b91c1c; flex-shrink:0;"></i>
+                Bắt buộc có Giấy phép lái xe còn hiệu lực
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <i data-lucide="x" style="width:14px; height:14px; color:#b91c1c; flex-shrink:0;"></i>
+                Không lái khi đã sử dụng rượu bia
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <i data-lucide="x" style="width:14px; height:14px; color:#b91c1c; flex-shrink:0;"></i>
+                Không vượt quá tốc độ cho phép
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#f5f5f0; border-radius:12px; padding:16px; font-size:13px; color:#555; line-height:1.7;">
+            <strong>💡 Mẹo:</strong> Đặt lịch vào buổi sáng sớm (8:00–10:00) để trải nghiệm tốt nhất — đường ít tắc, nhân viên tư vấn đầy đủ thời gian cho bạn.
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ══ HỖ TRỢ KHÁCH HÀNG ══ -->
+<div id="panelHoTro" style="display:none;">
+
+  <section class="section section-gray" style="padding:40px 24px;">
+    <div class="container" style="max-width:860px;">
+      <div style="background:#fff; border-radius:14px; padding:28px; border:1px solid #eaeae0; box-shadow:0 2px 12px rgba(0,0,0,0.06); margin-bottom:24px;">
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:20px;">
+          <div>
+            <h2 style="font-size:20px; font-weight:800;">Hỗ trợ khách hàng</h2>
+            <p style="font-size:13px; color:#64748b; margin-top:4px;">Đội ngũ tư vấn sẵn sàng hỗ trợ bạn 7 ngày/tuần</p>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:16px;">
+          <a href="tel:19001234" style="text-decoration:none; text-align:center; padding:20px 16px; background:#f5f5f0; border-radius:10px; transition:all 0.2s;"
+             onmouseover="this.style.background='var(--bg-primary)'; this.style.color='#fff'"
+             onmouseout="this.style.background='#f5f5f0'; this.style.color='inherit'">
+            <i data-lucide="phone-call" style="width:28px; height:28px; color:var(--accent-primary); margin-bottom:10px;"></i>
+            <div style="font-size:13px; font-weight:700; margin-bottom:4px;">Hotline</div>
+            <div style="font-size:15px; font-weight:800; color:var(--accent-primary);">1900 1234</div>
+            <div style="font-size:11px; color:#888; margin-top:4px;">8:00 – 20:00 hằng ngày</div>
+          </a>
+          <a href="mailto:contact@automart.vn" style="text-decoration:none; text-align:center; padding:20px 16px; background:#f5f5f0; border-radius:10px; transition:all 0.2s;"
+             onmouseover="this.style.background='var(--bg-primary)'; this.style.color='#fff'"
+             onmouseout="this.style.background='#f5f5f0'; this.style.color='inherit'">
+            <i data-lucide="mail" style="width:28px; height:28px; color:var(--accent-primary); margin-bottom:10px;"></i>
+            <div style="font-size:13px; font-weight:700; margin-bottom:4px;">Email</div>
+            <div style="font-size:13px; font-weight:800; color:var(--accent-primary);">contact@automart.vn</div>
+            <div style="font-size:11px; color:#888; margin-top:4px;">Phản hồi trong 2 giờ</div>
+          </a>
+          <div style="text-align:center; padding:20px 16px; background:#f5f5f0; border-radius:10px;">
+            <i data-lucide="message-circle" style="width:28px; height:28px; color:var(--accent-primary); margin-bottom:10px;"></i>
+            <div style="font-size:13px; font-weight:700; margin-bottom:4px;">Live Chat</div>
+            <div style="font-size:13px; font-weight:800; color:var(--accent-primary);">Chat ngay</div>
+            <div style="font-size:11px; color:#888; margin-top:4px;">Phản hồi trong 5 phút</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <h3 style="font-size:18px; font-weight:800; margin-bottom:16px;">Câu hỏi thường gặp</h3>
+      {% set faqs = [
+        {
+          "q": "AutoMart có bảo hành xe đã qua sử dụng không?",
+          "a": "Có. AutoMart cung cấp gói bảo hành 3–12 tháng tùy dòng xe. Chi tiết sẽ được ghi rõ trong hợp đồng mua bán."
+        },
+        {
+          "q": "Tôi có thể đổi trả xe sau khi mua không?",
+          "a": "AutoMart hỗ trợ đổi trả trong vòng 7 ngày nếu xe có lỗi phát sinh do nhà sản xuất hoặc thông tin không đúng như mô tả."
+        },
+        {
+          "q": "AutoMart có hỗ trợ vay mua xe trả góp không?",
+          "a": "Có. AutoMart liên kết với nhiều ngân hàng và công ty tài chính, hỗ trợ vay tối đa 80% giá trị xe với lãi suất ưu đãi."
+        },
+        {
+          "q": "Thủ tục sang tên xe mất bao lâu?",
+          "a": "Thông thường từ 3–7 ngày làm việc tùy địa phương. AutoMart hỗ trợ toàn bộ thủ tục sang tên và công chứng."
+        },
+        {
+          "q": "Tôi có thể đặt cọc xe online không?",
+          "a": "Có. Bạn có thể đặt cọc online qua chuyển khoản để giữ xe. Số tiền đặt cọc thường từ 5–10 triệu đồng."
+        },
+        {
+          "q": "AutoMart kiểm định xe như thế nào?",
+          "a": "AutoMart kiểm định toàn diện 150+ hạng mục bao gồm động cơ, hộp số, khung gầm, thân vỏ, nội thất và toàn bộ hệ thống điện."
+        },
+      ] %}
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        {% for faq in faqs %}
+        {% set idx = loop.index0 %}
+        <div style="background:#fff; border:1px solid #eaeae0; border-radius:10px; overflow:hidden;">
+          <button onclick="toggleFaq({{ idx }})"
+            ...>
+            {{ faq.q }}
+            <i data-lucide="chevron-down" id="faqIcon{{ idx }}" ...></i>
+          </button>
+          <div id="faqBody{{ idx }}" ...>
+            {{ faq.a }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Form gửi câu hỏi -->
+      <div class="search-box" style="margin-top:24px;">
+        <h3 class="search-title">
+          <i data-lucide="send" style="width:18px; height:18px;"></i>
+          Gửi câu hỏi cho chúng tôi
+        </h3>
+        <form id="hoTroForm" onsubmit="handleHoTroSubmit(event)">
+          <div class="search-grid">
+            <div class="form-group">
+              <label class="form-label">Họ tên *</label>
+              <input type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Số điện thoại *</label>
+              <input type="tel" class="form-control" placeholder="0901 234 567" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" placeholder="email@example.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Chủ đề</label>
+              <select class="form-control">
+                <option>Tư vấn mua xe</option>
+                <option>Hỗ trợ thanh toán</option>
+                <option>Thủ tục sang tên</option>
+                <option>Khiếu nại</option>
+                <option>Khác</option>
+              </select>
+            </div>
+            <div class="form-group form-group-full">
+              <label class="form-label">Nội dung *</label>
+              <textarea class="form-control" rows="4" placeholder="Mô tả vấn đề bạn cần hỗ trợ..." required></textarea>
+            </div>
+            <div class="form-group form-group-full">
+              <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:13px;">
+                <i data-lucide="send" style="width:16px; height:16px;"></i>
+                Gửi câu hỏi
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  lucide.createIcons();
+
+  // Set min date
+  const dateInput = document.getElementById('dateInput');
+  if (dateInput) dateInput.min = new Date().toISOString().split('T')[0];
+
+  function switchTab(tab) {
+    const isLaiThu = tab === 'lai-thu';
+    document.getElementById('panelLaiThu').style.display = isLaiThu ? 'block' : 'none';
+    document.getElementById('panelHoTro').style.display  = isLaiThu ? 'none'  : 'block';
+
+    const tabLT = document.getElementById('tabLaiThu');
+    const tabHT = document.getElementById('tabHoTro');
+
+    tabLT.style.borderBottomColor = isLaiThu ? 'var(--accent-primary)' : 'transparent';
+    tabLT.style.color             = isLaiThu ? 'var(--accent-primary)' : '#888';
+    tabLT.style.fontWeight        = isLaiThu ? '700' : '600';
+
+    tabHT.style.borderBottomColor = isLaiThu ? 'transparent' : 'var(--accent-primary)';
+    tabHT.style.color             = isLaiThu ? '#888' : 'var(--accent-primary)';
+    tabHT.style.fontWeight        = isLaiThu ? '600' : '700';
+  }
+
+  function toggleFaq(i) {
+    const body = document.getElementById(`faqBody${i}`);
+    const icon = document.getElementById(`faqIcon${i}`);
+    const isOpen = body.style.display === 'block';
+    body.style.display = isOpen ? 'none' : 'block';
+    icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  }
+
+  function handleLaiThuSubmit(e) {
+    e.preventDefault();
+    showToast('✅ Đặt lịch lái thử thành công! Chúng tôi sẽ liên hệ sớm.');
+    e.target.reset();
+  }
+
+  function handleHoTroSubmit(e) {
+    e.preventDefault();
+    showToast('✅ Đã gửi câu hỏi! Chúng tôi sẽ phản hồi trong 2 giờ.');
+    e.target.reset();
+  }
+</script>
+{% endblock %}

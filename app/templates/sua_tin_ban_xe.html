@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Sửa tin - {{ tin.hang_xe }} {{ tin.dong_xe }}{% endblock %}
+
+{% block content %}
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<section class="section" style="padding-top:32px;">
+  <div class="container" style="max-width:700px;">
+
+    <!-- Breadcrumb -->
+    <div style="font-size:13px;color:#888;margin-bottom:20px;">
+      <a href="/danh-sach-ban-xe" style="color:var(--accent-primary);text-decoration:none;">Tin bán xe</a>
+      <span style="margin:0 6px;">›</span>
+      <a href="/ban-xe/{{ tin.id }}" style="color:var(--accent-primary);text-decoration:none;">
+        {{ tin.hang_xe }} {{ tin.dong_xe }}
+      </a>
+      <span style="margin:0 6px;">›</span>
+      <span>Chỉnh sửa</span>
+    </div>
+
+    <div class="search-box">
+      <h3 class="search-title" style="margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+        <i data-lucide="pencil" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+        Chỉnh sửa tin bán xe
+      </h3>
+
+      <form id="suaForm" onsubmit="handleSuaSubmit(event)">
+
+        <!-- Row 1 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group">
+            <label style="font-size:12px;color:#888;margin-bottom:4px;display:block;">Hãng xe</label>
+            <select class="form-control" name="hang_xe" required>
+              <option value="">Chọn hãng</option>
+              {% for hang in ['Toyota','Honda','Mazda','Hyundai','Kia','Ford','BMW','Benz','Vinfast'] %}
+              <option value="{{ hang }}" {% if tin.hang_xe == hang %}selected{% endif %}>{{ hang }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="font-size:12px;color:#888;margin-bottom:4px;display:block;">Dòng xe</label>
+            <input type="text" class="form-control" name="dong_xe" value="{{ tin.dong_xe }}" required>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group">
+            <label style="font-size:12px;color:#888;margin-bottom:4px;display:block;">Năm sản xuất</label>
+            <select class="form-control" name="nam_san_xuat" required>
+              {% for y in range(2025, 2015, -1) %}
+              <option value="{{ y }}" {% if tin.nam_san_xuat == y %}selected{% endif %}>{{ y }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="font-size:12px;color:#888;margin-bottom:4px;display:block;">Số km</label>
+            <input type="number" class="form-control" name="so_km" value="{{ tin.so_km }}" required>
+          </div>
+          <div class="form-group">
+            <label style="font-size:12px;color:#888;margin-bottom:4px;display:block;">Giá (triệu)</label>
+            <input type="number" class="form-control" name="gia_mong_muon" value="{{ tin.gia_mong_muon }}" required>
+          </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group">
+            <label style="font-size:12px;color:#888;margin-bottom:4px;display:block;">Khu vực</label>
+            <select class="form-control" name="khu_vuc" required>
+              {% for kv in ['TP.HCM','Hà Nội','Đà Nẵng','Cần Thơ','Hải Phòng','Khác'] %}
+              <option value="{{ kv }}" {% if tin.khu_vuc == kv %}selected{% endif %}>{{ kv }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label style="font-size:12px;color:#888;margin-bottom:4px;display:block;">Số điện thoại</label>
+            <input type="tel" class="form-control" name="so_dien_thoai" value="{{ tin.so_dien_thoai }}" required>
+          </div>
+        </div>
+
+        <!-- Họ tên -->
+        <div class="form-group" style="margin-bottom:12px;">
+          <label style="font-size:12px;color:#888;margin-bottom:4px;display:block;">Họ và tên</label>
+          <input type="text" class="form-control" name="ho_ten" value="{{ tin.ho_ten }}" required>
+        </div>
+
+        <!-- Mô tả -->
+        <div class="form-group" style="margin-bottom:20px;">
+          <label style="font-size:12px;color:#888;margin-bottom:4px;display:block;display:flex;align-items:center;gap:6px;">
+            <i data-lucide="clipboard-pen" style="width:13px;height:13px;color:var(--accent-primary);"></i>
+            Mô tả hiện trạng xe
+          </label>
+          <textarea class="form-control" name="mo_ta" rows="5"
+            style="resize:vertical;font-family:inherit;font-size:13.5px;line-height:1.6;">{{ tin.mo_ta or '' }}</textarea>
+        </div>
+
+        <!-- Buttons -->
+        <div style="display:flex;gap:12px;">
+          <a href="/ban-xe/{{ tin.id }}"
+            style="flex:1;padding:13px;background:#f0f0ea;color:#555;border:none;border-radius:10px;
+            font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;
+            justify-content:center;gap:8px;text-decoration:none;">
+            <i data-lucide="x" style="width:16px;height:16px;"></i>
+            Hủy
+          </a>
+          <button type="submit"
+            style="flex:2;padding:13px;background:var(--accent-primary);color:#fff;border:none;
+            border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+            display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i data-lucide="save" style="width:18px;height:18px;"></i>
+            Lưu thay đổi
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</section>
+<div id="tinData" data-id="{{ tin.id }}" style="display:none;"></div>
+<script src="/static/js/sua_tin_ban_xe.js"></script>
+<script>lucide.createIcons();</script>
+{% endblock %}

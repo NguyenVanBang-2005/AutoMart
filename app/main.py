@@ -10,22 +10,24 @@ from app.core.database import init_db, engine
 from app.api.v1.router import api_router
 from sqlmodel import Session
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+from fastapi import FastAPI, Request, Depends
+from fastapi.responses import RedirectResponse
+from app.core.database import init_db, engine, get_session
 
 BASE_DIR = Path(__file__).resolve().parent
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # ── Startup ───────────────────────────────────────
     init_db()
 
     from app.services.car_service import seed_cars
+    from app.services.seed_dang_tin import seed_dang_tin
     with Session(engine) as session:
         seed_cars(session)
+        seed_dang_tin(session)
 
     yield
-
-    # ── Shutdown (nếu cần cleanup) ────────────────────
-    print("👋 Server đang tắt...")
+    print("Server đang tắt...")
 
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
@@ -110,4 +112,105 @@ def tu_van(request: Request):
         request=request,
         name="tu_van.html",
         context={"current_user": user}
+    )
+
+@app.get("/tin-tuc")
+def tin_tuc(request: Request):
+    user = get_current_user_for_template(request)
+    return templates.TemplateResponse(
+        request=request,
+        name="news.html",
+        context={"current_user": user}
+    )
+
+@app.get("/uu-dai-thang")
+def uu_dai_thang(request: Request):
+    user = get_current_user_for_template(request)
+    from app.services.car_service import get_cars
+    from app.models.cars import CarFilter
+    with Session(engine) as session:
+        deals = get_cars(session, CarFilter())[:12]
+    return templates.TemplateResponse(
+        request=request,
+        name="uu_dai_thang.html",
+        context={"current_user": user, "deals": list(deals)}
+    )
+
+@app.get("/huong-dan")
+def huong_dan(request: Request):
+    user = get_current_user_for_template(request)
+    return templates.TemplateResponse(
+        request=request,
+        name="huong_dan.html",
+        context={"current_user": user}
+    )
+
+@app.get("/dich-vu")
+def dich_vu(request: Request):
+    user = get_current_user_for_template(request)
+    return templates.TemplateResponse(
+        request=request,
+        name="dich_vu.html",
+        context={"current_user": user}
+    )
+
+@app.get("/xe/{car_id}")
+def xe_detail_page(request: Request, car_id: int):
+    from app.models.cars import Car
+    from app.services.car_service import get_car_images
+    user = get_current_user_for_template(request)
+    with Session(engine) as session:
+        car = session.get(Car, car_id)
+        if not car:
+            return RedirectResponse("/mua-xe")
+        images = get_car_images(session, car_id)
+    return templates.TemplateResponse(
+        request=request,
+        name="car_details.html",
+        context={"current_user": user, "car": car, "images": images}
+    )
+
+@app.get("/danh-sach-ban-xe")
+def danh_sach_ban_xe(request: Request):
+    user = get_current_user_for_template(request)
+    with Session(engine) as session:
+        from sqlmodel import select
+        from app.models.dang_tin import DangTin
+        tins = session.exec(select(DangTin).order_by(DangTin.created_at.desc())).all()
+    return templates.TemplateResponse(
+        request=request,
+        name="danh_sach_ban_xe.html",
+        context={"current_user": user, "tins": list(tins)}
+    )
+
+@app.get("/ban-xe/{tin_id}")
+def chi_tiet_ban_xe(request: Request, tin_id: int):
+    user = get_current_user_for_template(request)
+    with Session(engine) as session:
+        from app.models.dang_tin import DangTin
+        tin = session.get(DangTin, tin_id)
+        if not tin:
+            return RedirectResponse("/danh-sach-ban-xe")
+    # is_owner: True nếu user đang đăng nhập là chủ tin
+    is_owner = user is not None and tin.user_id == user.id
+    return templates.TemplateResponse(
+        request=request,
+        name="chi_tiet_ban_xe.html",
+        context={"current_user": user, "tin": tin, "is_owner": is_owner}
+    )
+
+@app.get("/ban-xe/{tin_id}/sua")
+def sua_tin_page(request: Request, tin_id: int):
+    user = get_current_user_for_template(request)
+    if not user:
+        return RedirectResponse("/")
+    with Session(engine) as session:
+        from app.models.dang_tin import DangTin
+        tin = session.get(DangTin, tin_id)
+        if not tin or tin.user_id != user.id:
+            return RedirectResponse("/danh-sach-ban-xe")
+    return templates.TemplateResponse(
+        request=request,
+        name="sua_tin_ban_xe.html",
+        context={"current_user": user, "tin": tin}
     )

@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}AutoMart - Danh sách tin bán xe{% endblock %}
+
+{% block content %}
+<section class="section" style="padding-top:32px;">
+  <div class="container" style="max-width:1000px;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
+      <div>
+        <h2 style="font-size:22px;font-weight:700;margin-bottom:4px;">Tin bán xe từ khách hàng</h2>
+        <p style="font-size:13px;color:#888;">{{ tins|length }} tin đăng</p>
+      </div>
+      <a href="/ban-xe" class="btn btn-primary" style="display:flex;align-items:center;gap:6px;">
+        <i data-lucide="plus" style="width:16px;height:16px;"></i>
+        Đăng tin bán xe
+      </a>
+    </div>
+
+    {% if tins %}
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      {% for tin in tins %}
+      <a href="/ban-xe/{{ tin.id }}" style="text-decoration:none;color:inherit;">
+        <div style="background:#fff;border:1px solid #eaeae0;border-radius:14px;padding:20px;
+          display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;
+          transition:.2s;cursor:pointer;"
+          onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,.08)';this.style.borderColor='var(--accent-primary)'"
+          onmouseout="this.style.boxShadow='none';this.style.borderColor='#eaeae0'">
+
+          <!-- Ảnh placeholder -->
+          <div style="width:120px;height:80px;border-radius:10px;background:#f0f0ea;
+            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="car" style="width:36px;height:36px;color:#ccc;"></i>
+          </div>
+
+          <!-- Thông tin -->
+          <div>
+            <div style="font-size:16px;font-weight:700;margin-bottom:6px;">
+              {{ tin.hang_xe }} {{ tin.dong_xe }} {{ tin.nam_san_xuat }}
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+              <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#666;">
+                <i data-lucide="gauge" style="width:13px;height:13px;color:var(--accent-primary);"></i>
+                {{ "{:,}".format(tin.so_km) }} km
+              </span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#666;">
+                <i data-lucide="map-pin" style="width:13px;height:13px;color:var(--accent-primary);"></i>
+                {{ tin.khu_vuc }}
+              </span>
+              <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#666;">
+                <i data-lucide="clock" style="width:13px;height:13px;color:var(--accent-primary);"></i>
+                {{ tin.created_at.strftime('%d/%m/%Y') }}
+              </span>
+            </div>
+            {% if tin.mo_ta %}
+            <p style="font-size:12px;color:#888;margin:0;
+              overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">
+              {{ tin.mo_ta }}
+            </p>
+            {% endif %}
+          </div>
+
+          <!-- Giá + CTA -->
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:20px;font-weight:800;color:var(--accent-primary);margin-bottom:8px;">
+              {{ "{:,}".format(tin.gia_mong_muon) }} triệu
+            </div>
+            <div style="font-size:12px;color:#888;margin-bottom:10px;">
+              {{ tin.ho_ten }}
+            </div>
+            <span style="background:var(--accent-primary);color:#fff;border-radius:20px;
+              padding:5px 14px;font-size:12px;font-weight:600;">
+              Xem chi tiết →
+            </span>
+          </div>
+
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div style="text-align:center;padding:80px 20px;color:#888;">
+      <i data-lucide="car" style="width:56px;height:56px;color:#ddd;margin-bottom:16px;"></i>
+      <h3 style="font-size:18px;margin-bottom:8px;">Chưa có tin bán xe nào</h3>
+      <p style="font-size:14px;margin-bottom:20px;">Hãy là người đầu tiên đăng tin!</p>
+      <a href="/ban-xe" class="btn btn-primary">Đăng tin ngay</a>
+    </div>
+    {% endif %}
+
+  </div>
+</section>
+<script>if(window.lucide) lucide.createIcons();</script>
+{% endblock %}

@@ -15,17 +15,17 @@
    <!-- Thông tin liên hệ -->
    <div>
     <div class="service-card" style="margin-bottom: 16px;">
-     <div class="service-icon"><span class="icon-location"></span></div>
+     <div class="service-icon"><i data-lucide="map-pin" style="width:28px; height:28px; color:#fff;"></i></div>
      <h3 class="service-title">Địa chỉ</h3>
      <p class="service-desc">123 Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh</p>
     </div>
     <div class="service-card" style="margin-bottom: 16px;">
-     <div class="service-icon"><span class="icon-phone"></span></div>
+     <div class="service-icon"><i data-lucide="phone" style="width:28px; height:28px; color:#fff;"></i></div>
      <h3 class="service-title">Điện thoại</h3>
      <p class="service-desc">1900 1234 (8:00 - 20:00, Thứ 2 - Chủ nhật)</p>
     </div>
     <div class="service-card" style="margin-bottom: 16px;">
-     <div class="service-icon"><span class="icon-email"></span></div>
+     <div class="service-icon"><i data-lucide="mail" style="width:28px; height:28px; color:#fff;"></i></div>
      <h3 class="service-title">Email</h3>
      <p class="service-desc">contact@automart.vn</p>
     </div>
@@ -33,7 +33,7 @@
 
    <!-- Form liên hệ -->
    <div class="search-box">
-    <h3 class="search-title">Gửi tin nhắn cho chúng tôi</h3>
+    <h3 class="search-title"><i data-lucide="message-square" style="width:18px; height:18px;"></i> Gửi tin nhắn cho chúng tôi</h3>
     <form id="contactForm" onsubmit="handleContactSubmit(event)">
      <div class="form-group">
       <label class="form-label">Họ tên *</label>
@@ -51,8 +51,8 @@
       <label class="form-label">Nội dung *</label>
       <textarea class="form-control" rows="4" placeholder="Bạn cần hỗ trợ gì?" required></textarea>
      </div>
-     <button type="submit" class="btn btn-primary" style="width: 100%;">
-      <span class="icon-check"></span> Gửi tin nhắn
+     <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+      <i data-lucide="send" style="width:16px; height:16px;"></i> Gửi tin nhắn
      </button>
     </form>
    </div>
@@ -60,4 +60,13 @@
   </div>
  </div>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function handleContactSubmit(e) {
+  e.preventDefault();
+  showToast('✅ Đã gửi tin nhắn! Chúng tôi sẽ phản hồi sớm.', 'success');
+}
+</script>
 {% endblock %}

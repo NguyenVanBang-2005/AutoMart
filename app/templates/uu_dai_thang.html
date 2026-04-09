@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}AutoMart - Ưu Đãi Tháng{% endblock %}
+
+{% block content %}
+
+<section class="section section-gray">
+  <div class="container">
+    <div class="section-header-row" style="margin-bottom:28px;">
+      <h2 class="section-title">Ưu đãi tháng <span class="section-title-accent" id="dealMonth"></span></h2>
+    </div>
+
+    <div class="car-grid">
+      {% for xe in deals %}
+      <div class="car-card">
+        <div class="car-image">
+          {% if xe.anh %}
+            <img src="{{ xe.anh }}" alt="{{ xe.hang }} {{ xe.dong }}">
+          {% else %}
+            <div class="car-image-placeholder"></div>
+          {% endif %}
+          <div class="car-badge-deal">-15%</div>
+        </div>
+        <div class="car-body">
+          <div class="car-title">{{ xe.hang }} {{ xe.dong }}</div>
+          <div style="margin-bottom:10px;">
+            <span style="font-size:18px; font-weight:800; color:var(--price-color);">
+              {{ (xe.gia * 0.85) | int }} triệu
+            </span>
+            <span style="font-size:12px; color:#aaa; text-decoration:line-through; margin-left:8px;">
+              {{ xe.gia }} triệu
+            </span>
+            <span style="font-size:11px; color:#fff; background:#e03030; border-radius:4px; padding:2px 6px; margin-left:6px; font-weight:700;">
+              Tiết kiệm {{ (xe.gia * 0.15) | int }} tr
+            </span>
+          </div>
+          <div class="car-specs">
+            <span class="car-spec">
+              <i data-lucide="calendar" style="width:12px; height:12px;"></i> {{ xe.nam }}
+            </span>
+            <span class="car-spec">
+              <i data-lucide="gauge" style="width:12px; height:12px;"></i> {{ xe.km }} km
+            </span>
+            <span class="car-spec">
+              <i data-lucide="map-pin" style="width:12px; height:12px;"></i> Hà Nội
+            </span>
+          </div>
+          <div class="car-footer">
+            <button class="btn-quote" onclick="openModal('quoteModal')">Nhận báo giá</button>
+            <button class="btn-trial">Đăng kí lái thử</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  lucide.createIcons();
+  document.getElementById('dealMonth').textContent = 'Tháng ' + (new Date().getMonth() + 1);
+</script>
+{% endblock %}

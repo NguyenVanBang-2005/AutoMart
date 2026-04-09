@@ -3,99 +3,230 @@
 {% block title %}AutoMart - Bán Xe{% endblock %}
 
 {% block content %}
-<section class="section">
- <div class="container">
-  <div class="section-header">
-   <h2 class="section-title">Đăng tin bán xe</h2>
-   <p class="section-subtitle">Tiếp cận hàng nghìn người mua tiềm năng mỗi ngày, miễn phí</p>
-  </div>
 
-  <div style="max-width: 720px; margin: 0 auto;">
-   <!-- Lợi ích -->
-   <div class="services-grid" style="margin-bottom: 40px;">
-    <div class="service-card">
-     <div class="service-icon"><span class="icon-megaphone"></span></div>
-     <h3 class="service-title">Miễn phí đăng tin</h3>
-     <p class="service-desc">Đăng tin không mất phí, tiếp cận hàng nghìn người mua mỗi ngày</p>
-    </div>
-    <div class="service-card">
-     <div class="service-icon"><span class="icon-shield"></span></div>
-     <h3 class="service-title">An toàn & uy tín</h3>
-     <p class="service-desc">Thông tin được xác minh, giao dịch an toàn có hỗ trợ từ AutoMart</p>
-    </div>
-   </div>
+<!-- ══ HERO FORM ══ -->
+<section class="section section-gray" style="padding: 40px 24px;">
+  <div class="container" style="max-width: 1100px;">
+    <div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;">
 
-   <!-- Form đăng tin -->
-   <div class="search-box">
-    <h3 class="search-title"><span class="icon-car"></span> Thông tin xe cần bán</h3>
-    <form id="sellForm" onsubmit="handleSellSubmit(event)">
-     <div class="search-grid">
-      <div class="form-group">
-       <label class="form-label">Hãng xe *</label>
-       <select class="form-control" required>
-        <option value="">Chọn hãng xe</option>
-        <option>Toyota</option>
-        <option>Honda</option>
-        <option>Mazda</option>
-        <option>Hyundai</option>
-        <option>Kia</option>
-        <option>Ford</option>
-       </select>
+      <!-- CỘT TRÁI: Form -->
+      <div class="search-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+          <h3 class="search-title" style="margin-bottom:0;">Nhập thông tin xe cơ bản</h3>
+          <a href="#" style="font-size:13px;color:var(--accent-primary);font-weight:600;text-decoration:none;">
+            Tìm hiểu quy trình bán →
+          </a>
+        </div>
+        <form id="sellForm" onsubmit="handleSellSubmit(event)">
+
+        <!-- Row 1 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group">
+            <select class="form-control" name="hang_xe" required>
+              <option value="">Hãng</option>
+              <option>Toyota</option><option>Honda</option><option>Mazda</option>
+              <option>Hyundai</option><option>Kia</option><option>Ford</option>
+              <option>BMW</option><option>Benz</option><option>Vinfast</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control" name="dong_xe" placeholder="Dòng xe (VD: Camry 2.0E)" required>
+          </div>
+          <div class="form-group">
+            <input type="number" class="form-control" name="so_km" placeholder="Số km" required>
+          </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group">
+            <input type="number" class="form-control" name="gia_mong_muon" placeholder="Giá mong muốn (triệu)" required>
+          </div>
+          <div class="form-group">
+            <select class="form-control" name="nam_san_xuat" required>
+              <option value="">Năm sản xuất</option>
+              <option>2025</option><option>2024</option><option>2023</option>
+              <option>2022</option><option>2021</option><option>2020</option>
+              <option>2019</option><option>2018</option><option>2017</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <select class="form-control" name="khu_vuc" required>
+              <option value="">Khu vực</option>
+              <option>TP.HCM</option><option>Hà Nội</option><option>Đà Nẵng</option>
+              <option>Cần Thơ</option><option>Hải Phòng</option><option>Khác</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Row 3: họ tên + sđt -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group">
+            <input type="text" class="form-control" name="ho_ten" placeholder="Họ và tên" required>
+          </div>
+          <div class="form-group">
+            <input type="tel" class="form-control" name="so_dien_thoai" placeholder="Số điện thoại" required>
+          </div>
+        </div>
+
+          <!-- Mô tả hiện trạng xe -->
+          <div class="form-group" style="margin-bottom:16px;">
+            <label style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+              <i data-lucide="clipboard-pen" style="width:14px;height:14px;color:var(--accent-primary);"></i>
+              Mô tả hiện trạng xe
+            </label>
+            <textarea class="form-control" name="mo_ta" rows="4"
+              placeholder="Mô tả tình trạng xe: nội thất, ngoại thất, máy móc, tai nạn (nếu có), đồ chơi thêm...&#10;Ví dụ: Xe còn mới 95%, nội thất sạch sẽ, máy êm, chưa tai nạn ngập nước, có camera 360, cửa sổ trời..."
+              style="resize:vertical;min-height:100px;font-family:inherit;font-size:13.5px;line-height:1.6;">
+            </textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
+              <span style="font-size:11px;color:#aaa;">Mô tả càng chi tiết, xe càng dễ bán được giá cao</span>
+              <button type="button" onclick="bxSelectSug('Gợi ý cách mô tả xe cho tôi')"
+                style="font-size:11px;color:var(--accent-primary);background:none;border:none;cursor:pointer;padding:0;font-family:inherit;">
+                💡 Nhờ AI gợi ý →
+              </button>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <button type="submit" class="btn btn-primary"
+            style="width:100%;justify-content:center;padding:13px;font-size:15px;border-radius:8px;display:flex;align-items:center;gap:8px;">
+            <i data-lucide="tag" style="width:18px;height:18px;"></i>
+            Định giá & bán xe ngay
+          </button>
+          <p style="font-size:11px;color:#888;margin-top:10px;text-align:center;">
+            ✓ Tôi đã đọc, hiểu rõ và đồng ý với
+            <a href="#" style="color:var(--accent-primary);">Chính sách bảo mật</a> và
+            <a href="#" style="color:var(--accent-primary);">Quy chế hoạt động</a> của AutoMart
+          </p>
+        </form>
       </div>
-      <div class="form-group">
-       <label class="form-label">Dòng xe *</label>
-       <input type="text" class="form-control" placeholder="VD: Camry, Civic..." required>
+
+      <!-- CỘT PHẢI: AI Chatbox -->
+      <div style="position:sticky;top:80px;background:#fff;border-radius:14px;
+        border:1.5px solid #eaeae0;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);">
+
+        <!-- Header -->
+        <div style="background:var(--accent-primary);padding:14px 16px;display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);
+            display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="bot" style="width:18px;height:18px;color:#fff;"></i>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:700;color:#fff;">Tư vấn bán xe AI</div>
+            <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.8);">
+              <span style="width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block;"></span>
+              Đang hoạt động
+            </div>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="bxChatMessages" style="height:280px;overflow-y:auto;padding:12px;
+          display:flex;flex-direction:column;background:#f8f8f6;"></div>
+
+        <!-- Suggestions -->
+        <div id="bxSuggestions" style="display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px;
+          background:#f8f8f6;border-top:1px solid #eaeae0;"></div>
+
+        <!-- Input -->
+        <div style="display:flex;gap:8px;padding:10px 12px;border-top:1px solid #eaeae0;background:#fff;">
+          <input id="bxInput" type="text" placeholder="Hỏi về bán xe..."
+            style="flex:1;border:1.5px solid #e2e2da;border-radius:20px;padding:8px 14px;
+            font-size:13px;font-family:inherit;outline:none;transition:.2s;"
+            onfocus="this.style.borderColor='var(--accent-primary)'"
+            onblur="this.style.borderColor='#e2e2da'">
+          <button onclick="bxSend()" style="width:36px;height:36px;background:var(--accent-primary);
+            border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="send" style="width:15px;height:15px;color:#fff;"></i>
+          </button>
+        </div>
       </div>
-      <div class="form-group">
-       <label class="form-label">Năm sản xuất *</label>
-       <select class="form-control" required>
-        <option value="">Chọn năm</option>
-        <option>2024</option>
-        <option>2023</option>
-        <option>2022</option>
-        <option>2021</option>
-        <option>2020</option>
-       </select>
-      </div>
-      <div class="form-group">
-       <label class="form-label">Số Km đã đi *</label>
-       <input type="number" class="form-control" placeholder="VD: 30000" required>
-      </div>
-      <div class="form-group">
-       <label class="form-label">Giá mong muốn (triệu) *</label>
-       <input type="number" class="form-control" placeholder="VD: 500" required>
-      </div>
-      <div class="form-group">
-       <label class="form-label">Khu vực *</label>
-       <select class="form-control" required>
-        <option value="">Chọn khu vực</option>
-        <option>TP. Hồ Chí Minh</option>
-        <option>Hà Nội</option>
-        <option>Đà Nẵng</option>
-        <option>Cần Thơ</option>
-       </select>
-      </div>
-      <div class="form-group form-group-full">
-       <label class="form-label">Mô tả thêm</label>
-       <textarea class="form-control" rows="3" placeholder="Tình trạng xe, lịch sử bảo dưỡng..."></textarea>
-      </div>
-      <div class="form-group">
-       <label class="form-label">Họ tên *</label>
-       <input type="text" class="form-control" required>
-      </div>
-      <div class="form-group">
-       <label class="form-label">Số điện thoại *</label>
-       <input type="tel" class="form-control" required>
-      </div>
-      <div class="form-group form-group-full">
-       <button type="submit" class="btn btn-primary" style="width: 100%;">
-        <span class="icon-check"></span> Đăng tin ngay
-       </button>
-      </div>
-     </div>
-    </form>
-   </div>
+
+      <div style="text-align:right;margin-bottom:16px;">
+      <a href="/danh-sach-ban-xe" style="display:inline-flex;align-items:center;gap:6px;
+        font-size:13px;color:var(--accent-primary);font-weight:600;text-decoration:none;">
+        <i data-lucide="list" style="width:15px;height:15px;"></i>
+        Xem tất cả tin bán xe →
+      </a>
+</div>
+
+    </div>
   </div>
- </div>
 </section>
+
+<!-- ══ 4 BƯỚC BÁN XE ══ -->
+<section class="section section-white">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">4 bước bán xe chỉ trong 1 giờ cùng AutoMart</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;">
+      <div class="service-card" style="position:relative;text-align:left;padding:24px;">
+        <span style="position:absolute;top:16px;right:20px;font-size:48px;font-weight:900;color:var(--accent-primary);line-height:1;opacity:0.9;">1</span>
+        <div class="service-icon" style="margin:0 0 14px 0;width:52px;height:52px;">
+          <i data-lucide="calendar-check" style="width:26px;height:26px;color:#fff;"></i>
+        </div>
+        <p style="font-size:13px;color:#444;line-height:1.6;padding-right:20px;">Định giá và đặt lịch kiểm tra xe</p>
+      </div>
+      <div class="service-card" style="position:relative;text-align:left;padding:24px;">
+        <span style="position:absolute;top:16px;right:20px;font-size:48px;font-weight:900;color:var(--accent-primary);line-height:1;opacity:0.9;">2</span>
+        <div class="service-icon" style="margin:0 0 14px 0;width:52px;height:52px;">
+          <i data-lucide="clipboard-list" style="width:26px;height:26px;color:#fff;"></i>
+        </div>
+        <p style="font-size:13px;color:#444;line-height:1.6;padding-right:20px;">Nhận kết quả tình trạng xe và giá đề xuất tốt nhất thị trường</p>
+      </div>
+      <div class="service-card" style="position:relative;text-align:left;padding:24px;">
+        <span style="position:absolute;top:16px;right:20px;font-size:48px;font-weight:900;color:var(--accent-primary);line-height:1;opacity:0.9;">3</span>
+        <div class="service-icon" style="margin:0 0 14px 0;width:52px;height:52px;">
+          <i data-lucide="handshake" style="width:26px;height:26px;color:#fff;"></i>
+        </div>
+        <p style="font-size:13px;color:#444;line-height:1.6;padding-right:20px;">AutoMart tiến hành mọi thủ tục mua/bán xe trong 24 giờ</p>
+      </div>
+      <div class="service-card" style="position:relative;text-align:left;padding:24px;">
+        <span style="position:absolute;top:16px;right:20px;font-size:48px;font-weight:900;color:var(--accent-primary);line-height:1;opacity:0.9;">4</span>
+        <div class="service-icon" style="margin:0 0 14px 0;width:52px;height:52px;">
+          <i data-lucide="banknote" style="width:26px;height:26px;color:#fff;"></i>
+        </div>
+        <p style="font-size:13px;color:#444;line-height:1.6;padding-right:20px;">Chủ xe nhận thanh toán trong 1 giờ</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIALS ══ -->
+<section class="section section-gray">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">
+        Hơn 4000+ khách hàng đã <span class="section-title-accent">bán ô tô cũ giá cao</span>
+        <br>cùng AutoMart
+      </h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:32px;">
+      {% for quote in [
+        'Giá thật sự cao! Vợ chồng tôi chào nhiều bên rồi mà không ngờ AutoMart có thể trả giá chênh hơn 20 triệu.',
+        'Chỉ trong 2 ngày từ lúc kiểm định xe đến khi công chứng mà tôi đã bán được xe và nhận tiền ngay.',
+        'Cảm ơn em Trọng đã giúp chị bán xe giá tốt. Lần sau chắc chắn vẫn sẽ chọn AutoMart!'
+      ] %}
+      <div style="background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eaeae0;box-shadow:0 1px 8px rgba(0,0,0,0.06);">
+        <div style="height:200px;background:#d8d8d0;position:relative;">
+          <svg width="100%" height="100%" style="position:absolute;top:0;left:0;" preserveAspectRatio="none">
+            <line x1="0" y1="0" x2="100%" y2="100%" stroke="#b8b8b0" stroke-width="1"/>
+            <line x1="100%" y1="0" x2="0" y2="100%" stroke="#b8b8b0" stroke-width="1"/>
+          </svg>
+        </div>
+        <div style="padding:16px;text-align:center;border-top:2px solid #eaeae0;">
+          <p style="font-size:13px;color:#333;line-height:1.65;font-style:italic;">"{{ quote }}"</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="text-align:center;">
+      <button class="btn btn-outline btn-large">Xem thêm</button>
+    </div>
+  </div>
+</section>
+
+<script src="/static/js/ban_xe.js"></script>
 {% endblock %}

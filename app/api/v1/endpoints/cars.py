@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Request
 from sqlmodel import Session
 from typing import Optional, List
 from app.models.cars import CarFilter
@@ -7,6 +7,8 @@ from app.services.car_service import (
     add_car_image, get_car_images
 )
 from app.core.database import get_session
+from fastapi.templating import Jinja2Templates
+templates = Jinja2Templates(directory="templates")
 
 router = APIRouter(prefix="/cars")
 
@@ -56,3 +58,17 @@ async def add_car(
 def list_car_images(car_id: int, session: Session = Depends(get_session)):
     images = get_car_images(session, car_id)
     return {"images": images}
+
+@router.get("/{car_id}/detail")
+def car_detail_page(request: Request, car_id: int, session: Session = Depends(get_session)):
+    from sqlmodel import select
+    from app.models.cars import Car
+    car = session.get(Car, car_id)
+    if not car:
+        raise HTTPException(status_code=404, detail="Không tìm thấy xe")
+    images = get_car_images(session, car_id)
+    return templates.TemplateResponse("car_detail.html", {
+        "request": request,
+        "car": car,
+        "images": images
+    })
