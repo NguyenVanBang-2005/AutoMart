@@ -55,13 +55,13 @@ def _get_or_create_user(session: Session, email: str, ho_ten: str) -> User:
 # ── Google ────────────────────────────────────────────
 @router.get("/google")
 async def google_login(request: Request):
-    # Tự động lấy domain hiện tại (Render hoặc localhost)
-    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    # Lấy domain hiện tại một cách đáng tin cậy
+    scheme = request.headers.get("x-forwarded-proto", "https")
     host = request.headers.get("host")
 
     redirect_uri = f"{scheme}://{host}/auth/google/callback"
 
-    print(f"=== REDIRECT URI being sent: {redirect_uri} ===")
+    print(f"=== REDIRECT URI: {redirect_uri} ===")  # Quan trọng để debug
 
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
