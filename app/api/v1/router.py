@@ -6,21 +6,20 @@ from app.api.v1.endpoints import (
 from app.api.v1.endpoints.user import public_router, private_router
 from app.core.security import get_current_user_required
 
-# Tạo api_router chính với prefix /api/v1
 api_router = APIRouter(prefix="/api/v1")
 
-# ── PUBLIC ROUTES ─────────────────────────────────────
+# Public routes
 api_router.include_router(cars.router,          tags=["Cars"])
 api_router.include_router(tin_tuc.router,       tags=["Tin tức"])
 api_router.include_router(uu_dai_thang.router,  tags=["Ưu đãi tháng"])
 api_router.include_router(ai_chat.router,       tags=["AI"])
 
-# Auth router - prefix riêng (không chồng prefix)
+# Auth router - cực kỳ quan trọng
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 
 api_router.include_router(public_router,        tags=["Users"])
 
-# ── PRIVATE ROUTES (yêu cầu đăng nhập) ─────────────────
+# Private routes
 api_router.include_router(
     private_router,
     tags=["Users"],
@@ -40,3 +39,8 @@ api_router.include_router(
     tags=["Tư vấn"],
     dependencies=[Depends(get_current_user_required)]
 )
+
+# Test route để kiểm tra router có hoạt động không
+@api_router.get("/test")
+def test_router():
+    return {"status": "ok", "message": "api_router is working"}
