@@ -51,7 +51,10 @@ def _get_or_create_user(session: Session, email: str, ho_ten: str) -> User:
         session.refresh(user)
     return user
 
-# ── Google ────────────────────────────────────────────
+@router.get("/test")
+async def test_route():
+    return {"message": "Auth router is working!"}
+
 # ── Google ────────────────────────────────────────────
 @router.get("/google")
 async def google_login(request: Request):
