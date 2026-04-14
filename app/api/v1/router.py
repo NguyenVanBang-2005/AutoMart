@@ -15,7 +15,7 @@ api_router.include_router(tin_tuc.router,       tags=["Tin tức"])
 api_router.include_router(uu_dai_thang.router,  tags=["Ưu đãi tháng"])
 api_router.include_router(ai_chat.router,       tags=["AI"])
 
-# Auth router - có prefix riêng /auth
+# Auth router - prefix riêng (không chồng prefix)
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 
 api_router.include_router(public_router,        tags=["Users"])
