@@ -16,15 +16,15 @@ class Settings(BaseSettings):
 
     APP_NAME: str = "AutoMart"
     DEBUG: bool = True
-    DATABASE_URL: str = "postgresql://Bang:trungHoang%402005@localhost:5432/automartdb"
-    SECRET_KEY: str = "changeme"
+    DATABASE_URL: str = ""
+    SECRET_KEY: str = ""
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     FRONTEND_URL: str = "http://localhost:3000"
     ENVIRONMENT: str = "development"
-    CLOUDINARY_CLOUD_NAME: str = "di0dg1uru"
-    CLOUDINARY_API_KEY: str = "186712837536447"
-    CLOUDINARY_API_SECRET: str = "aWoW4l--DYXBDx-FVpjQ0cDFXjk"
+    CLOUDINARY_CLOUD_NAME: str = ""
+    CLOUDINARY_API_KEY: str = ""
+    CLOUDINARY_API_SECRET: str = ""
     GROQ_API_KEY: str = ""
 
     class Config:
