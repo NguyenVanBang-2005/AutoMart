@@ -55,6 +55,7 @@ def _get_or_create_user(session: Session, email: str, ho_ten: str) -> User:
 @router.get("/google")
 async def google_login(request: Request):
     redirect_uri = str(request.url_for("google_callback"))
+    redirect_uri = redirect_uri.replace("http://", "https://")
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 @router.get("/google/callback", name="google_callback")
@@ -83,6 +84,7 @@ async def google_callback(
 @router.get("/facebook")
 async def facebook_login(request: Request):
     redirect_uri = str(request.url_for("facebook_callback"))
+    redirect_uri = redirect_uri.replace("http://", "https://")
     return await oauth.facebook.authorize_redirect(request, redirect_uri)
 
 @router.get("/facebook/callback", name="facebook_callback")
