@@ -59,7 +59,7 @@ app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router)
 
 def get_current_user_for_template(request: Request):
     try:

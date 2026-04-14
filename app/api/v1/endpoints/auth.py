@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
-from authlib.integrations.starlette_client import OAuth, OAuthError
+from authlib.integrations.starlette_client import OAuth as AuthlibOAuth
 from starlette.config import Config as StarletteConfig
 from app.core.config import settings
 from app.core.database import get_session
@@ -16,7 +16,7 @@ _starlette_config = StarletteConfig(environ={
     "GOOGLE_CLIENT_SECRET": settings.GOOGLE_CLIENT_SECRET,
 })
 
-oauth = OAuth(_starlette_config)
+oauth = AuthlibOAuth(_starlette_config)
 
 oauth.register(
     name="google",
@@ -55,13 +55,13 @@ def _get_or_create_user(session: Session, email: str, ho_ten: str) -> User:
 # ── Google ────────────────────────────────────────────
 @router.get("/google")
 async def google_login(request: Request):
-    # Lấy domain hiện tại một cách an toàn
+    # Tự động lấy domain hiện tại (Render hoặc localhost)
     scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
     host = request.headers.get("host")
 
     redirect_uri = f"{scheme}://{host}/auth/google/callback"
 
-    print(f"=== REDIRECT URI: {redirect_uri} ===")
+    print(f"=== REDIRECT URI being sent: {redirect_uri} ===")
 
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
@@ -80,7 +80,6 @@ async def google_callback(
         user = _get_or_create_user(session, email, ho_ten)
         jwt_token = create_access_token({"sub": str(user.id)})
 
-        # Redirect về frontend (dùng FRONTEND_URL từ settings)
         response = RedirectResponse(url=FRONTEND)
         set_auth_cookie(response, jwt_token)
         return response
