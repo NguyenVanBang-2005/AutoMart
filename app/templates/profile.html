@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Hồ sơ cá nhân – AutoMart{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="profile-container">
+
+    <!-- ── Sidebar ── -->
+    <aside class="profile-sidebar">
+      <div class="avatar-section">
+        <div class="avatar-wrapper" id="avatarWrapper">
+          {% if current_user.avatar_url %}
+            <img src="{{ current_user.avatar_url }}" alt="Avatar" class="avatar-img" id="avatarImg">
+            <div class="avatar-placeholder" id="avatarPlaceholder" style="display:none">
+              {{ current_user.ho_ten[0]|upper }}
+            </div>
+          {% else %}
+            <div class="avatar-placeholder" id="avatarPlaceholder">
+              {{ current_user.ho_ten[0]|upper }}
+            </div>
+            <img src="" alt="Avatar" class="avatar-img" id="avatarImg" style="display:none">
+          {% endif %}
+          <label class="avatar-edit-btn" for="avatarInput" title="Đổi ảnh">
+            <i data-lucide="camera" style="width:15px;height:15px"></i>
+          </label>
+          <input type="file" id="avatarInput" accept="image/*" style="display:none">
+        </div>
+        <p class="avatar-status" id="avatarStatus"></p>
+        <h3 class="sidebar-name" id="sidebarName">{{ current_user.ho_ten }}</h3>
+        <p class="sidebar-email">{{ current_user.email }}</p>
+      </div>
+
+      <nav class="profile-nav">
+        <button class="profile-nav-item active" data-tab="info">
+          <i data-lucide="user" style="width:16px;height:16px"></i>
+          Thông tin cá nhân
+        </button>
+        <button class="profile-nav-item" data-tab="password">
+          <i data-lucide="lock" style="width:16px;height:16px"></i>
+          Đổi mật khẩu
+        </button>
+        <button class="profile-nav-item" data-tab="history">
+          <i data-lucide="clock" style="width:16px;height:16px"></i>
+          Lịch sử đăng tin
+        </button>
+      </nav>
+    </aside>
+
+    <!-- ── Main ── -->
+    <main class="profile-main">
+
+      <!-- Tab: Thông tin -->
+      <section class="profile-tab active" id="tab-info">
+        <div class="section-header">
+          <h2>Thông tin cá nhân</h2>
+          <p>Cập nhật tên và số điện thoại của bạn</p>
+        </div>
+        <div class="form-message" id="infoMsg" style="display:none"></div>
+        <form class="profile-form" id="infoForm">
+          <div class="form-group">
+            <label>Họ và tên</label>
+            <input type="text" id="hoTen" value="{{ current_user.ho_ten }}" placeholder="Nhập họ và tên">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" value="{{ current_user.email }}" disabled class="input-disabled">
+            <span class="field-note">Email không thể thay đổi</span>
+          </div>
+          <div class="form-group">
+            <label>Số điện thoại</label>
+            <input type="tel" id="soDienThoai" value="{{ current_user.so_dien_thoai }}" placeholder="Nhập số điện thoại">
+          </div>
+          <button type="submit" class="btn-save" id="btnSaveInfo">
+            <i data-lucide="save" style="width:15px;height:15px"></i> Lưu thay đổi
+          </button>
+        </form>
+      </section>
+
+      <!-- Tab: Mật khẩu -->
+      <section class="profile-tab" id="tab-password">
+        <div class="section-header">
+          <h2>Đổi mật khẩu</h2>
+          <p>Sử dụng mật khẩu mạnh để bảo vệ tài khoản</p>
+        </div>
+        <div class="form-message" id="pwMsg" style="display:none"></div>
+        <form class="profile-form" id="passwordForm">
+          <div class="form-group">
+            <label>Mật khẩu hiện tại</label>
+            <div class="input-pw-wrap">
+              <input type="password" id="pwCu" placeholder="••••••••">
+              <button type="button" class="toggle-pw" data-target="pwCu">
+                <i data-lucide="eye" style="width:15px;height:15px"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Mật khẩu mới</label>
+            <div class="input-pw-wrap">
+              <input type="password" id="pwMoi" placeholder="••••••••">
+              <button type="button" class="toggle-pw" data-target="pwMoi">
+                <i data-lucide="eye" style="width:15px;height:15px"></i>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Xác nhận mật khẩu mới</label>
+            <div class="input-pw-wrap">
+              <input type="password" id="pwMoiConfirm" placeholder="••••••••">
+              <button type="button" class="toggle-pw" data-target="pwMoiConfirm">
+                <i data-lucide="eye" style="width:15px;height:15px"></i>
+              </button>
+            </div>
+          </div>
+          <button type="submit" class="btn-save" id="btnSavePw">
+            <i data-lucide="shield-check" style="width:15px;height:15px"></i> Đổi mật khẩu
+          </button>
+        </form>
+      </section>
+
+      <!-- Tab: Lịch sử -->
+      <section class="profile-tab" id="tab-history">
+        <div class="section-header">
+          <h2>Lịch sử đăng tin</h2>
+          <p>Các tin đăng bán xe của bạn</p>
+        </div>
+        {% if dang_tins %}
+          <div class="dang-tin-list">
+            {% for tin in dang_tins %}
+            <div class="dang-tin-card">
+              <div class="dang-tin-icon">
+                <i data-lucide="car" style="width:20px;height:20px"></i>
+              </div>
+              <div class="dang-tin-info">
+                <h4>{{ tin.hang_xe }} {{ tin.dong_xe }}</h4>
+                <div class="dang-tin-meta">
+                  <span><i data-lucide="calendar" style="width:12px;height:12px"></i> {{ tin.nam_san_xuat }}</span>
+                  <span><i data-lucide="gauge" style="width:12px;height:12px"></i> {{ "{:,}".format(tin.so_km) }} km</span>
+                  <span><i data-lucide="map-pin" style="width:12px;height:12px"></i> {{ tin.khu_vuc }}</span>
+                </div>
+              </div>
+              <div class="dang-tin-price">{{ "{:,}".format(tin.gia_mong_muon) }} triệu</div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <i data-lucide="inbox" style="width:48px;height:48px"></i>
+            <p>Bạn chưa có tin đăng nào</p>
+            <a href="/ban-xe" class="btn-save" style="text-decoration:none">Đăng tin ngay</a>
+          </div>
+        {% endif %}
+      </section>
+
+    </main>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>lucide.createIcons();</script>
+<script src="{{ url_for('static', path='js/profile.js') }}"></script>
+{% endblock %}

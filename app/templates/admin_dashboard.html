@@ -1,0 +1,626 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard — AutoMart{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+
+  <!-- ── Header ── -->
+  <div class="dashboard-header">
+    <div class="dashboard-header-left">
+      <div class="dashboard-header-icon">
+        <i data-lucide="shield-check" style="width:22px;height:22px;color:#fff;"></i>
+      </div>
+      <div>
+        <h1 class="dashboard-title">Admin Dashboard</h1>
+        <p class="dashboard-subtitle">Xin chào, {{ current_user.ho_ten }}</p>
+      </div>
+    </div>
+    <span class="dashboard-badge dashboard-badge-admin">Admin</span>
+  </div>
+
+  <!-- ── Stat cards ── -->
+  <div class="dashboard-stats">
+    <div class="stat-card">
+      <div class="stat-card-top">
+        <span class="stat-card-label">Người dùng</span>
+        <div class="stat-card-icon stat-card-icon-gold">
+          <i data-lucide="users" style="width:16px;height:16px;color:var(--accent-primary);"></i>
+        </div>
+      </div>
+      <div class="stat-card-value stat-card-value-gold">{{ total_users }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-top">
+        <span class="stat-card-label">Tin đăng</span>
+        <div class="stat-card-icon stat-card-icon-blue">
+          <i data-lucide="file-text" style="width:16px;height:16px;color:#3b82f6;"></i>
+        </div>
+      </div>
+      <div class="stat-card-value stat-card-value-blue">{{ total_tins }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-top">
+        <span class="stat-card-label">Lịch lái thử</span>
+        <div class="stat-card-icon" style="background:#fef3c7;">
+          <i data-lucide="car" style="width:16px;height:16px;color:#d97706;"></i>
+        </div>
+      </div>
+      <div class="stat-card-value" style="color:#d97706;">{{ total_lai_thu }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-top">
+        <span class="stat-card-label">Lái thử chờ duyệt</span>
+        <div class="stat-card-icon" style="background:#fce7f3;">
+          <i data-lucide="clock" style="width:16px;height:16px;color:#db2777;"></i>
+        </div>
+      </div>
+      <div class="stat-card-value" style="color:#db2777;">{{ cho_duyet_count }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-top">
+        <span class="stat-card-label">Liên hệ chưa đọc</span>
+        <div class="stat-card-icon" style="background:#ede9fe;">
+          <i data-lucide="mail" style="width:16px;height:16px;color:#7c3aed;"></i>
+        </div>
+      </div>
+      <div class="stat-card-value" style="color:#7c3aed;">{{ lien_he_chua_doc }}</div>
+    </div>
+  </div>
+
+  <!-- ── Panels row 1 ── -->
+  <div class="dashboard-panels">
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <h2 class="panel-card-title">
+          <i data-lucide="user-plus" style="width:15px;height:15px;color:var(--accent-primary);"></i>
+          Người dùng mới nhất
+        </h2>
+      </div>
+      <div class="panel-card-body">
+        {% for u in recent_users %}
+        <div class="panel-row">
+          <div class="panel-row-left">
+            <span class="panel-row-name">{{ u.ho_ten }}</span>
+            <span class="panel-row-sub">{{ u.email }}</span>
+          </div>
+          <div class="panel-row-right">
+            <span class="role-badge
+              {% if u.role.value == 'admin' %}role-badge-admin
+              {% elif u.role.value == 'staff' %}role-badge-staff
+              {% else %}role-badge-user{% endif %}">{{ u.role.value }}</span>
+          </div>
+        </div>
+        {% else %}
+        <div class="panel-empty">Chưa có người dùng nào</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <h2 class="panel-card-title">
+          <i data-lucide="car" style="width:15px;height:15px;color:#3b82f6;"></i>
+          Tin đăng mới nhất
+        </h2>
+      </div>
+      <div class="panel-card-body">
+        {% for tin in recent_tins %}
+        <div class="panel-row">
+          <div class="panel-row-left">
+            <span class="panel-row-name">{{ tin.hang_xe }} {{ tin.dong_xe }}</span>
+            <span class="panel-row-sub">{{ tin.khu_vuc }} · {{ tin.ho_ten }}</span>
+          </div>
+          <div class="panel-row-right">
+            <span class="panel-price">{{ tin.gia_mong_muon }}tr</span>
+            <a href="/ban-xe/{{ tin.id }}" class="panel-action">Xem</a>
+          </div>
+        </div>
+        {% else %}
+        <div class="panel-empty">Chưa có tin đăng nào</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Panel: Lái thử ── -->
+  <div style="margin-top:24px;">
+    <div class="panel-card" style="max-width:100%;">
+      <div class="panel-card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <h2 class="panel-card-title">
+          <i data-lucide="calendar-check" style="width:15px;height:15px;color:#d97706;"></i>
+          Đặt lịch lái thử
+        </h2>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button onclick="filterLaiThu('all')"       id="f-all"       class="lt-fbtn lt-factive">Tất cả</button>
+          <button onclick="filterLaiThu('cho_duyet')" id="f-cho_duyet" class="lt-fbtn">⏳ Chờ duyệt</button>
+          <button onclick="filterLaiThu('da_duyet')"  id="f-da_duyet"  class="lt-fbtn">✅ Đã duyệt</button>
+          <button onclick="filterLaiThu('tu_choi')"   id="f-tu_choi"   class="lt-fbtn">❌ Từ chối</button>
+        </div>
+      </div>
+      <div class="panel-card-body" style="padding:0;">
+        {% if lai_thu_list %}
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="background:#f8f8f6;border-bottom:1px solid #eaeae0;">
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;white-space:nowrap;">Khách hàng</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;white-space:nowrap;">Xe / Showroom</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;white-space:nowrap;">Ngày · Giờ</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;color:#64748b;white-space:nowrap;">Giấy tờ</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;color:#64748b;white-space:nowrap;">Trạng thái</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;color:#64748b;white-space:nowrap;">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for lt in lai_thu_list %}
+              <tr class="lt-row" data-trang-thai="{{ lt.trang_thai }}"
+                  style="border-bottom:1px solid #f0f0ea;transition:background .15s;"
+                  onmouseover="this.style.background='#fafaf8'"
+                  onmouseout="this.style.background='transparent'">
+                <td style="padding:14px 16px;">
+                  <div style="font-weight:600;">{{ lt.ho_ten }}</div>
+                  <div style="color:#64748b;font-size:12px;margin-top:2px;">{{ lt.so_dien_thoai }}</div>
+                </td>
+                <td style="padding:14px 16px;">
+                  <div style="font-weight:600;">{{ lt.hang_xe }}</div>
+                  <div style="color:#64748b;font-size:12px;margin-top:2px;">{{ lt.showroom }}</div>
+                </td>
+                <td style="padding:14px 16px;">
+                  <div>{{ lt.ngay_lai_thu }}</div>
+                  <div style="color:#64748b;font-size:12px;margin-top:2px;">{{ lt.khung_gio }}</div>
+                </td>
+                <td style="padding:14px 16px;text-align:center;">
+                  <div style="display:flex;gap:6px;justify-content:center;">
+                    {% if lt.anh_cccd %}<a href="{{ lt.anh_cccd }}" target="_blank" class="lt-doc-btn lt-doc-gold"><i data-lucide="id-card" style="width:12px;height:12px;"></i> CCCD</a>{% else %}<span style="font-size:11px;color:#c8c8b8;">—</span>{% endif %}
+                    {% if lt.anh_gplx %}<a href="{{ lt.anh_gplx }}" target="_blank" class="lt-doc-btn lt-doc-blue"><i data-lucide="car-front" style="width:12px;height:12px;"></i> GPLX</a>{% else %}<span style="font-size:11px;color:#c8c8b8;">—</span>{% endif %}
+                  </div>
+                </td>
+                <td style="padding:14px 16px;text-align:center;">
+                  {% if lt.trang_thai == 'cho_duyet' %}<span class="lt-badge lt-badge-wait">⏳ Chờ duyệt</span>
+                  {% elif lt.trang_thai == 'da_duyet' %}<span class="lt-badge lt-badge-ok">✅ Đã duyệt</span>
+                  {% else %}<span class="lt-badge lt-badge-no">❌ Từ chối</span>{% endif %}
+                </td>
+                <td style="padding:14px 16px;text-align:center;">
+                  <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                    <button class="lt-action-btn" style="background:#f1f5f9;color:#475569;"
+                      onclick="openDetail({{ lt.id }},{{ lt.ho_ten|tojson }},{{ lt.so_dien_thoai|tojson }},{{ lt.hang_xe|tojson }},{{ lt.showroom|tojson }},{{ lt.ngay_lai_thu|tojson }},{{ lt.khung_gio|tojson }},{{ (lt.anh_cccd or '')|tojson }},{{ (lt.anh_gplx or '')|tojson }},{{ lt.trang_thai|tojson }},{{ (lt.ly_do_tu_choi or '')|tojson }})">
+                      <i data-lucide="eye" style="width:12px;height:12px;"></i> Chi tiết
+                    </button>
+                    {% if lt.trang_thai != 'da_duyet' %}
+                    <button class="lt-action-btn" style="background:#d1fae5;color:#065f46;"
+                      onclick="confirmApprove({{ lt.id }},{{ lt.ho_ten|tojson }})">
+                      <i data-lucide="check" style="width:12px;height:12px;"></i> Duyệt
+                    </button>{% endif %}
+                    {% if lt.trang_thai != 'tu_choi' %}
+                    <button class="lt-action-btn" style="background:#fee2e2;color:#991b1b;"
+                      onclick="openRejectModal({{ lt.id }},{{ lt.ho_ten|tojson }})">
+                      <i data-lucide="x" style="width:12px;height:12px;"></i> Từ chối
+                    </button>{% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="panel-empty" style="padding:40px;">Chưa có lịch đặt lái thử nào</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Panel: Đơn liên hệ ── -->
+  <div style="margin-top:24px;">
+    <div class="panel-card" style="max-width:100%;">
+      <div class="panel-card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <h2 class="panel-card-title">
+          <i data-lucide="mail" style="width:15px;height:15px;color:#7c3aed;"></i>
+          Đơn liên hệ
+          {% if lien_he_chua_doc > 0 %}
+          <span id="lhNewBadge" style="margin-left:6px;background:#7c3aed;color:#fff;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">
+            {{ lien_he_chua_doc }} mới
+          </span>
+          {% endif %}
+        </h2>
+        <div style="display:flex;gap:6px;">
+          <button onclick="filterLienHe('all')"      id="lh-all"      class="lt-fbtn lt-factive">Tất cả</button>
+          <button onclick="filterLienHe('chua_doc')" id="lh-chua_doc" class="lt-fbtn">📬 Chưa đọc</button>
+          <button onclick="filterLienHe('da_doc')"   id="lh-da_doc"   class="lt-fbtn">✅ Đã đọc</button>
+        </div>
+      </div>
+      <div class="panel-card-body" style="padding:0;">
+        {% if lien_he_list %}
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="background:#f8f8f6;border-bottom:1px solid #eaeae0;">
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;">Người gửi</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;">Nội dung</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;white-space:nowrap;">Thời gian</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;color:#64748b;">Trạng thái</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;color:#64748b;">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for lh in lien_he_list %}
+              <tr class="lh-row"
+                  data-lh-id="{{ lh.id }}"
+                  data-da-doc="{{ 'da_doc' if lh.da_doc else 'chua_doc' }}"
+                  style="border-bottom:1px solid #f0f0ea;transition:background .15s;{% if not lh.da_doc %}background:#faf8ff;{% endif %}"
+                  onmouseover="this.style.background='#f5f3ff'"
+                  onmouseout="this.style.background='{{ '' if lh.da_doc else '#faf8ff' }}'">
+
+                <td style="padding:14px 16px;">
+                  <div style="font-weight:{{ '700' if not lh.da_doc else '600' }};color:var(--text-primary);">
+                    {{ lh.ho_ten }}
+                  </div>
+                  <div style="color:#64748b;font-size:12px;margin-top:2px;">{{ lh.so_dien_thoai }}</div>
+                  {% if lh.email %}
+                  <div style="color:#94a3b8;font-size:11px;">{{ lh.email }}</div>
+                  {% endif %}
+                </td>
+
+                <td style="padding:14px 16px;max-width:320px;">
+                  <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:300px;color:var(--text-primary);"
+                       title="{{ lh.noi_dung }}">{{ lh.noi_dung }}</div>
+                </td>
+
+                <td style="padding:14px 16px;white-space:nowrap;">
+                  <div style="color:#64748b;font-size:12px;">{{ lh.created_at.strftime('%d/%m/%Y') }}</div>
+                  <div style="color:#94a3b8;font-size:11px;">{{ lh.created_at.strftime('%H:%M') }}</div>
+                </td>
+
+                <td style="padding:14px 16px;text-align:center;">
+                  <span class="lh-status-badge" data-id="{{ lh.id }}">
+                    {% if lh.da_doc %}
+                    <span class="lh-badge-read">✅ Đã đọc</span>
+                    {% else %}
+                    <span class="lh-badge-unread">📬 Chưa đọc</span>
+                    {% endif %}
+                  </span>
+                </td>
+
+                <td style="padding:14px 16px;text-align:center;">
+                  <div style="display:flex;gap:6px;justify-content:center;">
+                    <button class="lt-action-btn" style="background:#ede9fe;color:#7c3aed;"
+                      onclick="openLienHeDetail(
+                        {{ lh.id }},
+                        {{ lh.ho_ten|tojson }},
+                        {{ lh.so_dien_thoai|tojson }},
+                        {{ (lh.email or '')|tojson }},
+                        {{ lh.noi_dung|tojson }},
+                        {{ lh.da_doc|tojson }},
+                        {{ lh.created_at.strftime('%d/%m/%Y %H:%M')|tojson }}
+                      )">
+                      <i data-lucide="eye" style="width:12px;height:12px;"></i> Xem
+                    </button>
+                    {% if not lh.da_doc %}
+                    <button class="lt-action-btn lh-mark-btn" style="background:#f0fdf4;color:#16a34a;"
+                      data-id="{{ lh.id }}"
+                      onclick="markDaDoc({{ lh.id }}, this)">
+                      <i data-lucide="check" style="width:12px;height:12px;"></i> Đã đọc
+                    </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="panel-empty" style="padding:40px;">Chưa có đơn liên hệ nào</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>{# /dashboard-wrapper #}
+
+
+<!-- ════════ MODAL: Chi tiết lái thử ════════ -->
+<div id="modalDetail" class="lt-overlay" onclick="closeOnOverlay(event,'modalDetail')">
+  <div class="lt-box" onclick="event.stopPropagation()">
+    <div class="lt-mhead">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="lt-micon" style="background:#fef3c7;"><i data-lucide="calendar-check" style="width:18px;height:18px;color:#d97706;"></i></div>
+        <div><div class="lt-mtitle">Chi tiết lịch lái thử</div><div id="detailId" class="lt-msub"></div></div>
+      </div>
+      <button class="lt-mclose" onclick="closeModal('modalDetail')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    </div>
+    <div class="lt-mbody">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
+        <div id="detailBadge"></div>
+        <div id="detailLyDo" style="display:none;font-size:13px;color:#991b1b;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:6px 12px;">
+          <strong>Lý do từ chối:</strong> <span id="detailLyDoText"></span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="user" style="width:11px;height:11px;"></i> Họ tên</div><div id="detailHoTen" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="phone" style="width:11px;height:11px;"></i> Số điện thoại</div><div id="detailSdt" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="car" style="width:11px;height:11px;"></i> Xe muốn lái thử</div><div id="detailHangXe" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="map-pin" style="width:11px;height:11px;"></i> Showroom</div><div id="detailShowroom" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="calendar" style="width:11px;height:11px;"></i> Ngày lái thử</div><div id="detailNgay" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="clock" style="width:11px;height:11px;"></i> Khung giờ</div><div id="detailGio" class="lt-fval"></div></div>
+      </div>
+      <div style="border-top:1px solid #eaeae0;padding-top:16px;">
+        <div class="lt-flabel" style="margin-bottom:10px;"><i data-lucide="file-image" style="width:11px;height:11px;"></i> Giấy tờ</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:6px;">CCCD / CMND</div>
+            <a id="detailCccdLink" href="#" target="_blank"><img id="detailCccdImg" src="" alt="CCCD" style="width:100%;height:130px;object-fit:cover;border-radius:10px;border:1.5px solid #eaeae0;cursor:zoom-in;"></a>
+            <div id="detailCccdEmpty" style="height:80px;background:#f5f5f0;border-radius:10px;display:none;align-items:center;justify-content:center;color:#b8b8b0;font-size:13px;">Chưa có ảnh</div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:6px;">Giấy phép lái xe</div>
+            <a id="detailGplxLink" href="#" target="_blank"><img id="detailGplxImg" src="" alt="GPLX" style="width:100%;height:130px;object-fit:cover;border-radius:10px;border:1.5px solid #eaeae0;cursor:zoom-in;"></a>
+            <div id="detailGplxEmpty" style="height:80px;background:#f5f5f0;border-radius:10px;display:none;align-items:center;justify-content:center;color:#b8b8b0;font-size:13px;">Chưa có ảnh</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="detailFooter" class="lt-mfoot"></div>
+  </div>
+</div>
+
+<!-- ════════ MODAL: Duyệt ════════ -->
+<div id="modalApprove" class="lt-overlay" onclick="closeOnOverlay(event,'modalApprove')">
+  <div class="lt-box" style="max-width:420px;" onclick="event.stopPropagation()">
+    <div class="lt-mhead">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="lt-micon" style="background:#d1fae5;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#059669;"></i></div>
+        <div class="lt-mtitle">Xác nhận duyệt lịch</div>
+      </div>
+      <button class="lt-mclose" onclick="closeModal('modalApprove')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    </div>
+    <div class="lt-mbody"><p id="approveMsg" style="font-size:14px;color:#475569;margin:0;line-height:1.7;"></p></div>
+    <div class="lt-mfoot" style="justify-content:flex-end;">
+      <button onclick="closeModal('modalApprove')" class="lt-btn-ghost">Huỷ</button>
+      <button id="btnApprove" onclick="submitApprove()" class="lt-btn-green"><i data-lucide="check" style="width:14px;height:14px;"></i> Xác nhận duyệt</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL: Từ chối ════════ -->
+<div id="modalReject" class="lt-overlay" onclick="closeOnOverlay(event,'modalReject')">
+  <div class="lt-box" style="max-width:480px;" onclick="event.stopPropagation()">
+    <div class="lt-mhead">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="lt-micon" style="background:#fee2e2;"><i data-lucide="x-circle" style="width:18px;height:18px;color:#dc2626;"></i></div>
+        <div><div class="lt-mtitle">Từ chối lịch lái thử</div><div id="rejectSubtitle" class="lt-msub"></div></div>
+      </div>
+      <button class="lt-mclose" onclick="closeModal('modalReject')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    </div>
+    <div class="lt-mbody">
+      <p style="font-size:13px;color:#64748b;margin:0 0 14px;">Vui lòng nhập lý do từ chối để lưu lại.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;">
+        <button onclick="setRejectReason('Khách hàng không liên lạc được')"            class="lt-chip">Không liên lạc được</button>
+        <button onclick="setRejectReason('Khung giờ đã đầy, không còn slot trống')"    class="lt-chip">Hết slot</button>
+        <button onclick="setRejectReason('Xe không còn tại showroom')"                  class="lt-chip">Xe không còn</button>
+        <button onclick="setRejectReason('Giấy tờ không hợp lệ hoặc thiếu thông tin')" class="lt-chip">Giấy tờ không hợp lệ</button>
+        <button onclick="setRejectReason('Khách tự hủy lịch')"                         class="lt-chip">Khách tự hủy</button>
+      </div>
+      <textarea id="rejectReason" rows="3" placeholder="Nhập lý do hoặc chọn gợi ý..."
+        style="padding:10px 13px;border:1.5px solid #deded4;border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;outline:none;width:100%;box-sizing:border-box;"
+        onfocus="this.style.borderColor='var(--accent-primary)'" onblur="this.style.borderColor='#deded4'"></textarea>
+      <div id="rejectError" style="display:none;font-size:12px;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:6px 10px;margin-top:6px;"></div>
+    </div>
+    <div class="lt-mfoot" style="justify-content:flex-end;">
+      <button onclick="closeModal('modalReject')" class="lt-btn-ghost">Huỷ</button>
+      <button id="btnReject" onclick="submitReject()" class="lt-btn-red"><i data-lucide="x-circle" style="width:14px;height:14px;"></i> Xác nhận từ chối</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL: Xem đơn liên hệ ════════ -->
+<div id="modalLienHe" class="lt-overlay" onclick="closeOnOverlay(event,'modalLienHe')">
+  <div class="lt-box" style="max-width:520px;" onclick="event.stopPropagation()">
+    <div class="lt-mhead">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="lt-micon" style="background:#ede9fe;"><i data-lucide="mail" style="width:18px;height:18px;color:#7c3aed;"></i></div>
+        <div><div class="lt-mtitle">Đơn liên hệ</div><div id="lhModalId" class="lt-msub"></div></div>
+      </div>
+      <button class="lt-mclose" onclick="closeModal('modalLienHe')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    </div>
+    <div class="lt-mbody">
+      <div style="margin-bottom:16px;" id="lhModalBadge"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="user" style="width:11px;height:11px;"></i> Họ tên</div><div id="lhModalHoTen" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="phone" style="width:11px;height:11px;"></i> Số điện thoại</div><div id="lhModalSdt" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="mail" style="width:11px;height:11px;"></i> Email</div><div id="lhModalEmail" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="clock" style="width:11px;height:11px;"></i> Thời gian gửi</div><div id="lhModalTime" class="lt-fval"></div></div>
+      </div>
+      <div style="border-top:1px solid #eaeae0;padding-top:14px;">
+        <div class="lt-flabel" style="margin-bottom:8px;"><i data-lucide="message-square" style="width:11px;height:11px;"></i> Nội dung</div>
+        <div id="lhModalNoidung" style="background:#f8f8f6;border:1px solid #eaeae0;border-radius:10px;padding:14px;font-size:14px;color:var(--text-primary);line-height:1.7;white-space:pre-wrap;"></div>
+      </div>
+    </div>
+    <div class="lt-mfoot" style="justify-content:space-between;">
+      <button onclick="closeModal('modalLienHe')" class="lt-btn-ghost">Đóng</button>
+      <button id="lhModalMarkBtn" onclick="markDaDocFromModal()" class="lt-btn-green" style="display:none;">
+        <i data-lucide="check" style="width:14px;height:14px;"></i> Đánh dấu đã đọc
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+.lt-fbtn{padding:5px 13px;font-size:12px;font-weight:600;border:1px solid #e2e2da;border-radius:20px;background:transparent;cursor:pointer;color:#64748b;font-family:inherit;transition:all .15s}
+.lt-fbtn:hover{border-color:var(--accent-primary);color:var(--accent-primary)}
+.lt-factive{background:var(--accent-primary)!important;color:#fff!important;border-color:var(--accent-primary)!important}
+.lt-badge{border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;white-space:nowrap}
+.lt-badge-wait{background:#fef3c7;color:#92400e}.lt-badge-ok{background:#d1fae5;color:#065f46}.lt-badge-no{background:#fee2e2;color:#991b1b}
+.lt-doc-btn{display:inline-flex;align-items:center;gap:4px;font-size:12px;text-decoration:none;font-weight:600;border-radius:6px;padding:4px 8px;border:1px solid;transition:all .15s}
+.lt-doc-gold{color:var(--accent-primary);border-color:var(--accent-primary)}.lt-doc-gold:hover{background:var(--accent-primary);color:#fff}
+.lt-doc-blue{color:#3b82f6;border-color:#3b82f6}.lt-doc-blue:hover{background:#3b82f6;color:#fff}
+.lt-action-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;font-size:12px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:inherit;transition:filter .15s}
+.lt-action-btn:hover{filter:brightness(.9)}
+.lh-badge-read{background:#f0fdf4;color:#16a34a;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600}
+.lh-badge-unread{background:#ede9fe;color:#7c3aed;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600}
+.lt-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)}
+.lt-overlay.lt-open{display:flex}
+.lt-box{background:#fff;border-radius:16px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2);animation:ltIn .2s ease}
+@keyframes ltIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.lt-mhead{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #eaeae0;position:sticky;top:0;background:#fff;z-index:1;border-radius:16px 16px 0 0}
+.lt-mbody{padding:20px 24px}.lt-mfoot{padding:14px 24px;border-top:1px solid #eaeae0;display:flex;align-items:center;gap:10px;position:sticky;bottom:0;background:#fff;border-radius:0 0 16px 16px}
+.lt-micon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lt-mtitle{font-size:16px;font-weight:800;color:var(--text-primary)}.lt-msub{font-size:12px;color:#94a3b8;margin-top:1px}
+.lt-mclose{width:32px;height:32px;border-radius:8px;border:1px solid #eaeae0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#888;transition:background .15s}
+.lt-mclose:hover{background:#f5f5f0}
+.lt-field{background:#f8f8f6;border:1px solid #eaeae0;border-radius:10px;padding:12px 14px}
+.lt-flabel{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.lt-fval{font-size:14px;font-weight:600;color:var(--text-primary)}
+.lt-chip{padding:5px 11px;font-size:12px;font-weight:500;border:1px solid #deded4;border-radius:20px;background:#fff;cursor:pointer;font-family:inherit;color:#475569;transition:all .15s}
+.lt-chip:hover{border-color:#dc2626;color:#dc2626;background:#fef2f2}
+.lt-btn-ghost{padding:9px 20px;border:1px solid #deded4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;cursor:pointer;color:#64748b;font-family:inherit;transition:background .15s}
+.lt-btn-ghost:hover{background:#f5f5f0}
+.lt-btn-green{padding:9px 18px;border:none;border-radius:8px;background:#059669;color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;transition:background .15s}
+.lt-btn-green:hover{background:#047857}.lt-btn-green:disabled{opacity:.6;cursor:not-allowed}
+.lt-btn-red{padding:9px 18px;border:none;border-radius:8px;background:#dc2626;color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;transition:background .15s}
+.lt-btn-red:hover{background:#b91c1c}.lt-btn-red:disabled{opacity:.6;cursor:not-allowed}
+@media(max-width:640px){.lt-box{border-radius:12px}.lt-mbody,.lt-mhead{padding:16px}.lt-mfoot{padding:12px 16px;flex-direction:column}.lt-mfoot button{width:100%;justify-content:center}}
+</style>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+lucide.createIcons();
+const API_BASE = `${window.location.origin}/api/v1`;
+let _activeId = null, _activeLhId = null;
+
+function openModal(id)  { document.getElementById(id).classList.add('lt-open'); lucide.createIcons(); }
+function closeModal(id) { document.getElementById(id).classList.remove('lt-open'); }
+function closeOnOverlay(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+// ── Filter lái thử ────────────────────────────────────
+function filterLaiThu(tt) {
+  document.querySelectorAll('[id^="f-"]').forEach(b => b.classList.remove('lt-factive'));
+  document.getElementById('f-' + tt)?.classList.add('lt-factive');
+  document.querySelectorAll('.lt-row').forEach(r => {
+    r.style.display = (tt === 'all' || r.dataset.trangThai === tt) ? '' : 'none';
+  });
+}
+
+// ── Filter liên hệ ────────────────────────────────────
+function filterLienHe(state) {
+  document.querySelectorAll('[id^="lh-"]').forEach(b => b.classList.remove('lt-factive'));
+  document.getElementById('lh-' + state)?.classList.add('lt-factive');
+  document.querySelectorAll('.lh-row').forEach(r => {
+    r.style.display = (state === 'all' || r.dataset.daDoc === state) ? '' : 'none';
+  });
+}
+
+// ── Chi tiết lái thử ─────────────────────────────────
+function openDetail(id, hoTen, sdt, hangXe, showroom, ngay, gio, cccdUrl, gplxUrl, trangThai, lyDo) {
+  _activeId = id;
+  document.getElementById('detailId').textContent       = `#${id}`;
+  document.getElementById('detailHoTen').textContent    = hoTen;
+  document.getElementById('detailSdt').textContent      = sdt;
+  document.getElementById('detailHangXe').textContent   = hangXe;
+  document.getElementById('detailShowroom').textContent = showroom;
+  document.getElementById('detailNgay').textContent     = ngay;
+  document.getElementById('detailGio').textContent      = gio;
+  const badges = { cho_duyet:'<span class="lt-badge lt-badge-wait">⏳ Chờ duyệt</span>', da_duyet:'<span class="lt-badge lt-badge-ok">✅ Đã duyệt</span>', tu_choi:'<span class="lt-badge lt-badge-no">❌ Từ chối</span>' };
+  document.getElementById('detailBadge').innerHTML = badges[trangThai] || '';
+  const lyDoWrap = document.getElementById('detailLyDo');
+  if (trangThai === 'tu_choi' && lyDo) { document.getElementById('detailLyDoText').textContent = lyDo; lyDoWrap.style.display = 'flex'; } else lyDoWrap.style.display = 'none';
+  const setImg = (imgId, linkId, emptyId, url) => { const img=document.getElementById(imgId),link=document.getElementById(linkId),empty=document.getElementById(emptyId); if(url){img.src=url;link.href=url;img.style.display='block';empty.style.display='none';}else{img.style.display='none';empty.style.display='flex';} };
+  setImg('detailCccdImg','detailCccdLink','detailCccdEmpty',cccdUrl);
+  setImg('detailGplxImg','detailGplxLink','detailGplxEmpty',gplxUrl);
+  const footer = document.getElementById('detailFooter');
+  let html = '<div style="flex:1"></div>';
+  if (trangThai !== 'da_duyet') html += `<button class="lt-btn-green" onclick="closeModal('modalDetail');confirmApprove(${id},${JSON.stringify(hoTen)})"><i data-lucide="check" style="width:14px;height:14px;"></i> Duyệt</button>`;
+  if (trangThai !== 'tu_choi')  html += `<button class="lt-btn-red"   onclick="closeModal('modalDetail');openRejectModal(${id},${JSON.stringify(hoTen)})"><i data-lucide="x-circle" style="width:14px;height:14px;"></i> Từ chối</button>`;
+  footer.innerHTML = html;
+  openModal('modalDetail');
+}
+
+// ── Duyệt ────────────────────────────────────────────
+function confirmApprove(id, hoTen) {
+  _activeId = id;
+  document.getElementById('approveMsg').innerHTML = `Xác nhận <strong>duyệt</strong> lịch của <strong>${hoTen}</strong>?<br><span style="font-size:13px;color:#94a3b8;">Có thể hoàn tác bằng cách từ chối sau.</span>`;
+  openModal('modalApprove');
+}
+async function submitApprove() {
+  const btn = document.getElementById('btnApprove');
+  btn.disabled=true; btn.innerHTML='<i data-lucide="loader" style="width:14px;height:14px;"></i> Đang xử lý...'; lucide.createIcons();
+  const fd=new FormData(); fd.append('trang_thai','da_duyet');
+  try { const res=await fetch(`${API_BASE}/admin/lai-thu/${_activeId}`,{method:'PATCH',credentials:'include',body:fd}); if(!res.ok){alert('Lỗi cập nhật');return;} closeModal('modalApprove'); location.reload(); }
+  catch{alert('Lỗi kết nối');}
+  finally{btn.disabled=false;btn.innerHTML='<i data-lucide="check" style="width:14px;height:14px;"></i> Xác nhận duyệt';lucide.createIcons();}
+}
+
+// ── Từ chối ───────────────────────────────────────────
+function openRejectModal(id, hoTen) {
+  _activeId=id; document.getElementById('rejectSubtitle').textContent=`Khách hàng: ${hoTen}`; document.getElementById('rejectReason').value=''; document.getElementById('rejectError').style.display='none'; openModal('modalReject'); setTimeout(()=>document.getElementById('rejectReason').focus(),120);
+}
+function setRejectReason(text) { document.getElementById('rejectReason').value=text; document.getElementById('rejectReason').focus(); }
+async function submitReject() {
+  const reason=document.getElementById('rejectReason').value.trim(); const errEl=document.getElementById('rejectError');
+  if(!reason){errEl.textContent='Vui lòng nhập lý do từ chối.';errEl.style.display='block';return;} errEl.style.display='none';
+  const btn=document.getElementById('btnReject'); btn.disabled=true; btn.innerHTML='<i data-lucide="loader" style="width:14px;height:14px;"></i> Đang xử lý...'; lucide.createIcons();
+  const fd=new FormData(); fd.append('trang_thai','tu_choi'); fd.append('ly_do_tu_choi',reason);
+  try{const res=await fetch(`${API_BASE}/admin/lai-thu/${_activeId}`,{method:'PATCH',credentials:'include',body:fd});const data=await res.json();if(!res.ok){errEl.textContent=data.detail||'Lỗi';errEl.style.display='block';return;}closeModal('modalReject');location.reload();}
+  catch{errEl.textContent='Lỗi kết nối';errEl.style.display='block';}
+  finally{btn.disabled=false;btn.innerHTML='<i data-lucide="x-circle" style="width:14px;height:14px;"></i> Xác nhận từ chối';lucide.createIcons();}
+}
+
+// ── Liên hệ: mở modal ────────────────────────────────
+function openLienHeDetail(id, hoTen, sdt, email, noiDung, daDoc, time) {
+  _activeLhId = id;
+  document.getElementById('lhModalId').textContent      = `#${id}`;
+  document.getElementById('lhModalHoTen').textContent   = hoTen;
+  document.getElementById('lhModalSdt').textContent     = sdt;
+  document.getElementById('lhModalEmail').textContent   = email || '(Không có)';
+  document.getElementById('lhModalNoidung').textContent = noiDung;
+  document.getElementById('lhModalTime').textContent    = time;
+  document.getElementById('lhModalBadge').innerHTML     = daDoc
+    ? '<span class="lh-badge-read">✅ Đã đọc</span>'
+    : '<span class="lh-badge-unread">📬 Chưa đọc</span>';
+  document.getElementById('lhModalMarkBtn').style.display = daDoc ? 'none' : 'flex';
+  openModal('modalLienHe');
+  // Tự động đánh dấu đã đọc khi mở, nếu chưa đọc
+  if (!daDoc) _autoMarkDaDoc(id);
+}
+
+// Cập nhật UI không reload khi auto-mark
+async function _autoMarkDaDoc(id) {
+  try {
+    const res = await fetch(`${API_BASE}/admin/lien-he/${id}/da-doc`,{method:'PATCH',credentials:'include'});
+    if (!res.ok) return;
+    // Cập nhật row trong bảng
+    const row = document.querySelector(`.lh-row[data-lh-id="${id}"]`);
+    if (row) {
+      row.dataset.daDoc = 'da_doc';
+      row.style.background = 'transparent';
+      const badge = row.querySelector('.lh-status-badge');
+      if (badge) badge.innerHTML = '<span class="lh-badge-read">✅ Đã đọc</span>';
+      const markBtn = row.querySelector('.lh-mark-btn');
+      if (markBtn) markBtn.remove();
+    }
+    // Giảm badge "mới" ở panel header
+    const newBadge = document.getElementById('lhNewBadge');
+    if (newBadge) { const n=parseInt(newBadge.textContent)-1; if(n<=0)newBadge.remove();else newBadge.textContent=`${n} mới`; }
+    // Giảm stat card
+    const statVal = document.querySelector('.stat-card-value[style*="7c3aed"]');
+    if (statVal) { const n=parseInt(statVal.textContent)-1; statVal.textContent=Math.max(0,n); }
+    // Ẩn nút mark trong modal
+    document.getElementById('lhModalMarkBtn').style.display='none';
+    document.getElementById('lhModalBadge').innerHTML='<span class="lh-badge-read">✅ Đã đọc</span>';
+  } catch { /* silent */ }
+}
+
+async function markDaDoc(id, btn) {
+  btn.disabled=true;
+  try { const res=await fetch(`${API_BASE}/admin/lien-he/${id}/da-doc`,{method:'PATCH',credentials:'include'}); if(!res.ok){alert('Lỗi');return;} location.reload(); }
+  catch{alert('Lỗi kết nối');btn.disabled=false;}
+}
+async function markDaDocFromModal() {
+  const btn=document.getElementById('lhModalMarkBtn'); btn.disabled=true;
+  try { const res=await fetch(`${API_BASE}/admin/lien-he/${_activeLhId}/da-doc`,{method:'PATCH',credentials:'include'}); if(!res.ok){alert('Lỗi');return;} closeModal('modalLienHe'); location.reload(); }
+  catch{alert('Lỗi kết nối');btn.disabled=false;}
+}
+</script>
+{% endblock %}

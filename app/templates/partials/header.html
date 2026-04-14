@@ -7,38 +7,108 @@
    <li><a href="/mua-xe" class="nav-link">Mua xe</a></li>
    <li><a href="/ban-xe" class="nav-link">Bán xe</a></li>
    <li><a href="/tu-van" class="nav-link">Tư vấn</a></li>
-   <li><a href="/tin-tuc" class="nav-link">Tin Tức</a></li>
+   <li><a href="/tin-tuc" class="nav-link">Tin tức</a></li>
    <li><a href="/dich-vu" class="nav-link">Dịch vụ</a></li>
    <li><a href="/lien-he" class="nav-link">Liên hệ</a></li>
+
+   {% if current_user and current_user.role.value in ('admin', 'staff') %}
+   <li>
+    <a href="{% if current_user.role.value == 'admin' %}/admin/dashboard{% else %}/staff/dashboard{% endif %}"
+       class="nav-link nav-link-dashboard">
+     <i data-lucide="layout-dashboard" style="width:13px;height:13px;display:inline;vertical-align:middle;margin-right:3px;"></i>Dashboard
+    </a>
+   </li>
+   {% endif %}
+
+   <!-- Mobile only actions -->
+   <div id="mobileNavActions">
+    {% if current_user %}
+     <span>Xin chào, {{ current_user.ho_ten }}</span>
+     <button class="btn btn-secondary" onclick="handleLogout()">Đăng xuất</button>
+     <a href="/ban-xe" class="btn btn-primary">+ Đăng tin</a>
+    {% else %}
+     <button class="btn btn-secondary" onclick="openModal('loginModal')">Đăng nhập</button>
+     <button class="btn btn-primary" onclick="openModal('signupModal')">Đăng ký</button>
+    {% endif %}
+   </div>
   </ul>
+
   <div class="nav-actions">
    {% if current_user %}
-    <!-- Đã đăng nhập — server render, không cần JS -->
-    <span style="font-weight:600; color:var(--accent-primary); margin-right:8px;">
-     Xin chào, {{ current_user.ho_ten }}
-    </span>
-    <button class="btn btn-secondary btn-small" onclick="handleLogout()">
-     Đăng xuất
-    </button>
-    <a href="/ban-xe" class="btn btn-primary btn-small">+ Đăng tin</a>
+    <!-- Avatar + dropdown -->
+    <div class="nav-user" onclick="toggleUserMenu()" id="navUserBtn">
+     <div class="nav-avatar">
+      {{ current_user.ho_ten[0]|upper }}
+     </div>
+     <span class="nav-user-name">{{ current_user.ho_ten.split()[0] }}</span>
+     {% if current_user.role.value in ('admin', 'staff') %}
+     <span class="nav-role-badge nav-role-{{ current_user.role.value }}">
+      {{ current_user.role.value|upper }}
+     </span>
+     {% endif %}
+     <i data-lucide="chevron-down" style="width:14px;height:14px;color:rgba(255,255,255,0.6);"></i>
+    </div>
+
+    <!-- Dropdown menu -->
+    <div class="nav-dropdown" id="navDropdown">
+      <div class="nav-dropdown-header">
+       <div style="font-weight:600;font-size:14px;color:var(--text-primary);">{{ current_user.ho_ten }}</div>
+       <div style="font-size:12px;color:#888;">{{ current_user.email }}</div>
+      </div>
+      <a href="/ban-xe" class="nav-dropdown-item">
+       <i data-lucide="plus-circle" style="width:15px;height:15px;"></i> Đăng tin mới
+      </a>
+      <a href="/profile" class="nav-dropdown-item">
+       <i data-lucide="user-circle" style="width:15px;height:15px;"></i> Hồ sơ cá nhân
+      </a>
+      {% if current_user.role.value == 'admin' %}
+      <a href="/admin/dashboard" class="nav-dropdown-item">
+       <i data-lucide="shield-check" style="width:15px;height:15px;"></i> Admin Dashboard
+      </a>
+      {% elif current_user.role.value == 'staff' %}
+      <a href="/staff/dashboard" class="nav-dropdown-item">
+       <i data-lucide="layout-dashboard" style="width:15px;height:15px;"></i> Staff Dashboard
+      </a>
+      {% endif %}
+      <div class="nav-dropdown-divider"></div>
+      <button onclick="handleLogout()" class="nav-dropdown-item nav-dropdown-logout">
+       <i data-lucide="log-out" style="width:15px;height:15px;"></i> Đăng xuất
+      </button>
+    </div>
+
    {% else %}
-    <!-- Chưa đăng nhập -->
+    <!-- Nút Đăng nhập / Đăng ký (đã sửa đúng modal) -->
     <button class="btn btn-secondary btn-small" onclick="openModal('loginModal')">
-     <span class="icon-person"></span> Đăng nhập
+     Đăng nhập
     </button>
-    <button class="btn btn-primary btn-small" onclick="openModal('registerModal')">
+    <button class="btn btn-primary btn-small" onclick="openModal('signupModal')">
      Đăng ký
     </button>
    {% endif %}
   </div>
-  <script>
-  const path = window.location.pathname;
-  document.querySelectorAll('.nav-link').forEach(link => {
-    const href = link.getAttribute('href');
-    if (href === '/' ? path === '/' : path.startsWith(href)) {
-      link.classList.add('active');
-    }
-  });
-</script>
  </nav>
 </header>
+
+<script>
+const path = window.location.pathname;
+document.querySelectorAll('.nav-link').forEach(link => {
+  const href = link.getAttribute('href');
+  if (href === '/' ? path === '/' : path.startsWith(href)) {
+    link.classList.add('active');
+  }
+});
+
+function toggleUserMenu() {
+  const dropdown = document.getElementById('navDropdown');
+  dropdown.classList.toggle('open');
+}
+
+// Đóng dropdown khi click ngoài
+document.addEventListener('click', (e) => {
+  const btn = document.getElementById('navUserBtn');
+  const dropdown = document.getElementById('navDropdown');
+  if (dropdown && btn && !btn.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.classList.remove('open');
+  }
+});
+</script>

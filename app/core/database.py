@@ -6,16 +6,25 @@ engine = create_engine(
     echo=settings.DEBUG,
 
     # Connection pooling
-    pool_size=10,           # số kết nối duy trì sẵn
-    max_overflow=20,        # số kết nối tạm thêm khi quá tải
-    pool_timeout=30,        # giây chờ lấy kết nối trước khi báo lỗi
-    pool_recycle=1800,      # tái sử dụng kết nối sau 30 phút (tránh timeout)
-    pool_pre_ping=True,     # kiểm tra kết nối còn sống trước khi dùng
+    pool_size=10,
+    max_overflow=20,
+    pool_timeout=30,
+    pool_recycle=1800,
+    pool_pre_ping=True,
     connect_args={"sslmode": "disable"},
 )
 
 
 def init_db():
+    # Import TẤT CẢ models ở đây để SQLModel.metadata biết các bảng cần tạo.
+    # Thiếu import = bảng không được tạo dù model đã có file.
+    from app.models.user import User          # noqa: F401
+    from app.models.cars import Car, CarImage # noqa: F401
+    from app.models.dang_tin import DangTin   # noqa: F401
+    from app.models.news import News          # noqa: F401
+    from app.models.lai_thu import LaiThu     # noqa: F401
+    from app.models.lien_he import LienHe     # noqa: F401
+
     SQLModel.metadata.create_all(engine)
 
 
@@ -23,10 +32,11 @@ def get_session():
     with Session(engine) as session:
         yield session
 
+
 if __name__ == "__main__":
     print("🔗 Connecting to:", settings.DATABASE_URL)
     try:
         with engine.connect() as conn:
-            print("✅ Kết nối Supabase thành công!")
+            print("✅ Kết nối thành công!")
     except Exception as e:
         print("❌ Lỗi kết nối:", e)

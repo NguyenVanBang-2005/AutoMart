@@ -571,112 +571,6 @@ function handleSocialLogin(provider) {
   else showToast('Tính năng đang được phát triển!');
 }
 
-// ── Consult Chat (tu_van.html) ────────────────────────
-const chatState = { open: false, messages: [], typing: false };
-
-function initConsultChat() {
-  const wrapper = document.querySelector('.search-box');
-  if (!wrapper) return;
-  wrapper.innerHTML = `
-    <h3 class="search-title" style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-      <i data-lucide="bot" style="width:20px;height:20px;color:var(--accent-primary);"></i>
-      Tư vấn với AI AutoMart
-      <span style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:400;color:#22c55e;">
-        <span style="width:8px;height:8px;background:#22c55e;border-radius:50%;display:inline-block;animation:pulse-dot 1.5s infinite;"></span>
-        Online
-      </span>
-    </h3>
-    <div id="chatMessages" style="height:clamp(240px,45vh,520px);overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:12px;background:var(--bg-primary,#f8f8f6);border-radius:10px;margin-bottom:12px;scroll-behavior:smooth;"></div>
-    <div id="chatSuggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
-    <div style="display:flex;gap:8px;align-items:flex-end;">
-      <textarea id="chatInput" rows="1" placeholder="Nhập câu hỏi của bạn..." style="flex:1;resize:none;border:1.5px solid #e2e2da;border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none;line-height:1.5;max-height:100px;overflow-y:auto;transition:border-color .2s;" onkeydown="handleChatKey(event)" oninput="autoResizeChat(this)"></textarea>
-      <button onclick="sendChatMessage()" style="width:42px;height:42px;background:var(--accent-primary,#c8a96e);border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-        <i data-lucide="send" style="width:18px;height:18px;color:#fff;"></i>
-      </button>
-    </div>`;
-  if (!document.getElementById('chatStyle')) {
-    const style = document.createElement('style');
-    style.id = 'chatStyle';
-    style.textContent = `@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}} @keyframes fadeInUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}} .chat-bubble{animation:fadeInUp .25s ease}`;
-    document.head.appendChild(style);
-  }
-  appendChatMessage('bot', 'Xin chào! Mình là trợ lý AI của AutoMart 🚗\nMình có thể giúp bạn tìm xe phù hợp, tư vấn tài chính, hoặc giải đáp thắc mắc. Bạn cần hỗ trợ gì?');
-  renderSuggestions(['Xe phù hợp ngân sách 500 triệu', 'Tư vấn vay mua xe', 'So sánh Toyota vs Honda', 'Xe điện tốt nhất hiện nay']);
-  if (window.lucide) lucide.createIcons();
-}
-
-function appendChatMessage(role, text) {
-  const box = document.getElementById('chatMessages');
-  if (!box) return;
-  const isBot  = role === 'bot';
-  const bubble = document.createElement('div');
-  bubble.className = 'chat-bubble';
-  bubble.style.cssText = `display:flex;gap:8px;align-items:flex-end;flex-direction:${isBot ? 'row' : 'row-reverse'};`;
-  bubble.innerHTML = `
-    <div style="width:30px;height:30px;border-radius:50%;background:${isBot ? 'var(--accent-primary,#c8a96e)' : '#e2e2da'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      <i data-lucide="${isBot ? 'bot' : 'user'}" style="width:16px;height:16px;color:${isBot ? '#fff' : '#888'};"></i>
-    </div>
-    <div style="max-width:78%;background:${isBot ? '#fff' : 'var(--accent-primary,#c8a96e)'};color:${isBot ? 'var(--text-primary,#1a1a1a)' : '#fff'};border-radius:${isBot ? '4px 14px 14px 14px' : '14px 4px 14px 14px'};padding:10px 14px;font-size:13.5px;line-height:1.55;box-shadow:0 1px 4px rgba(0,0,0,.07);white-space:pre-wrap;">${text}</div>`;
-  box.appendChild(bubble);
-  box.scrollTop = box.scrollHeight;
-  chatState.messages.push({ role, text });
-  if (window.lucide) lucide.createIcons();
-}
-
-function showTypingIndicator() {
-  const box = document.getElementById('chatMessages');
-  if (!box || chatState.typing) return;
-  chatState.typing = true;
-  const el = document.createElement('div');
-  el.id = 'typingIndicator'; el.className = 'chat-bubble';
-  el.style.cssText = 'display:flex;gap:8px;align-items:flex-end;';
-  el.innerHTML = `
-    <div style="width:30px;height:30px;border-radius:50%;background:var(--accent-primary,#c8a96e);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-      <i data-lucide="bot" style="width:16px;height:16px;color:#fff;"></i>
-    </div>
-    <div style="background:#fff;border-radius:4px 14px 14px 14px;padding:12px 16px;box-shadow:0 1px 4px rgba(0,0,0,.07);display:flex;gap:5px;align-items:center;">
-      <span style="width:7px;height:7px;border-radius:50%;background:#c8a96e;animation:pulse-dot .8s infinite;"></span>
-      <span style="width:7px;height:7px;border-radius:50%;background:#c8a96e;animation:pulse-dot .8s .2s infinite;"></span>
-      <span style="width:7px;height:7px;border-radius:50%;background:#c8a96e;animation:pulse-dot .8s .4s infinite;"></span>
-    </div>`;
-  box.appendChild(el); box.scrollTop = box.scrollHeight;
-  if (window.lucide) lucide.createIcons();
-}
-
-function hideTypingIndicator() { document.getElementById('typingIndicator')?.remove(); chatState.typing = false; }
-
-function renderSuggestions(items) {
-  const box = document.getElementById('chatSuggestions');
-  if (!box) return;
-  box.innerHTML = items.map(item => `
-    <button onclick="selectSuggestion('${item}')" style="border:1.5px solid var(--accent-primary,#c8a96e);background:transparent;color:var(--accent-primary,#c8a96e);border-radius:20px;padding:5px 13px;font-size:12.5px;cursor:pointer;transition:all .18s;font-family:inherit;"
-      onmouseover="this.style.background='var(--accent-primary,#c8a96e)';this.style.color='#fff';"
-      onmouseout="this.style.background='transparent';this.style.color='var(--accent-primary,#c8a96e)';">${item}</button>`).join('');
-}
-
-function selectSuggestion(text) {
-  const input = document.getElementById('chatInput');
-  if (input) { input.value = text; input.focus(); }
-  sendChatMessage();
-}
-
-async function sendChatMessage() {
-  const input = document.getElementById('chatInput');
-  const text  = input?.value.trim();
-  if (!text || chatState.typing) return;
-  input.value = ''; input.style.height = 'auto';
-  document.getElementById('chatSuggestions').innerHTML = '';
-  appendChatMessage('user', text);
-  showTypingIndicator();
-  await new Promise(r => setTimeout(r, 1200));
-  hideTypingIndicator();
-  appendChatMessage('bot', `[AI sẽ trả lời câu hỏi: "${text}"]\n\nTính năng đang được tích hợp. Vui lòng quay lại sau hoặc liên hệ hotline 1900 1234!`);
-  renderSuggestions(['Xem thêm xe', 'Tư vấn vay vốn', 'Liên hệ tư vấn viên']);
-}
-
-function handleChatKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); } }
-function autoResizeChat(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; }
-
 // ── Init ─────────────────────────────────────────────
 async function init() {
   const cars = await loadCarsFromAPI();
@@ -698,9 +592,7 @@ async function init() {
   } else {
     onConfigChange(defaultConfig);
   }
-  if (document.getElementById('consultForm')) {
-    setTimeout(initConsultChat, 0);
-  }
+  // ĐÃ XÓA: initConsultChat — đã chuyển sang tu_van.js
 }
 
 init();

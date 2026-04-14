@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% block title %}Staff Dashboard — AutoMart{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+
+  <!-- ── Header ── -->
+  <div class="dashboard-header">
+    <div class="dashboard-header-left">
+      <div class="dashboard-header-icon"
+           style="background:linear-gradient(135deg,#3b82f6,#60a5fa);">
+        <i data-lucide="layout-dashboard" style="width:22px;height:22px;color:#fff;"></i>
+      </div>
+      <div>
+        <h1 class="dashboard-title">Staff Dashboard</h1>
+        <p class="dashboard-subtitle">Xin chào, {{ current_user.ho_ten }}</p>
+      </div>
+    </div>
+    <span class="dashboard-badge dashboard-badge-staff">Staff</span>
+  </div>
+
+  <!-- ── Stat cards ── -->
+  <div class="dashboard-stats">
+    <div class="stat-card">
+      <div class="stat-card-top">
+        <span class="stat-card-label">Tin đăng</span>
+        <div class="stat-card-icon stat-card-icon-blue">
+          <i data-lucide="file-text" style="width:16px;height:16px;color:#3b82f6;"></i>
+        </div>
+      </div>
+      <div class="stat-card-value stat-card-value-blue">{{ total_tins }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-top">
+        <span class="stat-card-label">Liên hệ chưa đọc</span>
+        <div class="stat-card-icon" style="background:#ede9fe;">
+          <i data-lucide="mail" style="width:16px;height:16px;color:#7c3aed;"></i>
+        </div>
+      </div>
+      <div class="stat-card-value" style="color:#7c3aed;">{{ lien_he_chua_doc }}</div>
+    </div>
+  </div>
+
+  <!-- ── Panel: Tin đăng ── -->
+  <div class="dashboard-panels">
+    <div class="panel-card dashboard-panel-full">
+      <div class="panel-card-header">
+        <h2 class="panel-card-title">
+          <i data-lucide="clock" style="width:15px;height:15px;color:#3b82f6;"></i>
+          Tin đăng cần xử lý
+        </h2>
+        <a href="/danh-sach-ban-xe" class="panel-card-link">Xem tất cả →</a>
+      </div>
+      <div class="panel-card-body">
+        {% for tin in recent_tins %}
+        <div class="panel-row">
+          <div class="panel-row-left">
+            <span class="panel-row-name">{{ tin.hang_xe }} {{ tin.dong_xe }} ({{ tin.nam_san_xuat }})</span>
+            <span class="panel-row-sub">{{ tin.ho_ten }} · {{ tin.so_dien_thoai }} · {{ tin.khu_vuc }}</span>
+          </div>
+          <div class="panel-row-right">
+            <span class="panel-price">{{ tin.gia_mong_muon }}tr</span>
+            <a href="/ban-xe/{{ tin.id }}" class="panel-action">Xem</a>
+          </div>
+        </div>
+        {% else %}
+        <div class="panel-empty">Không có tin đăng nào cần xử lý</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Panel: Đơn liên hệ ── -->
+  <div style="margin-top:24px;">
+    <div class="panel-card" style="max-width:100%;">
+      <div class="panel-card-header"
+           style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <h2 class="panel-card-title">
+          <i data-lucide="mail" style="width:15px;height:15px;color:#7c3aed;"></i>
+          Đơn liên hệ
+          {% if lien_he_chua_doc > 0 %}
+          <span id="lhNewBadge"
+                style="margin-left:6px;background:#7c3aed;color:#fff;
+                       border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;">
+            {{ lien_he_chua_doc }} mới
+          </span>
+          {% endif %}
+        </h2>
+        <div style="display:flex;gap:6px;">
+          <button onclick="filterLienHe('all')"      id="lh-all"      class="lt-fbtn lt-factive">Tất cả</button>
+          <button onclick="filterLienHe('chua_doc')" id="lh-chua_doc" class="lt-fbtn">📬 Chưa đọc</button>
+          <button onclick="filterLienHe('da_doc')"   id="lh-da_doc"   class="lt-fbtn">✅ Đã đọc</button>
+        </div>
+      </div>
+
+      <div class="panel-card-body" style="padding:0;">
+        {% if lien_he_list %}
+        <div style="overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead>
+              <tr style="background:#f8f8f6;border-bottom:1px solid #eaeae0;">
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;">Người gửi</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;">Nội dung</th>
+                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;white-space:nowrap;">Thời gian</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;color:#64748b;">Trạng thái</th>
+                <th style="padding:12px 16px;text-align:center;font-weight:600;color:#64748b;">Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for lh in lien_he_list %}
+              <tr class="lh-row"
+                  data-lh-id="{{ lh.id }}"
+                  data-da-doc="{{ 'da_doc' if lh.da_doc else 'chua_doc' }}"
+                  style="border-bottom:1px solid #f0f0ea;transition:background .15s;{% if not lh.da_doc %}background:#faf8ff;{% endif %}"
+                  onmouseover="this.style.background='#f5f3ff'"
+                  onmouseout="this.style.background='{{ '' if lh.da_doc else '#faf8ff' }}'">
+
+                <td style="padding:14px 16px;">
+                  <div style="font-weight:{{ '700' if not lh.da_doc else '600' }};color:var(--text-primary);">
+                    {{ lh.ho_ten }}
+                  </div>
+                  <div style="color:#64748b;font-size:12px;margin-top:2px;">{{ lh.so_dien_thoai }}</div>
+                  {% if lh.email %}
+                  <div style="color:#94a3b8;font-size:11px;">{{ lh.email }}</div>
+                  {% endif %}
+                </td>
+
+                <td style="padding:14px 16px;max-width:320px;">
+                  <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+                               max-width:300px;color:var(--text-primary);"
+                       title="{{ lh.noi_dung }}">{{ lh.noi_dung }}</div>
+                </td>
+
+                <td style="padding:14px 16px;white-space:nowrap;">
+                  <div style="color:#64748b;font-size:12px;">{{ lh.created_at.strftime('%d/%m/%Y') }}</div>
+                  <div style="color:#94a3b8;font-size:11px;">{{ lh.created_at.strftime('%H:%M') }}</div>
+                </td>
+
+                <td style="padding:14px 16px;text-align:center;">
+                  <span class="lh-status-badge" data-id="{{ lh.id }}">
+                    {% if lh.da_doc %}
+                    <span class="lh-badge-read">✅ Đã đọc</span>
+                    {% else %}
+                    <span class="lh-badge-unread">📬 Chưa đọc</span>
+                    {% endif %}
+                  </span>
+                </td>
+
+                <td style="padding:14px 16px;text-align:center;">
+                  <div style="display:flex;gap:6px;justify-content:center;">
+                    <button class="lt-action-btn" style="background:#ede9fe;color:#7c3aed;"
+                      onclick="openLienHeDetail(
+                        {{ lh.id }},
+                        {{ lh.ho_ten|tojson }},
+                        {{ lh.so_dien_thoai|tojson }},
+                        {{ (lh.email or '')|tojson }},
+                        {{ lh.noi_dung|tojson }},
+                        {{ lh.da_doc|tojson }},
+                        {{ lh.created_at.strftime('%d/%m/%Y %H:%M')|tojson }}
+                      )">
+                      <i data-lucide="eye" style="width:12px;height:12px;"></i> Xem
+                    </button>
+                    {% if not lh.da_doc %}
+                    <button class="lt-action-btn lh-mark-btn" style="background:#f0fdf4;color:#16a34a;"
+                      data-id="{{ lh.id }}"
+                      onclick="markDaDoc({{ lh.id }}, this)">
+                      <i data-lucide="check" style="width:12px;height:12px;"></i> Đã đọc
+                    </button>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="panel-empty" style="padding:40px;">Chưa có đơn liên hệ nào</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>{# /dashboard-wrapper #}
+
+
+<!-- ════════ MODAL: Xem đơn liên hệ ════════ -->
+<div id="modalLienHe" class="lt-overlay" onclick="closeOnOverlay(event,'modalLienHe')">
+  <div class="lt-box" style="max-width:520px;" onclick="event.stopPropagation()">
+    <div class="lt-mhead">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="lt-micon" style="background:#ede9fe;">
+          <i data-lucide="mail" style="width:18px;height:18px;color:#7c3aed;"></i>
+        </div>
+        <div>
+          <div class="lt-mtitle">Đơn liên hệ</div>
+          <div id="lhModalId" class="lt-msub"></div>
+        </div>
+      </div>
+      <button class="lt-mclose" onclick="closeModal('modalLienHe')">
+        <i data-lucide="x" style="width:16px;height:16px;"></i>
+      </button>
+    </div>
+    <div class="lt-mbody">
+      <div style="margin-bottom:16px;" id="lhModalBadge"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="user" style="width:11px;height:11px;"></i> Họ tên</div><div id="lhModalHoTen" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="phone" style="width:11px;height:11px;"></i> Số điện thoại</div><div id="lhModalSdt" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="mail" style="width:11px;height:11px;"></i> Email</div><div id="lhModalEmail" class="lt-fval"></div></div>
+        <div class="lt-field"><div class="lt-flabel"><i data-lucide="clock" style="width:11px;height:11px;"></i> Thời gian gửi</div><div id="lhModalTime" class="lt-fval"></div></div>
+      </div>
+      <div style="border-top:1px solid #eaeae0;padding-top:14px;">
+        <div class="lt-flabel" style="margin-bottom:8px;"><i data-lucide="message-square" style="width:11px;height:11px;"></i> Nội dung</div>
+        <div id="lhModalNoidung" style="background:#f8f8f6;border:1px solid #eaeae0;border-radius:10px;padding:14px;font-size:14px;color:var(--text-primary);line-height:1.7;white-space:pre-wrap;"></div>
+      </div>
+    </div>
+    <div class="lt-mfoot" style="justify-content:space-between;">
+      <button onclick="closeModal('modalLienHe')" class="lt-btn-ghost">Đóng</button>
+      <button id="lhModalMarkBtn" onclick="markDaDocFromModal()" class="lt-btn-green" style="display:none;">
+        <i data-lucide="check" style="width:14px;height:14px;"></i> Đánh dấu đã đọc
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+.lt-fbtn{padding:5px 13px;font-size:12px;font-weight:600;border:1px solid #e2e2da;border-radius:20px;background:transparent;cursor:pointer;color:#64748b;font-family:inherit;transition:all .15s}
+.lt-fbtn:hover{border-color:var(--accent-primary);color:var(--accent-primary)}
+.lt-factive{background:var(--accent-primary)!important;color:#fff!important;border-color:var(--accent-primary)!important}
+.lt-action-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 10px;font-size:12px;font-weight:600;border:none;border-radius:6px;cursor:pointer;font-family:inherit;transition:filter .15s}
+.lt-action-btn:hover{filter:brightness(.9)}
+.lh-badge-read{background:#f0fdf4;color:#16a34a;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600}
+.lh-badge-unread{background:#ede9fe;color:#7c3aed;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600}
+.lt-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.48);z-index:1000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)}
+.lt-overlay.lt-open{display:flex}
+.lt-box{background:#fff;border-radius:16px;width:100%;max-width:620px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2);animation:ltIn .2s ease}
+@keyframes ltIn{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.lt-mhead{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #eaeae0;position:sticky;top:0;background:#fff;z-index:1;border-radius:16px 16px 0 0}
+.lt-mbody{padding:20px 24px}
+.lt-mfoot{padding:14px 24px;border-top:1px solid #eaeae0;display:flex;align-items:center;gap:10px;position:sticky;bottom:0;background:#fff;border-radius:0 0 16px 16px}
+.lt-micon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lt-mtitle{font-size:16px;font-weight:800;color:var(--text-primary)}.lt-msub{font-size:12px;color:#94a3b8;margin-top:1px}
+.lt-mclose{width:32px;height:32px;border-radius:8px;border:1px solid #eaeae0;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#888;transition:background .15s}
+.lt-mclose:hover{background:#f5f5f0}
+.lt-field{background:#f8f8f6;border:1px solid #eaeae0;border-radius:10px;padding:12px 14px}
+.lt-flabel{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.lt-fval{font-size:14px;font-weight:600;color:var(--text-primary)}
+.lt-btn-ghost{padding:9px 20px;border:1px solid #deded4;border-radius:8px;background:#fff;font-size:14px;font-weight:600;cursor:pointer;color:#64748b;font-family:inherit;transition:background .15s}
+.lt-btn-ghost:hover{background:#f5f5f0}
+.lt-btn-green{padding:9px 18px;border:none;border-radius:8px;background:#059669;color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;transition:background .15s}
+.lt-btn-green:hover{background:#047857}.lt-btn-green:disabled{opacity:.6;cursor:not-allowed}
+@media(max-width:640px){.lt-box{border-radius:12px}.lt-mbody,.lt-mhead{padding:16px}.lt-mfoot{padding:12px 16px;flex-direction:column}.lt-mfoot button{width:100%;justify-content:center}}
+</style>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+lucide.createIcons();
+const API_BASE = `${window.location.origin}/api/v1`;
+let _activeLhId = null;
+
+function openModal(id)  { document.getElementById(id).classList.add('lt-open'); lucide.createIcons(); }
+function closeModal(id) { document.getElementById(id).classList.remove('lt-open'); }
+function closeOnOverlay(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+function filterLienHe(state) {
+  document.querySelectorAll('[id^="lh-"]').forEach(b => b.classList.remove('lt-factive'));
+  document.getElementById('lh-' + state)?.classList.add('lt-factive');
+  document.querySelectorAll('.lh-row').forEach(r => {
+    r.style.display = (state === 'all' || r.dataset.daDoc === state) ? '' : 'none';
+  });
+}
+
+function openLienHeDetail(id, hoTen, sdt, email, noiDung, daDoc, time) {
+  _activeLhId = id;
+  document.getElementById('lhModalId').textContent      = `#${id}`;
+  document.getElementById('lhModalHoTen').textContent   = hoTen;
+  document.getElementById('lhModalSdt').textContent     = sdt;
+  document.getElementById('lhModalEmail').textContent   = email || '(Không có)';
+  document.getElementById('lhModalNoidung').textContent = noiDung;
+  document.getElementById('lhModalTime').textContent    = time;
+  document.getElementById('lhModalBadge').innerHTML     = daDoc
+    ? '<span class="lh-badge-read">✅ Đã đọc</span>'
+    : '<span class="lh-badge-unread">📬 Chưa đọc</span>';
+  document.getElementById('lhModalMarkBtn').style.display = daDoc ? 'none' : 'flex';
+  openModal('modalLienHe');
+  if (!daDoc) _autoMarkDaDoc(id);
+}
+
+async function _autoMarkDaDoc(id) {
+  try {
+    const res = await fetch(`${API_BASE}/admin/lien-he/${id}/da-doc`,{method:'PATCH',credentials:'include'});
+    if (!res.ok) return;
+    const row = document.querySelector(`.lh-row[data-lh-id="${id}"]`);
+    if (row) {
+      row.dataset.daDoc = 'da_doc';
+      row.style.background = 'transparent';
+      const badge = row.querySelector('.lh-status-badge');
+      if (badge) badge.innerHTML = '<span class="lh-badge-read">✅ Đã đọc</span>';
+      const markBtn = row.querySelector('.lh-mark-btn');
+      if (markBtn) markBtn.remove();
+    }
+    const newBadge = document.getElementById('lhNewBadge');
+    if (newBadge) { const n=parseInt(newBadge.textContent)-1; if(n<=0)newBadge.remove();else newBadge.textContent=`${n} mới`; }
+    const statVal = document.querySelector('.stat-card-value[style*="7c3aed"]');
+    if (statVal) { const n=parseInt(statVal.textContent)-1; statVal.textContent=Math.max(0,n); }
+    document.getElementById('lhModalMarkBtn').style.display='none';
+    document.getElementById('lhModalBadge').innerHTML='<span class="lh-badge-read">✅ Đã đọc</span>';
+  } catch { /* silent */ }
+}
+
+async function markDaDoc(id, btn) {
+  btn.disabled=true;
+  try { const res=await fetch(`${API_BASE}/admin/lien-he/${id}/da-doc`,{method:'PATCH',credentials:'include'}); if(!res.ok){alert('Lỗi');return;} location.reload(); }
+  catch{alert('Lỗi kết nối');btn.disabled=false;}
+}
+
+async function markDaDocFromModal() {
+  const btn=document.getElementById('lhModalMarkBtn'); btn.disabled=true;
+  try { const res=await fetch(`${API_BASE}/admin/lien-he/${_activeLhId}/da-doc`,{method:'PATCH',credentials:'include'}); if(!res.ok){alert('Lỗi');return;} closeModal('modalLienHe'); location.reload(); }
+  catch{alert('Lỗi kết nối');btn.disabled=false;}
+}
+</script>
+{% endblock %}

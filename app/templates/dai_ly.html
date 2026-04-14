@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block title %}Đại lý toàn quốc — AutoMart{% endblock %}
+
+{% block content %}
+<div style="background:#fff; border-bottom:1px solid #eaeae0; padding:28px 24px;">
+  <div class="container">
+    <div style="font-size:13px;color:#888;margin-bottom:8px;">
+      <a href="/" style="color:#888;text-decoration:none;">Trang chủ</a>
+      <span> › </span>
+      <span>Đại lý toàn quốc</span>
+    </div>
+    <h1 style="font-size:26px;font-weight:800;color:var(--text-primary);margin:0;">
+      Hệ thống đại lý AutoMart toàn quốc
+    </h1>
+    <p style="color:#666;font-size:14px;margin-top:6px;">
+      4 đại lý trải dài từ Bắc đến Nam — sẵn sàng phục vụ bạn
+    </p>
+  </div>
+</div>
+
+<div class="section section-gray">
+  <div class="container">
+
+    <!-- Miền Bắc -->
+    <div style="margin-bottom:40px;">
+      <h2 style="font-size:16px;font-weight:700;color:var(--text-primary);
+                 margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        <span style="width:4px;height:18px;background:var(--accent-primary);
+                     border-radius:2px;display:inline-block;"></span>
+        Miền Bắc
+      </h2>
+      <div class="dealers-grid">
+
+        <div class="dealer-card" style="cursor:default;">
+          <div class="dealer-body">
+            <div class="dealer-name">AutoMart Hưng Yên</div>
+            <div class="dealer-city">Thành phố Hưng Yên</div>
+            <div class="dealer-address" style="margin-bottom:10px;">
+              <i data-lucide="map-pin" style="width:13px;height:13px;flex-shrink:0;margin-top:2px;color:var(--accent-primary);"></i>
+              <span>Số 12 đường Điện Biên, phường Lê Lợi, Thành phố Hưng Yên</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="phone" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>0221 386 5678</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="clock" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>7:30 – 17:30 (Thứ 2 – Thứ 7)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="mail" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>hungyen@automart.vn</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="dealer-card" style="cursor:default;">
+          <div class="dealer-body">
+            <div class="dealer-name">AutoMart Quảng Ninh</div>
+            <div class="dealer-city">Thành phố Hạ Long</div>
+            <div class="dealer-address" style="margin-bottom:10px;">
+              <i data-lucide="map-pin" style="width:13px;height:13px;flex-shrink:0;margin-top:2px;color:var(--accent-primary);"></i>
+              <span>Số 25 đường Lê Thánh Tông, phường Bạch Đằng, Hạ Long</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="phone" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>0203 456 7890</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="clock" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>7:30 – 17:30 (Thứ 2 – Thứ 7)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="mail" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>quangninh@automart.vn</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Miền Trung -->
+    <div style="margin-bottom:40px;">
+      <h2 style="font-size:16px;font-weight:700;color:var(--text-primary);
+                 margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        <span style="width:4px;height:18px;background:#3b82f6;
+                     border-radius:2px;display:inline-block;"></span>
+        Miền Trung
+      </h2>
+      <div class="dealers-grid">
+
+        <div class="dealer-card" style="cursor:default;">
+          <div class="dealer-body">
+            <div class="dealer-name">AutoMart Thanh Hóa</div>
+            <div class="dealer-city">Thành phố Thanh Hóa</div>
+            <div class="dealer-address" style="margin-bottom:10px;">
+              <i data-lucide="map-pin" style="width:13px;height:13px;flex-shrink:0;margin-top:2px;color:var(--accent-primary);"></i>
+              <span>Ngã tư Phan Chu Trinh - Nguyễn Du, Phường Điện Biên, Thành phố Thanh Hóa, tỉnh Thanh Hóa</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="phone" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>0203 456 7890</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="clock" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>7:30 – 17:30 (Thứ 2 – Thứ 7)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="mail" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>thanhhoa@automart.vn</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Miền Nam -->
+    <div style="margin-bottom:40px;">
+      <h2 style="font-size:16px;font-weight:700;color:var(--text-primary);
+                 margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        <span style="width:4px;height:18px;background:#22c55e;
+                     border-radius:2px;display:inline-block;"></span>
+        Miền Nam
+      </h2>
+      <div class="dealers-grid">
+
+        <div class="dealer-card" style="cursor:default;">
+          <div class="dealer-body">
+            <div class="dealer-name">AutoMart Hồ Chí Minh</div>
+            <div class="dealer-city">Thành phố Hồ Chí Minh</div>
+            <div class="dealer-address" style="margin-bottom:10px;">
+              <i data-lucide="map-pin" style="width:13px;height:13px;flex-shrink:0;margin-top:2px;color:var(--accent-primary);"></i>
+              <span>Lô IV-22 Tây Thạnh, Phường Tây Thạnh, TP. HCM</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="phone" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>028 3812 3456</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="clock" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>7:30 – 17:30 (Thứ 2 – Thứ 7)</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:#666;">
+                <i data-lucide="mail" style="width:13px;height:13px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <span>hcm@automart.vn</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CTA liên hệ -->
+    <div style="background:var(--bg-primary);border-radius:14px;padding:32px;
+                text-align:center;margin-top:8px;">
+      <h3 style="color:#fff;font-size:18px;font-weight:700;margin-bottom:8px;">
+        Chưa có đại lý gần bạn?
+      </h3>
+      <p style="color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:20px;">
+        Liên hệ với chúng tôi — AutoMart sẽ hỗ trợ bạn trực tuyến toàn quốc.
+      </p>
+      <a href="/lien-he" class="btn btn-primary">
+        <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
+        Liên hệ ngay
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>lucide.createIcons();</script>
+{% endblock %}

@@ -7,12 +7,14 @@ from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from app.core.config import settings
 from app.core.database import init_db, engine
+from app.models.dang_tin import DangTin
 from app.api.v1.router import api_router
-from sqlmodel import Session
+from sqlmodel import Session, select
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import RedirectResponse
 from app.core.database import init_db, engine, get_session
+from app.models.lien_he import LienHe
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -58,24 +60,145 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 app.include_router(api_router, prefix="/api/v1")
 
 def get_current_user_for_template(request: Request):
-    """Truyền user vào mọi template để hiển thị đúng UI"""
     try:
+        token = request.cookies.get("automart_token")
+        print(f"=== COOKIE TOKEN: {'EXISTS' if token else 'MISSING'} ===")
         with Session(engine) as session:
-            return get_current_user_from_cookie(request, session)
-    except Exception:
+            user = get_current_user_from_cookie(request, session)
+            print(f"=== USER: {user} ===")
+            return user
+    except Exception as e:
+        print(f"=== ERROR: {e} ===")
         return None
 
 # ── Frontend routes ───────────────────────────────────
 @app.get("/")
 def home(request: Request):
     user = get_current_user_for_template(request)
-    template_path = BASE_DIR / "templates" / "index.html"
-    print(f"Template path exists: {template_path.exists()}")
-    print(f"BASE_DIR: {BASE_DIR}")
+    with Session(engine) as session:
+        from app.services.news_service import get_all_news
+        from app.models.news import NewsCategory
+        news_list    = get_all_news(session, NewsCategory.tin_tuc)
+        hoi_dap_list = get_all_news(session, NewsCategory.hoi_dap)
     return templates.TemplateResponse(
         request=request,
         name="index.html",
-        context={"current_user": user}
+        context={
+            "current_user": user,
+            "news_list": news_list,
+            "hoi_dap_list": hoi_dap_list,
+            "is_news_page": True,
+        }
+    )
+
+
+from app.models.dang_tin import DangTin
+
+@app.get("/profile")
+def profile_page(request: Request, session: Session = Depends(get_session)):
+    user = get_current_user_from_cookie(request, session)
+    if not user:
+        return RedirectResponse(url="/", status_code=302)
+
+    dang_tins = session.exec(
+        select(DangTin)
+        .where(DangTin.user_id == user.id)
+        .order_by(DangTin.created_at.desc())
+    ).all()
+
+    return templates.TemplateResponse("profile.html", {
+        "request": request,
+        "current_user": user,
+        "dang_tins": dang_tins,
+    })
+
+
+@app.get("/admin/dashboard")
+def admin_dashboard(request: Request):
+    user = get_current_user_for_template(request)
+    if not user or user.role.value != "admin":
+        return RedirectResponse("/")
+    with Session(engine) as session:
+        from sqlmodel import select, func
+        from app.models.user import User
+        from app.models.dang_tin import DangTin
+        from app.models.lai_thu import LaiThu
+        from app.models.lien_he import LienHe
+
+        total_users = session.exec(select(func.count()).select_from(User)).one()
+        total_tins = session.exec(select(func.count()).select_from(DangTin)).one()
+        total_lai_thu = session.exec(select(func.count()).select_from(LaiThu)).one()
+        cho_duyet_count = session.exec(
+            select(func.count()).select_from(LaiThu)
+            .where(LaiThu.trang_thai == "cho_duyet")
+        ).one()
+        lien_he_chua_doc = session.exec(
+            select(func.count()).select_from(LienHe)
+            .where(LienHe.da_doc == False)
+        ).one()
+
+        recent_users = session.exec(
+            select(User).order_by(User.created_at.desc()).limit(5)
+        ).all()
+        recent_tins = session.exec(
+            select(DangTin).order_by(DangTin.created_at.desc()).limit(5)
+        ).all()
+        lai_thu_list = session.exec(
+            select(LaiThu).order_by(LaiThu.created_at.desc())
+        ).all()
+        lien_he_list = session.exec(
+            select(LienHe).order_by(LienHe.created_at.desc())
+        ).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin_dashboard.html",
+        context={
+            "current_user": user,
+            "total_users": total_users,
+            "total_tins": total_tins,
+            "total_lai_thu": total_lai_thu,
+            "cho_duyet_count": cho_duyet_count,
+            "lien_he_chua_doc": lien_he_chua_doc,
+            "recent_users": recent_users,
+            "recent_tins": recent_tins,
+            "lai_thu_list": lai_thu_list,
+            "lien_he_list": lien_he_list,
+        }
+    )
+
+@app.get("/staff/dashboard")
+def staff_dashboard(request: Request):
+    user = get_current_user_for_template(request)
+    if not user or user.role.value not in ("staff", "admin"):
+        return RedirectResponse("/")
+    with Session(engine) as session:
+        from sqlmodel import select, func
+        from app.models.dang_tin import DangTin
+        from app.models.lien_he import LienHe
+
+        total_tins = session.exec(select(func.count()).select_from(DangTin)).one()
+        lien_he_chua_doc = session.exec(
+            select(func.count()).select_from(LienHe)
+            .where(LienHe.da_doc == False)
+        ).one()
+        recent_tins = session.exec(
+            select(DangTin).order_by(DangTin.created_at.desc()).limit(10)
+        ).all()
+        lien_he_list = session.exec(
+            select(LienHe).order_by(LienHe.created_at.desc())
+        ).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="staff_dashboard.html",
+        context={
+            "current_user": user,
+            "total_tins": total_tins,
+            "lien_he_chua_doc": lien_he_chua_doc,
+            "recent_tins": recent_tins,
+            "lien_he_list": lien_he_list,
+        }
     )
 
 @app.get("/mua-xe")
@@ -116,11 +239,43 @@ def tu_van(request: Request):
 
 @app.get("/tin-tuc")
 def tin_tuc(request: Request):
+    import sys
+    print("=== HIT ===", flush=True, file=sys.stderr)
     user = get_current_user_for_template(request)
+    with Session(engine) as session:
+        from app.services.news_service import get_all_news
+        from app.models.news import NewsCategory
+        news_list = get_all_news(session, NewsCategory.tin_tuc)
+        hoi_dap_list = get_all_news(session, NewsCategory.hoi_dap)
     return templates.TemplateResponse(
         request=request,
         name="news.html",
-        context={"current_user": user}
+        context={
+            "current_user": user,
+            "news_list": news_list,
+            "hoi_dap_list": hoi_dap_list,
+        }
+    )
+
+@app.get("/tin-tuc/{news_id}")
+def tin_tuc_detail(request: Request, news_id: int):
+    user = get_current_user_for_template(request)
+    with Session(engine) as session:
+        from app.services.news_service import get_all_news, get_news_by_id
+        from app.models.news import NewsCategory
+        news = get_news_by_id(session, news_id)
+        if not news:
+            return RedirectResponse("/tin-tuc")
+        # Gợi ý bài liên quan (cùng category, trừ bài hiện tại)
+        related = [n for n in get_all_news(session, news.category) if n.id != news_id][:4]
+    return templates.TemplateResponse(
+        request=request,
+        name="news_detail.html",
+        context={
+            "current_user": user,
+            "news": news,
+            "related": related,
+        }
     )
 
 @app.get("/uu-dai-thang")
@@ -151,7 +306,12 @@ def dich_vu(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="dich_vu.html",
-        context={"current_user": user}
+        context={
+            "current_user": user,
+            # is_logged_in không cần truyền riêng —
+            # template dùng current_user trực tiếp qua Jinja2,
+            # JS đọc qua data-logged-in attribute trên #dvPageData
+        }
     )
 
 @app.get("/xe/{car_id}")
@@ -213,4 +373,13 @@ def sua_tin_page(request: Request, tin_id: int):
         request=request,
         name="sua_tin_ban_xe.html",
         context={"current_user": user, "tin": tin}
+    )
+
+@app.get("/dai-ly")
+def dai_ly(request: Request):
+    user = get_current_user_for_template(request)
+    return templates.TemplateResponse(
+        request=request,
+        name="dai_ly.html",
+        context={"current_user": user}
     )

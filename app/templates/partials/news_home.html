@@ -1,0 +1,65 @@
+<!-- ══ TIN TỨC NỔI BẬT — trang chủ ══ -->
+<section class="section section-white" id="news">
+  <div class="container">
+    <div class="section-header-row">
+      <h2 class="section-title">Tin tức nổi bật</h2>
+      <a href="/tin-tuc" class="btn btn-outline btn-small">Xem thêm →</a>
+    </div>
+    {% if news_list %}
+    <div class="news-grid">
+      {% set featured = news_list[0] %}
+      <a href="/tin-tuc/{{ featured.id }}" class="news-featured">
+        <div class="news-featured-image">
+          {% if featured.thumbnail_url %}
+            <img src="{{ featured.thumbnail_url }}" alt="{{ featured.title }}"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <div class="news-featured-image-placeholder" style="display:none;"></div>
+          {% else %}
+            <div class="news-featured-image-placeholder"></div>
+          {% endif %}
+        </div>
+        <div class="news-featured-body">
+          <span class="news-tag">TIN TỨC MỚI</span>
+          <h3 class="news-featured-title">{{ featured.title }}</h3>
+          <p class="news-featured-desc">{{ featured.description }}</p>
+          <div class="news-meta">
+            <div class="news-meta-avatar"></div>
+            <span>{{ featured.author }}</span>
+            <span>•</span>
+            <span>{{ featured.created_at.strftime('%d/%m/%Y') }}</span>
+          </div>
+        </div>
+      </a>
+      <div class="news-list">
+        {% for item in news_list[1:5] %}
+        <a href="/tin-tuc/{{ item.id }}" class="news-item">
+          <div class="news-item-image">
+            {% if item.thumbnail_url %}
+              <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}"
+                   style="width:100%;height:100%;object-fit:cover;"
+                   onerror="this.style.display='none';">
+            {% else %}
+              <div class="news-item-image-placeholder"></div>
+            {% endif %}
+          </div>
+          <div class="news-item-body">
+            <div class="news-item-title">{{ item.title }}</div>
+            <div class="news-item-meta">
+              <div class="news-item-meta-avatar"></div>
+              <span>{{ item.author }}</span>
+              <span>•</span>
+              <span>{{ item.created_at.strftime('%d/%m/%Y') }}</span>
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:48px 0;color:#888;">
+      <i data-lucide="newspaper" style="width:40px;height:40px;margin-bottom:12px;opacity:0.3;"></i>
+      <p>Chưa có tin tức nào.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>

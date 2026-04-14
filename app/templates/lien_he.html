@@ -4,69 +4,118 @@
 
 {% block content %}
 <section class="section">
- <div class="container">
-  <div class="section-header">
-   <h2 class="section-title">Liên hệ với chúng tôi</h2>
-   <p class="section-subtitle">Chúng tôi luôn sẵn sàng hỗ trợ bạn</p>
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Liên hệ với chúng tôi</h2>
+      <p class="section-subtitle">Chúng tôi luôn sẵn sàng hỗ trợ bạn</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; max-width:960px; margin:0 auto;">
+
+      <!-- Thông tin liên hệ -->
+      <div>
+        <div class="service-card" style="margin-bottom:16px;">
+          <div class="service-icon">
+            <i data-lucide="map-pin" style="width:28px;height:28px;color:#fff;"></i>
+          </div>
+          <h3 class="service-title">Địa chỉ</h3>
+          <p class="service-desc">123 Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh</p>
+        </div>
+        <div class="service-card" style="margin-bottom:16px;">
+          <div class="service-icon">
+            <i data-lucide="phone" style="width:28px;height:28px;color:#fff;"></i>
+          </div>
+          <h3 class="service-title">Điện thoại</h3>
+          <p class="service-desc">1900 1234 (8:00 - 20:00, Thứ 2 - Chủ nhật)</p>
+        </div>
+        <div class="service-card" style="margin-bottom:16px;">
+          <div class="service-icon">
+            <i data-lucide="mail" style="width:28px;height:28px;color:#fff;"></i>
+          </div>
+          <h3 class="service-title">Email</h3>
+          <p class="service-desc">contact@automart.vn</p>
+        </div>
+      </div>
+
+      <!-- Form liên hệ -->
+      <div class="search-box">
+        <h3 class="search-title">
+          <i data-lucide="message-square" style="width:18px;height:18px;"></i>
+          Gửi tin nhắn cho chúng tôi
+        </h3>
+        <form id="contactForm" onsubmit="handleContactSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">Họ tên *</label>
+            <input type="text" name="ho_ten" class="form-control"
+                   placeholder="Nguyễn Văn A" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số điện thoại *</label>
+            <input type="tel" name="so_dien_thoai" class="form-control"
+                   placeholder="0901 234 567" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control"
+                   placeholder="email@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nội dung *</label>
+            <textarea name="noi_dung" class="form-control" rows="4"
+                      placeholder="Bạn cần hỗ trợ gì?" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary"
+                  style="width:100%; justify-content:center;">
+            <i data-lucide="send" style="width:16px;height:16px;"></i>
+            Gửi tin nhắn
+          </button>
+        </form>
+      </div>
+
+    </div>
   </div>
-
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; max-width: 960px; margin: 0 auto;">
-
-   <!-- Thông tin liên hệ -->
-   <div>
-    <div class="service-card" style="margin-bottom: 16px;">
-     <div class="service-icon"><i data-lucide="map-pin" style="width:28px; height:28px; color:#fff;"></i></div>
-     <h3 class="service-title">Địa chỉ</h3>
-     <p class="service-desc">123 Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh</p>
-    </div>
-    <div class="service-card" style="margin-bottom: 16px;">
-     <div class="service-icon"><i data-lucide="phone" style="width:28px; height:28px; color:#fff;"></i></div>
-     <h3 class="service-title">Điện thoại</h3>
-     <p class="service-desc">1900 1234 (8:00 - 20:00, Thứ 2 - Chủ nhật)</p>
-    </div>
-    <div class="service-card" style="margin-bottom: 16px;">
-     <div class="service-icon"><i data-lucide="mail" style="width:28px; height:28px; color:#fff;"></i></div>
-     <h3 class="service-title">Email</h3>
-     <p class="service-desc">contact@automart.vn</p>
-    </div>
-   </div>
-
-   <!-- Form liên hệ -->
-   <div class="search-box">
-    <h3 class="search-title"><i data-lucide="message-square" style="width:18px; height:18px;"></i> Gửi tin nhắn cho chúng tôi</h3>
-    <form id="contactForm" onsubmit="handleContactSubmit(event)">
-     <div class="form-group">
-      <label class="form-label">Họ tên *</label>
-      <input type="text" class="form-control" placeholder="Nguyễn Văn A" required>
-     </div>
-     <div class="form-group">
-      <label class="form-label">Số điện thoại *</label>
-      <input type="tel" class="form-control" placeholder="0901 234 567" required>
-     </div>
-     <div class="form-group">
-      <label class="form-label">Email</label>
-      <input type="email" class="form-control" placeholder="email@example.com">
-     </div>
-     <div class="form-group">
-      <label class="form-label">Nội dung *</label>
-      <textarea class="form-control" rows="4" placeholder="Bạn cần hỗ trợ gì?" required></textarea>
-     </div>
-     <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
-      <i data-lucide="send" style="width:16px; height:16px;"></i> Gửi tin nhắn
-     </button>
-    </form>
-   </div>
-
-  </div>
- </div>
 </section>
 {% endblock %}
 
 {% block extra_scripts %}
 <script>
-function handleContactSubmit(e) {
+async function handleContactSubmit(e) {
   e.preventDefault();
-  showToast('✅ Đã gửi tin nhắn! Chúng tôi sẽ phản hồi sớm.', 'success');
+  const form = e.target;
+  const btn  = form.querySelector('button[type="submit"]');
+
+  const payload = {
+    ho_ten:        form.ho_ten.value.trim(),
+    so_dien_thoai: form.so_dien_thoai.value.trim(),
+    email:         form.email.value.trim(),
+    noi_dung:      form.noi_dung.value.trim(),
+  };
+
+  btn.disabled  = true;
+  btn.innerHTML = '<span style="opacity:.6">Đang gửi...</span>';
+
+  try {
+    const res  = await fetch('/api/v1/lien-he', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showToast('❌ ' + (data.detail || 'Gửi thất bại!'));
+      return;
+    }
+    showToast('✅ Đã gửi tin nhắn! Chúng tôi sẽ phản hồi sớm.');
+    form.reset();
+  } catch {
+    showToast('❌ Không thể kết nối server!');
+  } finally {
+    btn.disabled  = false;
+    btn.innerHTML = '<i data-lucide="send" style="width:16px;height:16px;"></i> Gửi tin nhắn';
+    lucide.createIcons();
+  }
 }
 </script>
+<script>lucide.createIcons();</script>
 {% endblock %}

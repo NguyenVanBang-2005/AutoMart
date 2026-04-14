@@ -1,180 +1,263 @@
-<!-- ══ SEARCH BAR ══ -->
-<section style="background:#fff; padding:20px 24px; border-bottom:1px solid #eaeae0;">
-  <div class="container" style="max-width:640px;">
-    <div style="display:flex; align-items:center; gap:10px; border:1.5px solid #deded4; border-radius:24px; padding:10px 18px; background:#fafaf8;">
-      <i data-lucide="search" style="width:18px; height:18px; color:#888; flex-shrink:0;"></i>
-      <input type="text" placeholder="Tìm kiếm" style="border:none; outline:none; font-size:15px; width:100%; background:transparent; font-family:inherit; color:var(--text-primary);">
+<!-- ══ TOOLBAR: SEARCH + ĐĂNG TIN ══ -->
+<section style="background:#fff; padding:16px 24px; border-bottom:1px solid #eaeae0; position:relative; z-index:100;">
+  <div class="container">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <div class="news-search-wrapper">
+        <div style="display:flex; align-items:center; gap:10px;
+                    border:1.5px solid #deded4; border-radius:24px;
+                    padding:10px 18px; background:#fafaf8;">
+          <i data-lucide="search" style="width:18px;height:18px;color:#888;flex-shrink:0;"></i>
+          <input type="text" id="newsSearchInput" placeholder="Tìm kiếm tin tức..."
+            autocomplete="off"
+            style="border:none;outline:none;font-size:15px;width:100%;
+                   background:transparent;font-family:inherit;color:var(--text-primary);">
+          <button id="newsSearchClear" onclick="clearNewsSearch()"
+            style="display:none;background:none;border:none;cursor:pointer;color:#888;padding:0;">
+            <i data-lucide="x" style="width:15px;height:15px;"></i>
+          </button>
+        </div>
+        <div class="news-search-panel" id="newsSearchPanel"></div>
+      </div>
+      {% if current_user and current_user.role.value == 'admin' %}
+      <button onclick="openNewsModal()"
+        class="btn btn-primary btn-small"
+        style="display:inline-flex; align-items:center; gap:6px; flex-shrink:0;">
+        <i data-lucide="plus" style="width:15px;height:15px;"></i>
+        Đăng tin mới
+      </button>
+      {% endif %}
     </div>
   </div>
 </section>
+
+<!-- Modal — chỉ render với admin -->
+{% if current_user and current_user.role.value == 'admin' %}
+<div id="newsModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-header">
+      <span class="modal-title">
+        <i data-lucide="file-plus" style="width:18px;height:18px;"></i>
+        Đăng tin mới
+      </span>
+      <button class="modal-close" onclick="closeNewsModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div class="form-group">
+          <label class="form-label">Tiêu đề *</label>
+          <input id="newsTitle" type="text" class="form-control" placeholder="Nhập tiêu đề bài viết...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Danh mục *</label>
+          <select id="newsCategory" class="form-control">
+            <option value="tin_tuc">Tin tức</option>
+            <option value="hoi_dap">Hỏi đáp</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tóm tắt *</label>
+          <textarea id="newsDesc" class="form-control" rows="2"
+            placeholder="Mô tả ngắn hiển thị ở trang danh sách..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nội dung *</label>
+          <textarea id="newsContent" class="form-control" rows="6"
+            placeholder="Nội dung đầy đủ của bài viết..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL ảnh thumbnail</label>
+          <input id="newsThumbnail" type="text" class="form-control"
+            placeholder="https://... (để trống nếu không có)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL Video</label>
+          <input id="newsVideo" type="text" class="form-control"
+            placeholder="YouTube, VnExpress, Dantri... (để trống nếu không có)">
+          <span style="font-size:11px;color:#888;margin-top:4px;display:block;">
+            YouTube sẽ tự động phát • Web khác sẽ hiện nút xem ngoài
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeNewsModal()" class="btn btn-gray btn-small">Hủy</button>
+      <button onclick="submitNews()" id="newsSubmitBtn" class="btn btn-primary btn-small">
+        Đăng bài
+      </button>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <!-- ══ TIN TỨC NỔI BẬT ══ -->
 <section class="section section-white" id="news">
   <div class="container">
     <div class="section-header-row">
       <h2 class="section-title">Tin tức nổi bật</h2>
-      <a href="#" class="btn btn-outline btn-small">Xem thêm</a>
     </div>
-    <div class="news-grid">
 
-      <a href="#" class="news-featured">
-        <div class="news-featured-image">
-          <div class="news-featured-image-placeholder"></div>
+    {% if news_list %}
+    <div style="display:flex; flex-direction:column; gap:20px;" id="newsContainer">
+
+      {% set featured = news_list[0] %}
+      <a href="/tin-tuc/{{ featured.id }}"
+         style="display:flex; gap:24px; align-items:flex-start;
+                background:#fff; border-radius:12px; padding:20px;
+                border:1px solid #eaeae0; text-decoration:none; color:inherit;
+                transition:box-shadow 0.2s, border-color 0.2s;"
+         onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.09)';this.style.borderColor='#d8d8ce'"
+         onmouseout="this.style.boxShadow='none';this.style.borderColor='#eaeae0'">
+        <div style="width:280px; height:180px; border-radius:10px;
+                    overflow:hidden; flex-shrink:0; background:#e8e8de;">
+          {% if featured.thumbnail_url %}
+            <img src="{{ featured.thumbnail_url }}" alt="{{ featured.title }}"
+                 style="width:100%;height:100%;object-fit:cover;"
+                 onerror="this.style.display='none'">
+          {% endif %}
         </div>
-        <div class="news-featured-body">
-          <span class="news-tag">TIN TỨC MỚI</span>
-          <h3 class="news-featured-title">Omoda C5 hybrid ra mắt Việt Nam, giá từ 669 triệu đồng</h3>
-          <p class="news-featured-desc">Ngày 30/3, Omoda & Jaecoo Việt Nam chính thức trình làng phiên bản hybrid của dòng C5 mang tên Omoda C5 SHS-H 2026. Mẫu xe được phân phối với hai phiên bản gồm Premium giá 669 triệu đồng và Flagship giá 749 triệu đồng.</p>
-          <div class="news-meta">
+        <div style="flex:1; min-width:0; padding:4px 0;">
+          <span class="news-tag" style="margin-bottom:10px;">TIN TỨC MỚI</span>
+          <div style="font-size:20px; font-weight:700; color:var(--text-primary);
+                      line-height:1.4; margin-bottom:10px;">
+            {{ featured.title }}
+          </div>
+          <div style="font-size:14px; color:#666; line-height:1.7; margin-bottom:14px;
+                      display:-webkit-box; -webkit-line-clamp:3;
+                      -webkit-box-orient:vertical; overflow:hidden;">
+            {{ featured.description }}
+          </div>
+          <div style="font-size:12px; color:#a8a898; display:flex; align-items:center; gap:6px;">
             <div class="news-meta-avatar"></div>
-            <span>Biên tham vấn AutoMart</span>
+            <span>{{ featured.author }}</span>
             <span>•</span>
-            <span>22 giờ trước</span>
+            <span>{{ featured.created_at.strftime('%d/%m/%Y') }}</span>
+            {% if current_user and current_user.role.value == 'admin' %}
+            <button onclick="deleteNews({{ featured.id }}, event)"
+              style="margin-left:auto;background:none;border:none;color:#ef4444;cursor:pointer;padding:0;">
+              <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+            </button>
+            {% endif %}
           </div>
         </div>
       </a>
 
-      <div class="news-list">
-        <a href="#" class="news-item">
-          <div class="news-item-image"><div class="news-item-image-placeholder"></div></div>
-          <div class="news-item-body">
-            <div class="news-item-title">Mazda nâng cấp hệ thống treo và lái, CX-5 2026 vận hành mượt mà hơn</div>
-            <div class="news-item-meta">
-              <div class="news-item-meta-avatar"></div>
-              <span>Biên tham vấn AutoMart</span><span>•</span><span>22 giờ trước</span>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        {% for item in news_list[1:7] %}
+        <a href="/tin-tuc/{{ item.id }}"
+           style="display:flex; gap:16px; align-items:center;
+                  background:#fff; border-radius:12px; padding:16px;
+                  border:1px solid #eaeae0; text-decoration:none; color:inherit;
+                  transition:box-shadow 0.2s, border-color 0.2s;"
+           onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.09)';this.style.borderColor='#d8d8ce'"
+           onmouseout="this.style.boxShadow='none';this.style.borderColor='#eaeae0'">
+          <div style="width:120px; height:84px; border-radius:8px;
+                      overflow:hidden; flex-shrink:0; background:#e8e8de;">
+            {% if item.thumbnail_url %}
+              <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}"
+                   style="width:100%;height:100%;object-fit:cover;"
+                   onerror="this.style.display='none'">
+            {% endif %}
+          </div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:15px; font-weight:600; color:var(--text-primary);
+                        line-height:1.45; margin-bottom:8px;
+                        display:-webkit-box; -webkit-line-clamp:2;
+                        -webkit-box-orient:vertical; overflow:hidden;">
+              {{ item.title }}
+            </div>
+            <div style="font-size:12px; color:#a8a898; display:flex; align-items:center; gap:5px;">
+              <div class="news-meta-avatar"></div>
+              <span>{{ item.author }}</span>
+              <span>•</span>
+              <span>{{ item.created_at.strftime('%d/%m/%Y') }}</span>
+              {% if current_user and current_user.role.value == 'admin' %}
+              <button onclick="deleteNews({{ item.id }}, event)"
+                style="margin-left:auto;background:none;border:none;color:#ef4444;cursor:pointer;padding:0;">
+                <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+              </button>
+              {% endif %}
             </div>
           </div>
         </a>
-        <a href="#" class="news-item">
-          <div class="news-item-image"><div class="news-item-image-placeholder"></div></div>
-          <div class="news-item-body">
-            <div class="news-item-title">SUV điện BYD Song Ultra EV gây sốc với công nghệ sạc 9 phút</div>
-            <div class="news-item-meta">
-              <div class="news-item-meta-avatar"></div>
-              <span>Biên tham vấn AutoMart</span><span>•</span><span>22 giờ trước</span>
-            </div>
-          </div>
-        </a>
-        <a href="#" class="news-item">
-          <div class="news-item-image"><div class="news-item-image-placeholder"></div></div>
-          <div class="news-item-body">
-            <div class="news-item-title">Mitsubishi Xpander HEV 2026 ra mắt: tiết kiệm nhiên liệu, giữ vững thực dụng</div>
-            <div class="news-item-meta">
-              <div class="news-item-meta-avatar"></div>
-              <span>Biên tham vấn AutoMart</span><span>•</span><span>22 giờ trước</span>
-            </div>
-          </div>
-        </a>
-        <a href="#" class="news-item">
-          <div class="news-item-image"><div class="news-item-image-placeholder"></div></div>
-          <div class="news-item-body">
-            <div class="news-item-title">SUV cỡ lớn Hyundai Palisade thế hệ mới sắp trình làng khách Việt</div>
-            <div class="news-item-meta">
-              <div class="news-item-meta-avatar"></div>
-              <span>Biên tham vấn AutoMart</span><span>•</span><span>22 giờ trước</span>
-            </div>
-          </div>
-        </a>
-        <a href="#" class="news-item">
-          <div class="news-item-image"><div class="news-item-image-placeholder"></div></div>
-          <div class="news-item-body">
-            <div class="news-item-title">Quy định ghế trẻ em trên ô tô và mức phạt cha mẹ cần biết</div>
-            <div class="news-item-meta">
-              <div class="news-item-meta-avatar"></div>
-              <span>Biên tham vấn AutoMart</span><span>•</span><span>22 giờ trước</span>
-            </div>
-          </div>
-        </a>
-        <a href="#" class="news-item">
-          <div class="news-item-image"><div class="news-item-image-placeholder"></div></div>
-          <div class="news-item-body">
-            <div class="news-item-title">Hyundai Stargazer 2026 ra mắt: Giá cao nhất 615 triệu đồng</div>
-            <div class="news-item-meta">
-              <div class="news-item-meta-avatar"></div>
-              <span>Biên tham vấn AutoMart</span><span>•</span><span>22 giờ trước</span>
-            </div>
-          </div>
-        </a>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ══ TIN ĐỀ XUẤT ══ -->
-<section class="section" style="background:#2a2a2a; padding:32px 24px;">
-  <div class="container">
-    <div class="section-header-row" style="margin-bottom:16px;">
-      <h2 class="section-title" style="color:#fff; border-bottom-color:var(--accent-primary);">Tin đề xuất cho bạn</h2>
-    </div>
-    <div class="scroll-row-wrapper">
-      <div class="scroll-row">
-        {% for i in range(5) %}
-        <div style="flex-shrink:0; width:240px; background:#3a3a3a; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.08);">
-          <div style="height:150px; background:#2e2e2e;"></div>
-          <div style="padding:12px;">
-            <p style="font-size:12px; color:rgba(255,255,255,0.75); line-height:1.5; margin-bottom:8px;">
-              Lexus ES 2025 lộ diện với nội thất lấy cảm ngẫu mực và trang bị động cơ dòng mới
-            </p>
-            <p style="font-size:11px; color:rgba(255,255,255,0.35);">Biên tham vấn AutoMart • 22 giờ trước</p>
-          </div>
-        </div>
         {% endfor %}
       </div>
+
     </div>
+    {% else %}
+    <div style="text-align:center;padding:48px 0;color:#888;">
+      <i data-lucide="newspaper" style="width:40px;height:40px;margin-bottom:12px;opacity:0.3;display:block;margin-inline:auto;"></i>
+      <p>Chưa có tin tức nào. {% if current_user and current_user.role.value == 'admin' %}Hãy đăng bài đầu tiên!{% endif %}</p>
+    </div>
+    {% endif %}
   </div>
 </section>
 
 <!-- ══ HỎI ĐÁP ══ -->
+{% if hoi_dap_list %}
 <section class="section section-white">
   <div class="container">
     <div class="section-header-row">
       <h2 class="section-title">Hỏi đáp</h2>
-      <a href="#" class="btn btn-outline btn-small">Xem thêm</a>
     </div>
     <div class="news-grid">
-
-      <a href="#" class="news-featured">
+      {% set featured_qa = hoi_dap_list[0] %}
+      <a href="/tin-tuc/{{ featured_qa.id }}" class="news-featured">
         <div class="news-featured-image">
-          <div class="news-featured-image-placeholder"></div>
+          {% if featured_qa.thumbnail_url %}
+            <img src="{{ featured_qa.thumbnail_url }}" alt="{{ featured_qa.title }}"
+                 style="width:100%;height:100%;object-fit:cover;">
+          {% else %}
+            <div class="news-featured-image-placeholder"></div>
+          {% endif %}
         </div>
         <div class="news-featured-body">
           <span class="news-tag">HỎI ĐÁP</span>
-          <h3 class="news-featured-title">Kia K3 2022 - Có nên mua hay không?</h3>
-          <p class="news-featured-desc">Xe Kia K3 là một dòng xe số phổ biến tại Việt Nam. Bài viết này sẽ điểm qua các ưu nhược điểm của Xe ô tô Kia K3 theo đánh giá của người dùng. Xe Hàn nổi lên các năm gần đây với "danh tiếng" là đầy áp các trang bị trong và ngoài xe. Kia K3 cũng không nằm ngoài xu hướng.</p>
+          <h3 class="news-featured-title">{{ featured_qa.title }}</h3>
+          <p class="news-featured-desc">{{ featured_qa.description }}</p>
           <div class="news-meta">
             <div class="news-meta-avatar"></div>
-            <span>Biên tham vấn AutoMart</span>
+            <span>{{ featured_qa.author }}</span>
             <span>•</span>
-            <span>22 giờ trước</span>
+            <span>{{ featured_qa.created_at.strftime('%d/%m/%Y') }}</span>
+            {% if current_user and current_user.role.value == 'admin' %}
+            <button onclick="deleteNews({{ featured_qa.id }}, event)"
+              style="margin-left:auto;background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;padding:0;">
+              <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+            </button>
+            {% endif %}
           </div>
         </div>
       </a>
-
       <div class="news-list">
-        {% set qa_items = [
-          'Ô tô trung bình mỗi năm đi bao nhiêu kilomet?',
-          'Thủ tục đổi từ biển vuông sang biển dài cần những loại giấy tờ gì?',
-          'Mitsubishi Xpander HEV 2026 ra mắt: tiết kiệm nhiên liệu, giữ vững thực dụng',
-          'SUV cỡ lớn Hyundai Palisade thế hệ mới sắp trình làng khách Việt',
-          'Quy định ghế trẻ em trên ô tô và mức phạt cha mẹ cần biết',
-          'Hyundai Stargazer 2026 ra mắt: Giá cao nhất 615 triệu đồng'
-        ] %}
-        {% for title in qa_items %}
-        <a href="#" class="news-item">
-          <div class="news-item-image"><div class="news-item-image-placeholder"></div></div>
+        {% for item in hoi_dap_list[1:7] %}
+        <a href="/tin-tuc/{{ item.id }}" class="news-item">
+          <div class="news-item-image">
+            {% if item.thumbnail_url %}
+              <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}"
+                   style="width:100%;height:100%;object-fit:cover;">
+            {% else %}
+              <div class="news-item-image-placeholder"></div>
+            {% endif %}
+          </div>
           <div class="news-item-body">
-            <div class="news-item-title">{{ title }}</div>
+            <div class="news-item-title">{{ item.title }}</div>
             <div class="news-item-meta">
               <div class="news-item-meta-avatar"></div>
-              <span>Biên tham vấn AutoMart</span><span>•</span><span>22 giờ trước</span>
+              <span>{{ item.author }}</span>
+              <span>•</span>
+              <span>{{ item.created_at.strftime('%d/%m/%Y') }}</span>
+              {% if current_user and current_user.role.value == 'admin' %}
+              <button onclick="deleteNews({{ item.id }}, event)"
+                style="margin-left:auto;background:none;border:none;color:#ef4444;cursor:pointer;padding:0;">
+                <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
+              </button>
+              {% endif %}
             </div>
           </div>
         </a>
         {% endfor %}
       </div>
-
     </div>
   </div>
 </section>
-
+{% endif %}

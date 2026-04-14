@@ -1,0 +1,391 @@
+/* ══════════════════════════════════════════════════
+   PROFILE PAGE — đồng nhất với AutoMart style.css
+   ══════════════════════════════════════════════════ */
+
+.profile-page {
+  min-height: 100vh;
+  background: #f5f5f0;
+  padding: 40px 24px 80px;
+}
+
+.profile-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .profile-container { grid-template-columns: 1fr; }
+  .profile-page { padding: 24px 16px 60px; }
+}
+
+/* ══════════════════════════════════════════════════
+   SIDEBAR
+   ══════════════════════════════════════════════════ */
+.profile-sidebar {
+  background: var(--bg-surface);
+  border: 1px solid #eaeae0;
+  border-radius: 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  padding: 28px 20px;
+  position: sticky;
+  top: 90px;
+}
+
+/* Avatar */
+.avatar-section {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #eaeae0;
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  margin: 0 auto 12px;
+}
+
+.avatar-img,
+.avatar-placeholder {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-primary);
+  color: #fff;
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.avatar-edit-btn {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 26px;
+  height: 26px;
+  background: var(--bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  transition: background 0.2s;
+  border: 2px solid #fff;
+}
+.avatar-edit-btn:hover { background: var(--accent-primary); }
+
+.avatar-status {
+  font-size: 12px;
+  color: #888880;
+  min-height: 16px;
+  margin: 4px 0 8px;
+}
+
+.sidebar-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 3px;
+}
+
+.sidebar-email {
+  font-size: 12px;
+  color: #888880;
+  margin: 0;
+  word-break: break-all;
+}
+
+/* Nav */
+.profile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+.profile-nav-item:hover {
+  background: #f5f5f0;
+  color: var(--text-primary);
+}
+.profile-nav-item.active {
+  background: #f5efe0;
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+.profile-nav-item.active i { color: var(--accent-primary); }
+.profile-nav-item i { color: #a8a898; flex-shrink: 0; }
+
+/* ══════════════════════════════════════════════════
+   MAIN PANEL
+   ══════════════════════════════════════════════════ */
+.profile-main {
+  background: var(--bg-surface);
+  border: 1px solid #eaeae0;
+  border-radius: 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  padding: 32px;
+}
+
+.profile-tab { display: none; }
+.profile-tab.active { display: block; }
+
+.section-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eaeae0;
+}
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+  margin: 0 0 4px;
+}
+.section-header p {
+  font-size: 13px;
+  color: #888880;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   FORM
+   ══════════════════════════════════════════════════ */
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 460px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888880;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.form-group input {
+  padding: 10px 13px;
+  border: 1.5px solid #deded4;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: var(--text-primary);
+  width: 100%;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-group input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(200,169,110,0.12);
+}
+.form-group input::placeholder { color: #b8b8b0; }
+
+.input-disabled {
+  background: #f5f5f0 !important;
+  color: #a8a898 !important;
+  cursor: not-allowed;
+}
+
+.field-note {
+  font-size: 12px;
+  color: #a8a898;
+}
+
+/* Password input wrapper */
+.input-pw-wrap { position: relative; }
+.input-pw-wrap input { padding-right: 42px; }
+.toggle-pw {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #a8a898;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+.toggle-pw:hover { color: var(--text-primary); }
+
+/* Save button — theo style btn-primary của site */
+.btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--accent-primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  align-self: flex-start;
+  text-decoration: none;
+  line-height: 1;
+}
+.btn-save:hover {
+  background: var(--accent-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(200,169,110,0.35);
+}
+.btn-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Messages */
+.form-message {
+  padding: 11px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.form-message.success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+.form-message.error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+/* ══════════════════════════════════════════════════
+   LỊCH SỬ ĐĂNG TIN
+   ══════════════════════════════════════════════════ */
+.dang-tin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dang-tin-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border: 1px solid #eaeae0;
+  border-radius: 10px;
+  transition: all 0.2s;
+  cursor: default;
+}
+.dang-tin-card:hover {
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 14px rgba(200,169,110,0.1);
+  transform: translateY(-1px);
+}
+
+.dang-tin-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: #f5efe0;
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dang-tin-info { flex: 1; min-width: 0; }
+.dang-tin-info h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dang-tin-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.dang-tin-meta span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: #888880;
+}
+
+.dang-tin-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--price-color);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 20px;
+  color: #a8a898;
+}
+.empty-state i { color: #c8c8b8; }
+.empty-state p { margin: 0; font-size: 15px; color: #888880; }
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .profile-main { padding: 24px 20px; }
+  .profile-sidebar { position: static; }
+  .dang-tin-card { flex-wrap: wrap; }
+  .dang-tin-price { width: 100%; text-align: right; }
+}

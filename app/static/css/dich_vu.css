@@ -1,0 +1,294 @@
+/* ══════════════════════════════════════════════════
+   dich_vu.css — Trang Dịch Vụ AutoMart
+   ══════════════════════════════════════════════════ */
+
+/* ── Tab navigation ── */
+.dv-tab-nav {
+  background: #fff;
+  border-bottom: 1px solid #eaeae0;
+  position: sticky;
+  top: 68px;
+  z-index: 100;
+}
+
+.dv-tab-nav .container {
+  display: flex;
+  gap: 0;
+}
+
+.dv-tab-btn {
+  padding: 16px 32px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  color: #888;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.dv-tab-btn.active {
+  font-weight: 700;
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
+}
+
+/* ── Info cards (30 phút / tại showroom / miễn phí) ── */
+.dv-info-card {
+  text-align: center;
+  padding: 16px;
+  background: #f5f5f0;
+  border-radius: 10px;
+}
+.dv-info-card .dv-info-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 8px;
+}
+.dv-info-card .dv-info-sub {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* ── File upload drop zone ── */
+.dv-upload-zone {
+  position: relative;
+}
+.dv-upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+}
+.dv-upload-label {
+  border: 2px dashed #d4b97e;
+  border-radius: 10px;
+  padding: 20px 16px;
+  text-align: center;
+  background: #fdf9f0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.dv-upload-label:hover {
+  border-color: var(--accent-primary);
+  background: #fef6e4;
+}
+.dv-upload-label .dv-upload-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+.dv-upload-label .dv-upload-sub {
+  font-size: 11px;
+  color: #94a3b8;
+}
+.dv-upload-preview {
+  margin-top: 8px;
+}
+.dv-upload-preview img {
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid var(--accent-primary);
+}
+.dv-upload-preview-name {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+}
+.dv-upload-clear-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ef4444;
+  border: none;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  z-index: 3;
+}
+
+/* ── Login required overlay ── */
+.dv-login-overlay {
+  position: relative;
+}
+.dv-login-blur {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+.dv-login-gate {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 14px;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+  text-align: center;
+  padding: 24px;
+}
+.dv-login-gate-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f5efe0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dv-login-gate h3 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+.dv-login-gate p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+}
+.dv-login-gate-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ── Ghi chú (được phép / lưu ý) ── */
+.dv-note-box {
+  border-radius: 12px;
+  padding: 20px;
+}
+.dv-note-box.green { background: #f5efe0; }
+.dv-note-box.red   { background: #fef2f2; }
+.dv-note-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dv-note-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: #555;
+}
+.dv-note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Tip box ── */
+.dv-tip-box {
+  background: #f5f5f0;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.7;
+}
+
+/* ── Hotline / contact cards ── */
+.dv-contact-card {
+  text-decoration: none;
+  text-align: center;
+  padding: 20px 16px;
+  background: #f5f5f0;
+  border-radius: 10px;
+  transition: all 0.2s;
+  display: block;
+  color: inherit;
+}
+.dv-contact-card:hover {
+  background: var(--bg-primary);
+  color: #fff;
+}
+.dv-contact-name {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  margin-top: 10px;
+}
+.dv-contact-value {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent-primary);
+}
+.dv-contact-sub {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* ── FAQ accordion ── */
+.dv-faq-item {
+  background: #fff;
+  border: 1px solid #eaeae0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.dv-faq-btn {
+  width: 100%;
+  padding: 16px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: inherit;
+  color: var(--text-primary);
+  gap: 12px;
+}
+.dv-faq-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.dv-faq-body {
+  display: none;
+  padding: 0 16px 16px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.7;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .dv-tab-btn { padding: 12px 18px; font-size: 14px; }
+  .dv-form-notes-grid { grid-template-columns: 1fr !important; }
+  .dv-login-gate-actions { flex-direction: column; }
+  .dv-login-gate-actions .btn { width: 100%; justify-content: center; }
+}

@@ -1,92 +1,189 @@
 {% extends 'base.html' %}
 
-{% block title %}AutoMart - Tư Vấn{% endblock %}
+{% block title %}AutoMart - Tư Vấn AI{% endblock %}
 
 {% block content %}
-<section class="section">
- <div class="container">
-  <div class="section-header">
-   <h2 class="section-title">Tư vấn mua xe</h2>
-   <p class="section-subtitle">Đội ngũ chuyên gia sẵn sàng tư vấn miễn phí cho bạn</p>
-  </div>
+<div id="pageData"
+  data-user-name="{{ current_user.ho_ten if current_user else '' }}"
+  data-user-phone="{{ current_user.so_dien_thoai if current_user else '' }}"
+  style="display:none;"></div>
 
-  <!-- Dịch vụ tư vấn -->
-  <div class="services-grid" style="margin-bottom: 48px;">
-   <div class="service-card">
-    <div class="service-icon"><i data-lucide="shield-check"></i></div>
-    <h3 class="service-title">Kiểm định xe</h3>
-    <p class="service-desc">Kiểm tra 150+ hạng mục, đảm bảo xe không lỗi ẩn trước khi mua</p>
-   </div>
-   <div class="service-card">
-    <div class="service-icon"><i data-lucide="landmark"></i></div>
-    <h3 class="service-title">Tư vấn vay vốn</h3>
-    <p class="service-desc">So sánh gói vay từ nhiều ngân hàng, chọn lãi suất tốt nhất cho bạn</p>
-   </div>
-   <div class="service-card">
-    <div class="service-icon"><i data-lucide="refresh-cw"></i></div>
-    <h3 class="service-title">Định giá xe cũ</h3>
-    <p class="service-desc">Định giá chính xác xe bạn đang có để tính toán chi phí đổi xe mới</p>
-   </div>
-   <div class="service-card">
-    <div class="service-icon"><i data-lucide="wrench"></i></div>
-    <h3 class="service-title">Tư vấn bảo hành</h3>
-    <p class="service-desc">Hướng dẫn chọn gói bảo hành phù hợp với nhu cầu sử dụng</p>
-   </div>
-  </div>
+<section class="section section-gray">
+  <div class="container">
 
-  <!-- Form đăng ký tư vấn -->
-  <div style="max-width: 560px; margin: 0 auto;">
-   <div class="search-box">
-    <h3 class="search-title">
-     <i data-lucide="user-round" style="width:20px;height:20px;vertical-align:middle;margin-right:6px;"></i>
-     Đăng ký tư vấn miễn phí
-    </h3>
-    <form id="consultForm" onsubmit="handleConsultSubmit(event)">
-     <div class="form-group">
-      <label class="form-label">Họ tên *</label>
-      <input type="text" class="form-control" placeholder="Nguyễn Văn A" required>
-     </div>
-     <div class="form-group">
-      <label class="form-label">Số điện thoại *</label>
-      <input type="tel" class="form-control" placeholder="0901 234 567" required>
-     </div>
-     <div class="form-group">
-      <label class="form-label">Bạn cần tư vấn về</label>
-      <select class="form-control">
-       <option value="">Chọn chủ đề</option>
-       <option>Mua xe phù hợp ngân sách</option>
-       <option>Vay mua xe</option>
-       <option>Kiểm định xe trước khi mua</option>
-       <option>Đổi xe cũ lấy xe mới</option>
-       <option>Bảo hành & bảo hiểm</option>
-      </select>
-     </div>
-     <div class="form-group">
-      <label class="form-label">Thời gian liên hệ mong muốn</label>
-      <select class="form-control">
-       <option value="">Bất kỳ lúc nào</option>
-       <option>Sáng (8:00 - 12:00)</option>
-       <option>Chiều (12:00 - 17:00)</option>
-       <option>Tối (17:00 - 20:00)</option>
-      </select>
-     </div>
-     <div class="form-group">
-      <label class="form-label">Ghi chú thêm</label>
-      <textarea class="form-control" rows="3" placeholder="Mô tả nhu cầu của bạn..."></textarea>
-     </div>
-     <button type="submit" class="btn btn-primary" style="width: 100%; display:flex; align-items:center; justify-content:center; gap:8px;">
-      <i data-lucide="circle-check" style="width:18px;height:18px;"></i>
-      Đăng ký tư vấn
-     </button>
-    </form>
-   </div>
-  </div>
+    <div class="section-header" style="margin-bottom:32px;">
+      <h2 class="section-title">Tư vấn <span class="section-title-accent">AI AutoMart</span></h2>
+      <p class="section-subtitle">Trợ lý thông minh giúp bạn tìm xe phù hợp trong vài giây</p>
+    </div>
 
- </div>
+    <div class="services-grid" style="margin-bottom:40px;">
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="shield-check" style="width:28px;height:28px;color:#fff;"></i></div>
+        <h3 class="service-title">Kiểm định xe</h3>
+        <p class="service-desc">Kiểm tra 150+ hạng mục, đảm bảo xe không lỗi ẩn trước khi mua</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="landmark" style="width:28px;height:28px;color:#fff;"></i></div>
+        <h3 class="service-title">Tư vấn vay vốn</h3>
+        <p class="service-desc">So sánh gói vay từ nhiều ngân hàng, chọn lãi suất tốt nhất</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="refresh-cw" style="width:28px;height:28px;color:#fff;"></i></div>
+        <h3 class="service-title">Định giá xe cũ</h3>
+        <p class="service-desc">Định giá chính xác để tính toán chi phí đổi xe mới</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon"><i data-lucide="wrench" style="width:28px;height:28px;color:#fff;"></i></div>
+        <h3 class="service-title">Tư vấn bảo hành</h3>
+        <p class="service-desc">Hướng dẫn chọn gói bảo hành phù hợp nhu cầu sử dụng</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start;" id="tuvanLayout">
+
+      <!-- Chat panel -->
+      <div>
+        <div class="search-box" style="padding:0;overflow:hidden;display:flex;flex-direction:column;height:clamp(540px,72vh,780px);">
+
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#1a1a1a;flex-shrink:0;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="width:36px;height:36px;border-radius:50%;background:#c8a96e;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i data-lucide="bot" style="width:20px;height:20px;color:#fff;"></i>
+              </div>
+              <div>
+                <div style="font-size:14px;font-weight:700;color:#fff;">AutoMart AI</div>
+                <div style="font-size:11px;color:#22c55e;display:flex;align-items:center;gap:5px;margin-top:1px;">
+                  <span style="width:7px;height:7px;border-radius:50%;background:#22c55e;display:inline-block;animation:tvPulse 1.5s infinite;"></span>
+                  Đang hoạt động
+                </div>
+              </div>
+            </div>
+            <button onclick="tvClearChat()" style="background:rgba(255,255,255,0.08);border:none;border-radius:7px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.6);" title="Xóa chat">
+              <i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i>
+            </button>
+          </div>
+
+          <div id="tvMessages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;background:#f8f8f5;scroll-behavior:smooth;"></div>
+
+          <div id="tvCarSlot" style="display:none;padding:10px 14px;background:#f3f2ee;border-top:1px solid #eaeae0;overflow-x:auto;flex-shrink:0;"></div>
+
+          <div id="tvChips" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px 0;flex-shrink:0;background:#fff;min-height:38px;"></div>
+
+          <div style="display:flex;gap:8px;align-items:flex-end;padding:12px 14px;background:#fff;border-top:1px solid #eaeae0;flex-shrink:0;">
+            <textarea id="tvInput" rows="1"
+              placeholder="Nhập câu hỏi của bạn..."
+              onkeydown="tvKeyDown(event)"
+              oninput="tvResize(this)"
+              style="flex:1;resize:none;border:1.5px solid #e2e2da;border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none;line-height:1.5;max-height:100px;overflow-y:auto;background:#fafaf8;transition:border-color 0.2s;"></textarea>
+            <button id="tvSendBtn" onclick="tvSend()"
+              style="width:42px;height:42px;background:#c8a96e;border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i data-lucide="send" style="width:18px;height:18px;color:#fff;"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Form panel -->
+      <div>
+        <div id="tvFormWrapper" class="search-box" style="display:none;position:sticky;top:88px;">
+          <h3 class="search-title">
+            <i data-lucide="user-round" style="width:20px;height:20px;"></i>
+            Đăng ký gặp tư vấn viên
+          </h3>
+          <p style="font-size:13px;color:#888880;margin-bottom:18px;margin-top:-8px;">
+            Để lại thông tin — nhân viên liên hệ trong 30 phút.
+          </p>
+          <form id="tvForm" onsubmit="tvFormSubmit(event)">
+            <div class="form-group" style="margin-bottom:12px;">
+              <label class="form-label">Họ tên *</label>
+              <input id="tvHoTen" name="ho_ten" type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label class="form-label">Số điện thoại *</label>
+              <input id="tvPhone" name="so_dien_thoai" type="tel" class="form-control" placeholder="0901 234 567" required>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label class="form-label">Chủ đề</label>
+              <select name="chu_de" class="form-control">
+                <option value="">Chọn chủ đề</option>
+                <option>Mua xe phù hợp ngân sách</option>
+                <option>Vay mua xe</option>
+                <option>Kiểm định xe trước khi mua</option>
+                <option>Đổi xe cũ lấy xe mới</option>
+                <option>Bảo hành & bảo hiểm</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label class="form-label">Thời gian liên hệ</label>
+              <select name="thoi_gian" class="form-control">
+                <option value="">Bất kỳ lúc nào</option>
+                <option>Sáng (8:00 - 12:00)</option>
+                <option>Chiều (12:00 - 17:00)</option>
+                <option>Tối (17:00 - 20:00)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:18px;">
+              <label class="form-label">Ghi chú</label>
+              <textarea name="mo_ta" class="form-control" rows="3" placeholder="Mô tả nhu cầu..."></textarea>
+            </div>
+            <div id="tvFormSuccess" style="display:none;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;font-size:13px;color:#166534;font-weight:500;margin-bottom:12px;">
+              <i data-lucide="circle-check" style="width:20px;height:20px;color:#22c55e;"></i>
+              Đăng ký thành công! Nhân viên sẽ liên hệ sớm.
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
+              Đăng ký tư vấn
+            </button>
+          </form>
+          <div style="display:flex;align-items:flex-start;gap:12px;margin-top:20px;padding:14px 16px;background:#faf8f3;border:1px solid #ede8d8;border-radius:10px;">
+            <i data-lucide="phone" style="width:18px;height:18px;color:#c8a96e;flex-shrink:0;margin-top:2px;"></i>
+            <div>
+              <div style="font-size:11px;color:#888880;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Hotline</div>
+              <div style="font-size:17px;font-weight:800;color:#c8a96e;">1900 1234</div>
+              <div style="font-size:11px;color:#a8a898;">Thứ 2 – CN, 8:00 – 20:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </section>
+
+<style>
+@keyframes tvPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.tv-bubble { display:flex; gap:8px; align-items:flex-end; animation:tvFade 0.22s ease; }
+.tv-bubble-bot { flex-direction:row; }
+.tv-bubble-user { flex-direction:row-reverse; }
+@keyframes tvFade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.tv-avatar { width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+.tv-avatar-bot { background:#c8a96e; }
+.tv-avatar-user { background:#e2e2da; }
+.tv-text { max-width:78%;padding:10px 14px;font-size:13.5px;line-height:1.6;box-shadow:0 1px 4px rgba(0,0,0,.07); }
+.tv-text-bot { background:#fff;color:#1a1a1a;border-radius:4px 14px 14px 14px; }
+.tv-text-user { background:#c8a96e;color:#fff;border-radius:14px 4px 14px 14px; }
+.tv-chip { border:1.5px solid #c8a96e;background:transparent;color:#c8a96e;border-radius:20px;padding:5px 13px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .18s; }
+.tv-chip:hover { background:#c8a96e;color:#fff; }
+.tv-dot { width:7px;height:7px;border-radius:50%;background:#c8a96e; }
+.tv-dot:nth-child(1){animation:tvPulse .8s 0s infinite}
+.tv-dot:nth-child(2){animation:tvPulse .8s .2s infinite}
+.tv-dot:nth-child(3){animation:tvPulse .8s .4s infinite}
+.tv-mini-card { background:#fff;border-radius:10px;border:1px solid #eaeae0;overflow:hidden;flex-shrink:0;width:180px;text-decoration:none;color:inherit;display:inline-block;transition:all .25s;vertical-align:top; }
+.tv-mini-card:hover { transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.1);border-color:#c8a96e; }
+.tv-mini-img { height:100px;background:#e0e0d8;overflow:hidden;position:relative; }
+.tv-mini-img img { width:100%;height:100%;object-fit:cover; }
+.tv-mini-body { padding:8px 10px; }
+.tv-mini-title { font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px; }
+.tv-mini-price { font-size:12px;font-weight:800;color:#c8722a;margin-bottom:4px; }
+.tv-mini-spec { font-size:10px;color:#a8a898; }
+.tv-mini-cta { display:block;text-align:center;background:#c8a96e;color:#fff;font-size:11px;font-weight:700;padding:5px;margin:6px 8px 8px;border-radius:5px;text-decoration:none; }
+@media(max-width:960px){
+  #tuvanLayout { grid-template-columns:1fr !important; }
+  #tvFormWrapper { position:static !important; }
+}
+</style>
 {% endblock %}
 
-{% block scripts %}
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<script>lucide.createIcons();</script>
+{% block extra_scripts %}
+<script src="/static/js/tv_agent.js"></script>
 {% endblock %}

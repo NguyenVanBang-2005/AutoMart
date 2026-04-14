@@ -42,7 +42,7 @@ SAMPLE_DANG_TIN = [
 ]
 
 
-def seed_dang_tin(session: Session, default_user_id: int = 1):
+def seed_dang_tin(session: Session, default_user_id: int = 8):
     existing = session.exec(select(DangTin)).first()
     if existing:
         return  # Đã có data, không seed lại
