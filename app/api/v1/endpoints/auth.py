@@ -51,10 +51,6 @@ def _get_or_create_user(session: Session, email: str, ho_ten: str) -> User:
         session.refresh(user)
     return user
 
-@router.get("/test")
-async def test_route():
-    return {"message": "Auth router is working!"}
-
 # ── Google ────────────────────────────────────────────
 @router.get("/google")
 async def google_login(request: Request):
@@ -129,3 +125,8 @@ async def twitter_login():
     # Twitter OAuth 2.0 cần thêm setup phức tạp hơn
     # Tạm thời redirect về trang chủ
     return RedirectResponse(url=FRONTEND)
+
+# Test route cho auth router
+@router.get("/test")
+async def test_auth_router():
+    return {"status": "ok", "message": "Auth router is working correctly!"}
