@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile, File
 from sqlmodel import Session, select
+from app.services.email_service import send_otp, verify_otp
 from app.core.database import get_session
 from app.core.security import (
     create_access_token, set_auth_cookie, delete_auth_cookie,
@@ -42,7 +43,32 @@ def get_user_or_401(request: Request, session: Session) -> object:
 # ══════════════════════════════════════════════════════════════
 # PUBLIC — không cần đăng nhập
 # ══════════════════════════════════════════════════════════════
+@public_router.post("/send-otp")
+async def send_otp_route(data: SendOTPRequest, session: Session = Depends(get_session)):
+    if find_user_by_email(session, data.email):
+        raise HTTPException(status_code=400, detail="Email đã được sử dụng")
+    ok = await send_otp(data.email)
+    if not ok:
+        raise HTTPException(status_code=500, detail="Gửi OTP thất bại, kiểm tra cấu hình Gmail")
+    return {"success": True, "message": "Đã gửi OTP"}
 
+@public_router.post("/register-otp", response_model=TokenOut, status_code=201)
+def register_otp_route(data: RegisterWithOTP, response: Response, session: Session = Depends(get_session)):
+    if not verify_otp(data.email, data.otp):
+        raise HTTPException(status_code=400, detail="OTP không hợp lệ hoặc đã hết hạn")
+    if find_user_by_email(session, data.email):
+        raise HTTPException(status_code=400, detail="Email đã được sử dụng")
+    # Convert sang UserRegister vì create_user chỉ nhận UserRegister
+    user_data = UserRegister(
+        ho_ten=data.ho_ten,
+        email=data.email,
+        so_dien_thoai=data.so_dien_thoai,
+        password=data.password
+    )
+    user = create_user(session, user_data)
+    token = create_access_token({"sub": str(user.id)})
+    set_auth_cookie(response, token)
+    return TokenOut(access_token=token, user=to_user_out(user))
 @public_router.post("/register", response_model=TokenOut, status_code=201)
 def register(data: UserRegister, response: Response, session: Session = Depends(get_session)):
     if find_user_by_email(session, data.email):
@@ -128,3 +154,4 @@ def get_my_dang_tin(request: Request, session: Session = Depends(get_session)):
         .order_by(DangTin.created_at.desc())
     ).all()
     return {"total": len(tins), "data": tins}
+

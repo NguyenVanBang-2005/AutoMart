@@ -178,8 +178,17 @@ async function handleSellSubmit(e) {
 
 // ── Modal Helpers ────────────────────────────────────
 function switchModal(fromId, toId) { closeModal(fromId); setTimeout(() => openModal(toId), 200); }
-function openModal(modalId)  { document.getElementById(modalId).classList.add('active'); }
-function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+function openModal(modalId) {
+    const el = document.getElementById(modalId);
+    if (!el) { console.warn(`Modal không tồn tại: ${modalId}`); return; }
+    el.classList.add('active');
+}
+
+function closeModal(modalId) {
+    const el = document.getElementById(modalId);
+    if (!el) return;
+    el.classList.remove('active');
+}
 function showFormError(elementId, message) {
   const el = document.getElementById(elementId);
   if (!el) return; el.textContent = message; el.style.display = 'block';

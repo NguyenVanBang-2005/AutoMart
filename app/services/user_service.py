@@ -1,5 +1,6 @@
 from sqlmodel import Session, select
 from typing import Optional
+from app.services.email_service import send_otp, verify_otp
 from app.models.user import User, UserRegister, UserUpdateProfile, UserChangePassword
 from app.core.security import hash_password, verify_password
 
