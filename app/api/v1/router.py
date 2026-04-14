@@ -12,7 +12,7 @@ api_router = APIRouter()
 api_router.include_router(cars.router,          tags=["Cars"])
 api_router.include_router(tin_tuc.router,       tags=["Tin tức"])
 api_router.include_router(uu_dai_thang.router,  tags=["Ưu đãi tháng"])
-api_router.include_router(auth.router,          tags=["Auth"])
+api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 api_router.include_router(public_router,        tags=["Users"])
 api_router.include_router(ai_chat.router,       tags=["AI"])
 
