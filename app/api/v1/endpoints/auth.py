@@ -52,28 +52,36 @@ def _get_or_create_user(session: Session, email: str, ho_ten: str) -> User:
     return user
 
 # ── Google ────────────────────────────────────────────
+# ── Google ────────────────────────────────────────────
 @router.get("/google")
 async def google_login(request: Request):
-    redirect_uri = str(request.url_for("google_callback"))
-    redirect_uri = redirect_uri.replace("http://", "https://")
+    # Lấy domain hiện tại một cách an toàn
+    scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
+    host = request.headers.get("host")
+
+    redirect_uri = f"{scheme}://{host}/auth/google/callback"
+
     print(f"=== REDIRECT URI: {redirect_uri} ===")
+
     return await oauth.google.authorize_redirect(request, redirect_uri)
+
 
 @router.get("/google/callback", name="google_callback")
 async def google_callback(
-    request: Request,
-    session: Session = Depends(get_session)
+        request: Request,
+        session: Session = Depends(get_session)
 ):
     try:
-        token     = await oauth.google.authorize_access_token(request)
+        token = await oauth.google.authorize_access_token(request)
         user_info = token.get("userinfo") or await oauth.google.userinfo(token=token)
-        email     = user_info["email"]
-        ho_ten    = user_info.get("name", email.split("@")[0])
+        email = user_info["email"]
+        ho_ten = user_info.get("name", email.split("@")[0])
 
-        user      = _get_or_create_user(session, email, ho_ten)
+        user = _get_or_create_user(session, email, ho_ten)
         jwt_token = create_access_token({"sub": str(user.id)})
 
-        response  = RedirectResponse(url=FRONTEND)
+        # Redirect về frontend (dùng FRONTEND_URL từ settings)
+        response = RedirectResponse(url=FRONTEND)
         set_auth_cookie(response, jwt_token)
         return response
 
