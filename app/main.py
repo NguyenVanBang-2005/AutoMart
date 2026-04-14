@@ -33,7 +33,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, lifespan=lifespan)
-app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 from starlette.middleware.sessions import SessionMiddleware
 app.add_middleware(
@@ -48,11 +47,14 @@ app.add_middleware(
         "http://127.0.0.1:8000",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://melodious-alignment-production-a406.up.railway.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
