@@ -61,6 +61,9 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 app.include_router(api_router)
 
+from app.api.v1.endpoints.auth import router as auth_router
+app.include_router(auth_router, prefix="/auth")
+
 def get_current_user_for_template(request: Request):
     try:
         token = request.cookies.get("automart_token")
