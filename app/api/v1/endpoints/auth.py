@@ -8,7 +8,7 @@ from app.core.database import get_session
 from app.core.security import create_access_token, set_auth_cookie
 from app.models.user import User
 
-router = APIRouter(prefix="/auth")
+router = APIRouter()
 
 # ── OAuth setup ───────────────────────────────────────
 _starlette_config = StarletteConfig(environ={
