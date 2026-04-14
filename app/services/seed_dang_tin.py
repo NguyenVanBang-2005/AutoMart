@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 from app.models.dang_tin import DangTin
-
+from app.models.user import User, UserRole
 
 SAMPLE_DANG_TIN = [
     {
@@ -42,13 +42,19 @@ SAMPLE_DANG_TIN = [
 ]
 
 
-def seed_dang_tin(session: Session, default_user_id: int = 8):
+def seed_dang_tin(session: Session):
     existing = session.exec(select(DangTin)).first()
     if existing:
-        return  # Đã có data, không seed lại
+        return
+
+    # Lấy user admin thay vì hardcode id=8
+    admin = session.exec(select(User).where(User.role == UserRole.admin)).first()
+    if not admin:
+        print("⚠️ Không có user admin nào, bỏ qua seed dang_tin")
+        return
 
     for item in SAMPLE_DANG_TIN:
-        tin = DangTin(user_id=default_user_id, **item)
+        tin = DangTin(user_id=admin.id, **item)
         session.add(tin)
     session.commit()
     print(f"✅ Đã seed {len(SAMPLE_DANG_TIN)} tin bán xe mẫu")
