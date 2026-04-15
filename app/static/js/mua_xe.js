@@ -91,35 +91,88 @@ function closeAddCarModal() {
   if (modal) modal.style.display = 'none';
 }
 
+// ==================== MODAL & UPLOAD ẢNH ====================
+function showAddCarModal() {
+  console.log("🔥 Mở modal thêm xe");
+  document.getElementById('addCarModal').style.display = 'flex';
+  document.getElementById('imagePreview').innerHTML = ''; // xóa preview cũ
+}
+
+function closeAddCarModal() {
+  document.getElementById('addCarModal').style.display = 'none';
+}
+
+// Preview ảnh
+function setupImagePreview() {
+  const input = document.getElementById('carImages');
+  const preview = document.getElementById('imagePreview');
+
+  if (!input) return;
+
+  input.addEventListener('change', function() {
+    preview.innerHTML = '';
+    const files = this.files;
+
+    if (files.length > 3) {
+      alert("Chỉ được chọn tối đa 3 ảnh!");
+      this.value = '';
+      return;
+    }
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:6px;border:1px solid #ddd;';
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+}
+
+// Xử lý submit form + upload ảnh
 async function handleAddCar(e) {
   e.preventDefault();
 
-  const payload = {
-    hang: document.getElementById('carHang').value.trim(),
-    dong: document.getElementById('carDong').value.trim(),
-    nam: parseInt(document.getElementById('carNam').value),
-    gia: parseInt(document.getElementById('carGia').value),
-    km: parseInt(document.getElementById('carKm').value) || 0,
-    loai: document.getElementById('carLoai').value
-  };
+  const formData = new FormData();
+
+  // Thêm dữ liệu text
+  formData.append('hang', document.getElementById('carHang').value.trim());
+  formData.append('dong', document.getElementById('carDong').value.trim());
+  formData.append('nam', document.getElementById('carNam').value);
+  formData.append('gia', document.getElementById('carGia').value);
+  formData.append('km', document.getElementById('carKm').value || 0);
+  formData.append('loai', document.getElementById('carLoai').value);
+
+  // Thêm ảnh
+  const imageInput = document.getElementById('carImages');
+  if (imageInput && imageInput.files.length > 0) {
+    for (let file of imageInput.files) {
+      formData.append('images', file);
+    }
+  }
 
   try {
     const res = await fetch('/api/cars', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: formData
+      // Không cần headers 'Content-Type' khi dùng FormData
     });
 
     if (res.ok) {
       alert('Thêm xe thành công!');
       closeAddCarModal();
       document.getElementById('addCarForm').reset();
+      document.getElementById('imagePreview').innerHTML = '';
       loadCars();
     } else {
       const err = await res.json();
       alert(err.detail || 'Thêm xe thất bại');
     }
   } catch (err) {
+    console.error(err);
     alert('Lỗi kết nối server');
   }
 }
