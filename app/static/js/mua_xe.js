@@ -157,7 +157,7 @@ async function handleAddCar(e) {
   try {
     console.log("Đang gửi dữ liệu lên /cars ...");
 
-    const res = await fetch('/cars', {        // ← SỬA Ở ĐÂY: /cars thay vì /api/cars
+    const res = await fetch('api/v1/cars', {
       method: 'POST',
       body: formData
     });
