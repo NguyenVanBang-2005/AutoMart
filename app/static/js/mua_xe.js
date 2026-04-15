@@ -28,7 +28,11 @@ function renderCars(cars) {
     const card = document.createElement('div');
     card.className = 'car-card';
     card.innerHTML = `
-      <div class="car-image" style="background-image:url('${car.anh || '/static/images/placeholder-car.jpg'}')"></div>
+      <div class="car-image">
+        <img src="${car.anh || '/static/images/placeholder-car.jpg'}" 
+             alt="${car.hang} ${car.dong}"
+             onerror="this.src='/static/images/placeholder-car.jpg'">
+      </div>
       <div class="car-body">
         <h3 class="car-title">${car.hang} ${car.dong}</h3>
         <p class="car-price">${Number(car.gia).toLocaleString('vi-VN')} triệu</p>
@@ -37,7 +41,7 @@ function renderCars(cars) {
           <span>${Number(car.km || 0).toLocaleString('vi-VN')} km</span>
           <span>${car.loai}</span>
         </div>
-        <button class="btn btn-primary" style="width:100%;margin-top:12px;" onclick="viewCar(${car.id})">Xem chi tiết</button>
+        <button class="btn btn-primary" onclick="viewCar(${car.id})">Xem chi tiết</button>
       </div>
     `;
     grid.appendChild(card);
