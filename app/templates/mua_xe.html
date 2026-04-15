@@ -5,86 +5,84 @@
 {% block content %}
 <section class="section" id="cars">
  <div class="container">
-  <div class="section-header">
-   <h2 class="section-title">Tìm xe của bạn</h2>
-   <p class="section-subtitle">Hàng nghìn xe chất lượng, giá tốt nhất thị trường</p>
+  <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+   <div>
+    <h2 class="section-title">Tìm xe của bạn</h2>
+    <p class="section-subtitle">Hàng nghìn xe chất lượng, giá tốt nhất thị trường</p>
+   </div>
+
+   <!-- Nút Thêm xe - chỉ hiện với Admin & Staff -->
+   {% if current_user and current_user.role and (current_user.role.value in ['admin', 'staff'] or current_user.role in ['admin', 'staff']) %}
+   <button onclick="showAddCarModal()"
+           class="btn btn-primary"
+           style="padding:10px 24px; font-size:15px; display:flex; align-items:center; gap:8px;">
+     <i data-lucide="plus-circle" style="width:20px;height:20px;"></i>
+     Thêm xe mới
+   </button>
+   {% endif %}
   </div>
 
-  <!-- Bộ lọc + Nút Thêm xe -->
-  <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 40px;">
-
-    <!-- Form Lọc xe (giữ nguyên như cũ) -->
-    <div class="search-box" style="flex: 1;">
-     <h3 class="search-title"><span class="icon-search"></span> Lọc xe</h3>
-     <form id="searchForm" onsubmit="handleSearch(event)">
-      <div class="search-grid">
-       <div class="form-group">
-        <label class="form-label">Hãng xe</label>
-        <select class="form-control" id="brandSelect">
-         <option value="">Tất cả hãng xe</option>
-         <option value="Toyota">Toyota</option>
-         <option value="Honda">Honda</option>
-         <option value="Mazda">Mazda</option>
-         <option value="Hyundai">Hyundai</option>
-         <option value="Kia">Kia</option>
-         <option value="Ford">Ford</option>
-         <option value="Mercedes">Mercedes</option>
-         <option value="BMW">BMW</option>
-         <option value="Vinfast">Vinfast</option>
-        </select>
-       </div>
-       <div class="form-group">
-        <label class="form-label">Khoảng giá</label>
-        <select class="form-control" id="priceSelect">
-         <option value="">Tất cả mức giá</option>
-         <option value="0-300">Dưới 300 triệu</option>
-         <option value="300-500">300 - 500 triệu</option>
-         <option value="500-800">500 - 800 triệu</option>
-         <option value="800-1000">800 triệu - 1 tỷ</option>
-         <option value="1000+">Trên 1 tỷ</option>
-        </select>
-       </div>
-       <div class="form-group">
-        <label class="form-label">Năm sản xuất</label>
-        <select class="form-control" id="yearSelect">
-         <option value="">Tất cả năm</option>
-         <option value="2024">2024</option>
-         <option value="2023">2023</option>
-         <option value="2022">2022</option>
-         <option value="2021">2021</option>
-         <option value="2020">2020</option>
-         <option value="before2018">Trước 2018</option>
-        </select>
-       </div>
-       <div class="form-group">
-        <label class="form-label">Loại xe</label>
-        <select class="form-control" id="typeSelect">
-         <option value="">Tất cả loại xe</option>
-         <option value="Sedan">Sedan</option>
-         <option value="SUV">SUV / CUV</option>
-         <option value="Hatchback">Hatchback</option>
-         <option value="Pickup">Pickup</option>
-         <option value="MPV">MPV</option>
-        </select>
-       </div>
-       <div class="form-group form-group-full">
-        <button type="submit" class="btn btn-primary" style="width: 100%;">
-         <span class="icon-search"></span> Tìm kiếm xe
-        </button>
-       </div>
-      </div>
-     </form>
+  <!-- Bộ lọc -->
+  <div class="search-box" style="margin-bottom: 40px;">
+   <h3 class="search-title"><span class="icon-search"></span> Lọc xe</h3>
+   <form id="searchForm" onsubmit="handleSearch(event)">
+    <div class="search-grid">
+     <div class="form-group">
+      <label class="form-label">Hãng xe</label>
+      <select class="form-control" id="brandSelect">
+       <option value="">Tất cả hãng xe</option>
+       <option value="Toyota">Toyota</option>
+       <option value="Honda">Honda</option>
+       <option value="Mazda">Mazda</option>
+       <option value="Hyundai">Hyundai</option>
+       <option value="Kia">Kia</option>
+       <option value="Ford">Ford</option>
+       <option value="Mercedes">Mercedes</option>
+       <option value="BMW">BMW</option>
+       <option value="Vinfast">Vinfast</option>
+      </select>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Khoảng giá</label>
+      <select class="form-control" id="priceSelect">
+       <option value="">Tất cả mức giá</option>
+       <option value="0-300">Dưới 300 triệu</option>
+       <option value="300-500">300 - 500 triệu</option>
+       <option value="500-800">500 - 800 triệu</option>
+       <option value="800-1000">800 triệu - 1 tỷ</option>
+       <option value="1000+">Trên 1 tỷ</option>
+      </select>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Năm sản xuất</label>
+      <select class="form-control" id="yearSelect">
+       <option value="">Tất cả năm</option>
+       <option value="2024">2024</option>
+       <option value="2023">2023</option>
+       <option value="2022">2022</option>
+       <option value="2021">2021</option>
+       <option value="2020">2020</option>
+       <option value="before2018">Trước 2018</option>
+      </select>
+     </div>
+     <div class="form-group">
+      <label class="form-label">Loại xe</label>
+      <select class="form-control" id="typeSelect">
+       <option value="">Tất cả loại xe</option>
+       <option value="Sedan">Sedan</option>
+       <option value="SUV">SUV / CUV</option>
+       <option value="Hatchback">Hatchback</option>
+       <option value="Pickup">Pickup</option>
+       <option value="MPV">MPV</option>
+      </select>
+     </div>
+     <div class="form-group form-group-full">
+      <button type="submit" class="btn btn-primary" style="width: 100%;">
+       <span class="icon-search"></span> Tìm kiếm xe
+      </button>
+     </div>
     </div>
-
-    <!-- Nút Thêm xe (nằm riêng bên phải form lọc) -->
-    {% if current_user and current_user.role and (current_user.role.value in ['admin', 'staff'] or current_user.role in ['admin', 'staff']) %}
-    <button onclick="showAddCarModal()"
-            class="btn btn-primary"
-            style="padding:12px 28px; font-size:15px; height: fit-content; margin-top: 32px; display:flex; align-items:center; gap:8px; white-space:nowrap;">
-      <i data-lucide="plus-circle" style="width:20px;height:20px;"></i>
-      Thêm xe mới
-    </button>
-    {% endif %}
+   </form>
   </div>
 
   <!-- Danh sách xe -->

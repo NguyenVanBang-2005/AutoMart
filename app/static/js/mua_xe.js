@@ -81,13 +81,15 @@ function loadMoreCars() {
   alert("Chức năng xem thêm xe sẽ được phát triển sau.");
 }
 
-// Modal functions
+// ====================== MODAL THÊM XE ======================
 function showAddCarModal() {
-  document.getElementById('addCarModal').style.display = 'flex';
+  const modal = document.getElementById('addCarModal');
+  if (modal) modal.style.display = 'flex';
 }
 
 function closeAddCarModal() {
-  document.getElementById('addCarModal').style.display = 'none';
+  const modal = document.getElementById('addCarModal');
+  if (modal) modal.style.display = 'none';
 }
 
 async function handleAddCar(e) {
