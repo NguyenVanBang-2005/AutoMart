@@ -520,7 +520,7 @@ async function regGoStep3() {
   if (pw !== pw2)    { errEl.textContent = 'Mật khẩu xác nhận không khớp!';      errEl.style.display = 'block'; return; }
   errEl.style.display = 'none'; _regData.password = pw;
   try {
-    const res    = await fetch(`${API_BASE}/users/send-otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: _regData.email }) });
+    const res    = await fetch(`${API_BASE}/user/send-otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: _regData.email }) });
     const result = await res.json();
     if (!res.ok) { errEl.textContent = result.detail || 'Gửi OTP thất bại!'; errEl.style.display = 'block'; return; }
     regShowStep(3); initOTPBoxes(); showToast(`Đã gửi OTP đến ${_regData.email}`);
