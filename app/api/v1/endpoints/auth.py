@@ -54,13 +54,10 @@ def _get_or_create_user(session: Session, email: str, ho_ten: str) -> User:
 # ── Google ────────────────────────────────────────────
 @router.get("/google")
 async def google_login(request: Request):
-    # Lấy domain hiện tại một cách đáng tin cậy
-    scheme = request.headers.get("x-forwarded-proto", "https")
-    host = request.headers.get("host")
+    # Hardcode redirect_uri để test (dùng domain Render)
+    redirect_uri = "https://automart-ri4m.onrender.com/api/v1/auth/google/callback"
 
-    redirect_uri = f"{scheme}://{host}/auth/google/callback"
-
-    print(f"=== REDIRECT URI: {redirect_uri} ===")  # Quan trọng để debug
+    print(f"=== HARD CODED REDIRECT URI: {redirect_uri} ===")
 
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
@@ -71,21 +68,36 @@ async def google_callback(
         session: Session = Depends(get_session)
 ):
     try:
+        # Lấy token từ Google
         token = await oauth.google.authorize_access_token(request)
-        user_info = token.get("userinfo") or await oauth.google.userinfo(token=token)
-        email = user_info["email"]
-        ho_ten = user_info.get("name", email.split("@")[0])
 
+        # Lấy thông tin user (cách an toàn hơn)
+        user_info = token.get("userinfo")
+        if not user_info:
+            user_info = await oauth.google.userinfo(token=token)
+
+        email = user_info.get("email")
+        if not email:
+            raise ValueError("No email returned from Google")
+
+        ho_ten = user_info.get("name") or email.split("@")[0]
+
+        # Tạo hoặc lấy user
         user = _get_or_create_user(session, email, ho_ten)
+
+        # Tạo JWT token
         jwt_token = create_access_token({"sub": str(user.id)})
 
+        # Redirect về frontend
         response = RedirectResponse(url=FRONTEND)
         set_auth_cookie(response, jwt_token)
+
         return response
 
     except Exception as e:
-        print(f"Google OAuth error: {e}")
-        return RedirectResponse(url=f"{FRONTEND}?error=google_login_failed")
+        print(f"Google OAuth error: {type(e).__name__}: {e}")
+        # Trả về lỗi rõ ràng hơn để debug
+        return RedirectResponse(url=f"{FRONTEND}?error=google_login_failed&detail={str(e)}")
 
 # ── Facebook ──────────────────────────────────────────
 @router.get("/facebook")
