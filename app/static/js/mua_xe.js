@@ -132,6 +132,20 @@ window.handleAddCar = async function(e) {
   }
 };
 
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("✅ mua_xe.js loaded successfully");
+
+  const addBtn = document.getElementById('btnAddCar');
+  if (addBtn) {
+    addBtn.addEventListener('click', showAddCarModal);
+    console.log("✅ Đã gắn event cho nút Thêm xe");
+  } else {
+    console.warn("Không tìm thấy nút #btnAddCar");
+  }
+
+  loadCars();
+});
+
 // Khởi tạo
 document.addEventListener('DOMContentLoaded', () => {
   console.log("✅ mua_xe.js loaded successfully");
