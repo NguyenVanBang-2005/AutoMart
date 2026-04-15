@@ -101,13 +101,15 @@
 
 <!-- Modal Thêm Xe -->
 <div class="modal" id="addCarModal" style="display: none;">
-  <div class="modal-content" style="max-width:520px;">
+  <div class="modal-content" style="max-width:560px;">
     <div class="modal-header">
       <h3 class="modal-title">Thêm xe mới</h3>
       <button class="modal-close" onclick="closeAddCarModal()">×</button>
     </div>
     <div class="modal-body">
       <form id="addCarForm" onsubmit="handleAddCar(event)">
+
+        <!-- Các trường thông tin xe cũ -->
         <div class="form-group">
           <label class="form-label">Hãng xe *</label>
           <input type="text" id="carHang" class="form-control" required>
@@ -140,6 +142,17 @@
             <option value="Coupe">Coupe</option>
           </select>
         </div>
+
+        <!-- Phần upload ảnh xe (mới thêm) -->
+        <div class="form-group">
+          <label class="form-label">Ảnh xe (tối đa 3 ảnh)</label>
+          <input type="file" id="carImages" class="form-control" accept="image/*" multiple>
+          <small style="color:#666; display:block; margin-top:4px;">
+            Chọn tối đa 3 ảnh (jpg, png, webp)
+          </small>
+          <div id="imagePreview" style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;"></div>
+        </div>
+
         <div class="form-group">
           <button type="submit" class="btn btn-primary" style="width:100%;">
             <i data-lucide="plus"></i> Thêm xe vào hệ thống

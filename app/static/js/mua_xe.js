@@ -1,5 +1,3 @@
-// mua_xe.js - Phiên bản ổn định nhất
-
 console.log("✅ mua_xe.js loaded successfully");
 
 // ==================== LOAD & RENDER ====================
