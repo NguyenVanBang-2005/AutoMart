@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
+from pydantic import Field
 
 load_dotenv()
 
@@ -20,7 +21,10 @@ class Settings(BaseSettings):
     SECRET_KEY: str = ""
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    FRONTEND_URL: str = "http://localhost:3000"
+    FRONTEND_URL: str = Field(
+        default="http://localhost:8000",
+        env="FRONTEND_URL"
+    )
     ENVIRONMENT: str = "development"
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""
