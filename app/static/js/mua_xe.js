@@ -1,4 +1,6 @@
-// mua_xe.js - Đã sửa lỗi showAddCarModal is not defined
+// mua_xe.js - Fix ReferenceError showAddCarModal
+
+console.log("✅ mua_xe.js bắt đầu load...");
 
 let allCars = [];
 
@@ -8,7 +10,7 @@ async function loadCars() {
     const res = await fetch('/api/cars');
     if (res.ok) {
       const data = await res.json();
-      allCars = data.cars || data;
+      allCars = Array.isArray(data) ? data : (data.cars || []);
       renderCars(allCars);
     }
   } catch (e) {
@@ -21,7 +23,7 @@ function renderCars(cars) {
   if (!grid) return;
   grid.innerHTML = '';
 
-  if (cars.length === 0) {
+  if (!cars || cars.length === 0) {
     grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#888;">Không tìm thấy xe phù hợp.</p>';
     return;
   }
@@ -48,6 +50,7 @@ function renderCars(cars) {
 
 function handleSearch(e) {
   e.preventDefault();
+  // ... (giữ nguyên code cũ của bạn)
   const brand = document.getElementById('brandSelect').value;
   const priceRange = document.getElementById('priceSelect').value;
   const year = document.getElementById('yearSelect').value;
@@ -82,21 +85,22 @@ function loadMoreCars() {
 }
 
 // ====================== MODAL THÊM XE ======================
-function showAddCarModal() {
+window.showAddCarModal = function() {
+  console.log("showAddCarModal được gọi từ onclick");
   const modal = document.getElementById('addCarModal');
   if (modal) {
     modal.style.display = 'flex';
   } else {
     console.error("Không tìm thấy modal #addCarModal");
   }
-}
+};
 
-function closeAddCarModal() {
+window.closeAddCarModal = function() {
   const modal = document.getElementById('addCarModal');
   if (modal) modal.style.display = 'none';
-}
+};
 
-async function handleAddCar(e) {
+window.handleAddCar = async function(e) {
   e.preventDefault();
 
   const payload = {
@@ -117,7 +121,7 @@ async function handleAddCar(e) {
 
     if (res.ok) {
       alert('Thêm xe thành công!');
-      closeAddCarModal();
+      window.closeAddCarModal();
       document.getElementById('addCarForm').reset();
       loadCars();
     } else {
@@ -127,10 +131,10 @@ async function handleAddCar(e) {
   } catch (err) {
     alert('Lỗi kết nối server');
   }
-}
+};
 
-// Khởi tạo khi trang load
+// Khởi tạo
 document.addEventListener('DOMContentLoaded', () => {
-  console.log("mua_xe.js loaded successfully");
+  console.log("✅ mua_xe.js loaded successfully");
   loadCars();
 });
