@@ -1,10 +1,10 @@
-// mua_xe.js - Phiên bản cuối cùng, tập trung fix ReferenceError
+// mua_xe.js - Phiên bản ổn định nhất
 
-console.log("✅ mua_xe.js bắt đầu load...");
+console.log("✅ mua_xe.js loaded successfully");
 
 let allCars = [];
 
-// ==================== LOAD & RENDER CARS ====================
+// ==================== LOAD & RENDER ====================
 async function loadCars() {
   try {
     const res = await fetch('/api/cars');
@@ -48,7 +48,6 @@ function renderCars(cars) {
   });
 }
 
-// ==================== SEARCH ====================
 function handleSearch(e) {
   e.preventDefault();
   const brand = document.getElementById('brandSelect').value;
@@ -89,7 +88,6 @@ function showAddCarModal() {
   console.log("🔥 showAddCarModal được gọi");
   const modal = document.getElementById('addCarModal');
   if (modal) modal.style.display = 'flex';
-  else console.error("❌ Không tìm thấy modal #addCarModal");
 }
 
 function closeAddCarModal() {
@@ -130,7 +128,7 @@ async function handleAddCar(e) {
   }
 }
 
-// ==================== KHỞI TẠO ====================
+// ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
   console.log("✅ mua_xe.js loaded successfully");
 
@@ -138,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const addBtn = document.getElementById('btnAddCar');
   if (addBtn) {
     addBtn.addEventListener('click', showAddCarModal);
-    console.log("✅ Đã gắn event click cho nút Thêm xe");
+    console.log("✅ Đã gắn sự kiện click cho nút Thêm xe");
   } else {
     console.warn("⚠️ Không tìm thấy nút #btnAddCar");
   }
