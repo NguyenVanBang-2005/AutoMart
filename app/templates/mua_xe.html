@@ -13,16 +13,16 @@
 
    <!-- Nút Thêm xe - chỉ hiện với Admin & Staff -->
    {% if current_user and current_user.role %}
-     {% if current_user.role == 'admin' or current_user.role == 'staff' or
-           (current_user.role.value == 'admin' if hasattr(current_user.role, 'value') else False) %}
-     <button onclick="showAddCarModal()"
-             class="btn btn-primary"
-             style="padding:10px 24px; font-size:15px; display:flex; align-items:center; gap:8px;">
-       <i data-lucide="plus-circle" style="width:20px;height:20px;"></i>
-       Thêm xe mới
-     </button>
-     {% endif %}
-   {% endif %}
+    {% set role_str = current_user.role.value if hasattr(current_user.role, 'value') else current_user.role %}
+    {% if role_str in ['admin', 'staff'] %}
+    <button onclick="showAddCarModal()"
+            class="btn btn-primary"
+            style="padding:10px 24px; font-size:15px; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="plus-circle" style="width:20px;height:20px;"></i>
+      Thêm xe mới
+    </button>
+    {% endif %}
+  {% endif %}
   </div>
 
   <!-- Bộ lọc -->
