@@ -1,4 +1,4 @@
-// mua_xe.js - Fix ReferenceError showAddCarModal
+// mua_xe.js - Fix hoàn chỉnh ReferenceError showAddCarModal
 
 console.log("✅ mua_xe.js bắt đầu load...");
 
@@ -50,7 +50,6 @@ function renderCars(cars) {
 
 function handleSearch(e) {
   e.preventDefault();
-  // ... (giữ nguyên code cũ của bạn)
   const brand = document.getElementById('brandSelect').value;
   const priceRange = document.getElementById('priceSelect').value;
   const year = document.getElementById('yearSelect').value;
@@ -86,12 +85,12 @@ function loadMoreCars() {
 
 // ====================== MODAL THÊM XE ======================
 window.showAddCarModal = function() {
-  console.log("showAddCarModal được gọi từ onclick");
+  console.log("🔥 showAddCarModal được gọi thành công từ onclick");
   const modal = document.getElementById('addCarModal');
   if (modal) {
     modal.style.display = 'flex';
   } else {
-    console.error("Không tìm thấy modal #addCarModal");
+    console.error("❌ Không tìm thấy modal #addCarModal");
   }
 };
 
