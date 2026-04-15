@@ -3,7 +3,7 @@ console.log("✅ mua_xe.js loaded successfully");
 // ==================== LOAD & RENDER ====================
 async function loadCars() {
   try {
-    const res = await fetch('/api/cars');
+    const res = await fetch('/api/v1/cars');
     if (res.ok) {
       const data = await res.json();
       allCars = Array.isArray(data) ? data : (data.cars || []);
