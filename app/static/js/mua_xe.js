@@ -1,4 +1,4 @@
-// mua_xe.js
+// mua_xe.js - Đã sửa lỗi showAddCarModal is not defined
 
 let allCars = [];
 
@@ -84,7 +84,11 @@ function loadMoreCars() {
 // ====================== MODAL THÊM XE ======================
 function showAddCarModal() {
   const modal = document.getElementById('addCarModal');
-  if (modal) modal.style.display = 'flex';
+  if (modal) {
+    modal.style.display = 'flex';
+  } else {
+    console.error("Không tìm thấy modal #addCarModal");
+  }
 }
 
 function closeAddCarModal() {
@@ -125,5 +129,8 @@ async function handleAddCar(e) {
   }
 }
 
-// Khởi tạo
-document.addEventListener('DOMContentLoaded', loadCars);
+// Khởi tạo khi trang load
+document.addEventListener('DOMContentLoaded', () => {
+  console.log("mua_xe.js loaded successfully");
+  loadCars();
+});
