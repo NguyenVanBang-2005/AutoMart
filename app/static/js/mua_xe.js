@@ -2,8 +2,6 @@
 
 console.log("✅ mua_xe.js loaded successfully");
 
-let allCars = [];
-
 // ==================== LOAD & RENDER ====================
 async function loadCars() {
   try {
