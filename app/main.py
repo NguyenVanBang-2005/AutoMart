@@ -64,16 +64,26 @@ app.include_router(api_router)
 from app.api.v1.endpoints.auth import router as auth_router
 app.include_router(auth_router, prefix="/auth")
 
+
 def get_current_user_for_template(request: Request):
     try:
         token = request.cookies.get("automart_token")
         print(f"=== COOKIE TOKEN: {'EXISTS' if token else 'MISSING'} ===")
+
+        if not token:
+            return None
+
         with Session(engine) as session:
-            user = get_current_user_from_cookie(request, session)
-            print(f"=== USER: {user} ===")
+            from app.services.user_service import find_user_by_id
+            # Giả sử decode_token đã có trong security
+            from app.core.security import decode_token
+            payload = decode_token(token)
+            user_id = int(payload.get("sub"))
+            user = find_user_by_id(session, user_id)
+            print(f"=== USER FOUND: {user} | Role: {user.role if user else None} ===")
             return user
     except Exception as e:
-        print(f"=== ERROR: {e} ===")
+        print(f"=== ERROR getting current_user: {e} ===")
         return None
 
 # ── Frontend routes ───────────────────────────────────

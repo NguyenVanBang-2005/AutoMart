@@ -886,3 +886,49 @@ textarea.form-control { resize: vertical; }
   border-radius: 2px;
   padding: 0 1px;
 }
+
+/* ══════════════════════════════════════════════════
+   BACK TO TOP BUTTON
+   ══════════════════════════════════════════════════ */
+#backToTopBtn {
+  position: fixed;
+  bottom: 28px;
+  right: 24px;
+  z-index: 999;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(200,169,110,0.5);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+}
+
+#backToTopBtn.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+#backToTopBtn:hover {
+  background: var(--accent-dark);
+  transform: scale(1.1);
+}
+
+/* Responsive cho nút về đầu trang */
+@media (max-width: 768px) {
+  #backToTopBtn {
+    bottom: 20px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+  }
+}
