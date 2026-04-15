@@ -138,7 +138,7 @@ async function handleAddCar(e) {
 
   const formData = new FormData();
 
-  // Thêm dữ liệu text
+  // Thông tin xe
   formData.append('hang', document.getElementById('carHang').value.trim());
   formData.append('dong', document.getElementById('carDong').value.trim());
   formData.append('nam', document.getElementById('carNam').value);
@@ -146,34 +146,36 @@ async function handleAddCar(e) {
   formData.append('km', document.getElementById('carKm').value || 0);
   formData.append('loai', document.getElementById('carLoai').value);
 
-  // Thêm ảnh
+  // Ảnh xe
   const imageInput = document.getElementById('carImages');
   if (imageInput && imageInput.files.length > 0) {
     for (let file of imageInput.files) {
-      formData.append('images', file);
+      formData.append('images', file);   // tên phải là 'images' để khớp backend
     }
   }
 
   try {
-    const res = await fetch('/api/cars', {
+    console.log("Đang gửi dữ liệu lên /cars ...");
+
+    const res = await fetch('/cars', {        // ← SỬA Ở ĐÂY: /cars thay vì /api/cars
       method: 'POST',
       body: formData
-      // Không cần headers 'Content-Type' khi dùng FormData
     });
 
+    const result = await res.json();
+
     if (res.ok) {
-      alert('Thêm xe thành công!');
+      alert('✅ Thêm xe thành công! ID: ' + result.car_id);
       closeAddCarModal();
       document.getElementById('addCarForm').reset();
       document.getElementById('imagePreview').innerHTML = '';
-      loadCars();
+      loadCars();                    // reload danh sách xe
     } else {
-      const err = await res.json();
-      alert(err.detail || 'Thêm xe thất bại');
+      alert(result.detail || 'Thêm xe thất bại');
     }
   } catch (err) {
     console.error(err);
-    alert('Lỗi kết nối server');
+    alert('❌ Lỗi kết nối server');
   }
 }
 
