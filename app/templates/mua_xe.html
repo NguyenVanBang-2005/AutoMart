@@ -14,6 +14,7 @@
    <!-- Nút Thêm xe - chỉ hiện với Admin & Staff -->
    {% if current_user and current_user.role %}
     {% set role_str = current_user.role.value if hasattr(current_user.role, 'value') else current_user.role %}
+
     {% if role_str in ['admin', 'staff'] %}
     <button onclick="showAddCarModal()"
             class="btn btn-primary"
