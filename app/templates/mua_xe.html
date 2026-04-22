@@ -3,6 +3,9 @@
 {% block title %}AutoMart - Mua Xe{% endblock %}
 
 {% block content %}
+<div id="pageData"
+     data-is-admin="{{ 'true' if current_user and (current_user.role == 'admin' or current_user.role.value == 'admin') else 'false' }}"
+     style="display:none;"></div>
 <section class="section" id="cars">
  <div class="container">
   <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
@@ -159,6 +162,88 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Ưu Đãi — chỉ admin dùng -->
+<div id="modalUuDai"
+     style="display:none;position:fixed;inset:0;z-index:1000;
+            background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);
+            align-items:center;justify-content:center;padding:20px;"
+     onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#fff;border-radius:20px;width:100%;max-width:420px;
+              padding:28px;box-shadow:0 24px 64px rgba(0,0,0,0.2);">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;">
+        <i data-lucide="tag" style="width:18px;height:18px;color:var(--accent-primary);"></i>
+        Thêm ưu đãi
+      </div>
+      <button onclick="document.getElementById('modalUuDai').style.display='none'"
+              style="background:none;border:none;cursor:pointer;font-size:20px;color:#888;line-height:1;">✕</button>
+    </div>
+
+    <!-- Preview xe đang chọn -->
+    <div id="modalXeInfo"
+         style="background:#f8f8f6;border-radius:10px;padding:12px;
+                display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <img id="modalXeAnh" src="" alt=""
+           style="width:64px;height:48px;object-fit:cover;border-radius:8px;display:none;">
+      <div>
+        <div id="modalXeTen" style="font-size:13px;font-weight:700;"></div>
+        <div id="modalXeGiaGoc" style="font-size:12px;color:#888;"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:6px;">% Giảm giá *</label>
+        <input type="number" id="modalPct" class="form-control"
+               min="1" max="99" placeholder="VD: 15"
+               oninput="previewModalGia()"
+               style="padding:10px 14px;font-size:14px;font-weight:600;">
+      </div>
+
+      <!-- Preview giá realtime -->
+      <div id="modalPricePreview"
+           style="display:none;flex-direction:column;gap:4px;
+                  background:#fffbf0;border-radius:10px;padding:12px;">
+        <div style="font-size:11px;color:#888;">Giá sau ưu đãi</div>
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <span id="modalGiaKM"
+                style="font-size:20px;font-weight:800;color:var(--accent-primary);"></span>
+          <span id="modalGiaGocLabel"
+                style="font-size:12px;color:#aaa;text-decoration:line-through;"></span>
+        </div>
+        <span id="modalTietKiem"
+              style="font-size:11px;color:#fff;background:#e03030;border-radius:4px;
+                     padding:2px 8px;width:fit-content;font-weight:700;"></span>
+      </div>
+
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:6px;">Ưu đãi theo tháng *</label>
+        <select id="modalThang" class="form-control" style="padding:10px 14px;font-size:13px;"></select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <label style="font-size:12px;color:#666;display:block;margin-bottom:6px;">Ngày bắt đầu *</label>
+          <input type="date" id="modalStart" class="form-control" style="padding:10px;font-size:13px;">
+        </div>
+        <div>
+          <label style="font-size:12px;color:#666;display:block;margin-bottom:6px;">Ngày kết thúc *</label>
+          <input type="date" id="modalEnd" class="form-control" style="padding:10px;font-size:13px;">
+        </div>
+      </div>
+
+      <button onclick="submitUuDai()"
+              style="width:100%;padding:12px;background:var(--accent-primary);color:#fff;
+                     border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;
+                     display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i data-lucide="save" style="width:16px;height:16px;"></i>
+        Lưu ưu đãi
+      </button>
     </div>
   </div>
 </div>

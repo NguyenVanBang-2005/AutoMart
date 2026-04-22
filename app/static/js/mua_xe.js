@@ -15,7 +15,7 @@ async function loadCars() {
 }
 
 function renderCars(cars) {
-  const grid = document.getElementById('carGrid');
+  var grid = document.getElementById('carGrid');
   if (!grid) return;
   grid.innerHTML = '';
 
@@ -24,28 +24,41 @@ function renderCars(cars) {
     return;
   }
 
-  cars.forEach(car => {
-    const card = document.createElement('div');
+  cars.forEach(function(car) {
+    var card = document.createElement('div');
     card.className = 'car-card';
-    card.innerHTML = `
-      <div class="car-image">
-        <img src="${car.anh || '/static/images/placeholder-car.jpg'}" 
-             alt="${car.hang} ${car.dong}"
-             onerror="this.src='/static/images/placeholder-car.jpg'">
-      </div>
-      <div class="car-body">
-        <h3 class="car-title">${car.hang} ${car.dong}</h3>
-        <p class="car-price">${Number(car.gia).toLocaleString('vi-VN')} triệu</p>
-        <div class="car-specs">
-          <span>${car.nam}</span>
-          <span>${Number(car.km || 0).toLocaleString('vi-VN')} km</span>
-          <span>${car.loai}</span>
-        </div>
-        <button class="btn btn-primary" onclick="viewCar(${car.id})">Xem chi tiết</button>
-      </div>
-    `;
+
+    var adminBtn = isAdmin
+      ? '<button onclick="openUuDaiModal(' + car.id + ', \'' + (car.hang + ' ' + car.dong).replace(/'/g, '') + '\', ' + car.gia + ', \'' + (car.anh || '') + '\')" '
+        + 'style="width:100%;margin-top:8px;padding:8px;background:#fffbf0;color:#92400e;'
+        + 'border:1.5px dashed #f0d080;border-radius:8px;font-size:12px;font-weight:600;'
+        + 'cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">'
+        + '<i data-lucide="tag" style="width:13px;height:13px;"></i> Thêm ưu đãi'
+        + '</button>'
+      : '';
+
+    card.innerHTML = ''
+      + '<div class="car-image">'
+      +   '<img src="' + (car.anh || '/static/images/placeholder-car.jpg') + '" '
+      +        'alt="' + car.hang + ' ' + car.dong + '" '
+      +        'onerror="this.src=\'/static/images/placeholder-car.jpg\'">'
+      + '</div>'
+      + '<div class="car-body">'
+      +   '<h3 class="car-title">' + car.hang + ' ' + car.dong + '</h3>'
+      +   '<p class="car-price">' + Number(car.gia).toLocaleString('vi-VN') + ' triệu</p>'
+      +   '<div class="car-specs">'
+      +     '<span>' + car.nam + '</span>'
+      +     '<span>' + Number(car.km || 0).toLocaleString('vi-VN') + ' km</span>'
+      +     '<span>' + car.loai + '</span>'
+      +   '</div>'
+      +   '<button class="btn btn-primary" onclick="viewCar(' + car.id + ')">Xem chi tiết</button>'
+      +   adminBtn
+      + '</div>';
+
     grid.appendChild(card);
   });
+
+  if (window.lucide) lucide.createIcons();
 }
 
 function handleSearch(e) {
@@ -183,18 +196,102 @@ async function handleAddCar(e) {
   }
 }
 
-// ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', () => {
-  console.log("✅ mua_xe.js loaded successfully");
+// ==================== ƯU ĐÃI ====================
 
-  // Gắn sự kiện cho nút Thêm xe
-  const addBtn = document.getElementById('btnAddCar');
-  if (addBtn) {
-    addBtn.addEventListener('click', showAddCarModal);
-    console.log("✅ Đã gắn sự kiện click cho nút Thêm xe");
-  } else {
-    console.warn("⚠️ Không tìm thấy nút #btnAddCar");
+function openUuDaiModal(xeId, tenXe, giaGoc, anhXe) {
+  activeXeId   = xeId;
+  activeGiaGoc = giaGoc;
+
+  // Điền thông tin xe
+  document.getElementById('modalXeTen').textContent    = tenXe;
+  document.getElementById('modalXeGiaGoc').textContent = 'Giá gốc: ' + Number(giaGoc).toLocaleString('vi-VN') + ' triệu';
+
+  var anh = document.getElementById('modalXeAnh');
+  if (anhXe) { anh.src = anhXe; anh.style.display = 'block'; }
+  else        { anh.style.display = 'none'; }
+
+  // Reset form
+  document.getElementById('modalPct').value = '';
+  document.getElementById('modalPricePreview').style.display = 'none';
+
+  // Ngày mặc định
+  var today   = new Date();
+  var lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  var fmt = function(d) { return d.toISOString().split('T')[0]; };
+  document.getElementById('modalStart').value = fmt(today);
+  document.getElementById('modalEnd').value   = fmt(lastDay);
+
+  // Populate dropdown tháng
+  var months = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+                'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
+  var sel = document.getElementById('modalThang');
+  var cm = today.getMonth(), cy = today.getFullYear();
+  sel.innerHTML = '';
+  for (var i = 0; i < 12; i++) {
+    var m = (cm + i) % 12;
+    var y = cy + Math.floor((cm + i) / 12);
+    var opt = document.createElement('option');
+    opt.value = months[m] + ' ' + y;
+    opt.textContent = months[m] + ' ' + y;
+    if (i === 0) opt.selected = true;
+    sel.appendChild(opt);
   }
 
+  document.getElementById('modalUuDai').style.display = 'flex';
+  if (window.lucide) lucide.createIcons();
+}
+
+function previewModalGia() {
+  var pct = parseFloat(document.getElementById('modalPct').value);
+  var box = document.getElementById('modalPricePreview');
+  if (!pct || pct < 1 || pct > 99 || !activeGiaGoc) { box.style.display = 'none'; return; }
+
+  var giaKM    = Math.round(activeGiaGoc * (1 - pct / 100));
+  var tietKiem = Math.round(activeGiaGoc * pct / 100);
+
+  document.getElementById('modalGiaKM').textContent      = giaKM.toLocaleString('vi-VN') + ' triệu';
+  document.getElementById('modalGiaGocLabel').textContent = activeGiaGoc.toLocaleString('vi-VN') + ' triệu';
+  document.getElementById('modalTietKiem').textContent   = 'Tiết kiệm ' + tietKiem.toLocaleString('vi-VN') + ' tr';
+  box.style.display = 'flex';
+}
+
+function submitUuDai() {
+  var pct   = parseFloat(document.getElementById('modalPct').value);
+  var start = document.getElementById('modalStart').value;
+  var end   = document.getElementById('modalEnd').value;
+  var thang = document.getElementById('modalThang').value;
+
+  if (!activeXeId)              { alert('Lỗi: chưa chọn xe'); return; }
+  if (!pct || pct < 1 || pct > 99) { alert('% giảm giá phải từ 1 đến 99'); return; }
+  if (!start || !end)           { alert('Vui lòng chọn ngày'); return; }
+  if (end <= start)             { alert('Ngày kết thúc phải sau ngày bắt đầu'); return; }
+
+  var url = '/api/v1/uu-dai/' + activeXeId
+    + '?phan_tram_giam=' + pct
+    + '&ngay_bat_dau='   + start
+    + '&ngay_ket_thuc='  + end
+    + '&mo_ta='          + encodeURIComponent(thang);
+
+  fetch(url, { method: 'POST', credentials: 'include' })
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(e) { throw new Error(e.detail); });
+      return r.json();
+    })
+    .then(function() {
+      document.getElementById('modalUuDai').style.display = 'none';
+      alert('Đã tạo ưu đãi thành công!');
+    })
+    .catch(function(err) { alert('Lỗi: ' + err.message); });
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', function() {
+  var pageData = document.getElementById('pageData');
+  isAdmin = pageData && pageData.dataset.isAdmin === 'true';
+
+  var addBtn = document.getElementById('btnAddCar');
+  if (addBtn) addBtn.addEventListener('click', showAddCarModal);
+
+  setupImagePreview();
   loadCars();
 });
