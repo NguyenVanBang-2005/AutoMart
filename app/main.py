@@ -297,6 +297,7 @@ def tin_tuc_detail(request: Request, news_id: int):
 @app.get("/uu-dai-thang")
 def uu_dai_thang(request: Request):
     user = get_current_user_for_template(request)
+    from app.models.user import UserRole
     from app.services.car_service import get_cars
     from app.models.cars import CarFilter
     from app.models.uu_dai import UuDai
