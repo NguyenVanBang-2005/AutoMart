@@ -296,28 +296,52 @@ def tin_tuc_detail(request: Request, news_id: int):
 
 @app.get("/uu-dai-thang")
 def uu_dai_thang(request: Request):
-    from app.services.car_service import get_cars
-    from app.models.cars import CarFilter
+    from app.models.uu_dai import UuDai
+    from app.models.cars import Car, CarFilter
+    from app.models.user import UserRole
+    from sqlmodel import select
+    from datetime import date
 
     user = get_current_user_for_template(request)
 
     with Session(engine) as session:
-        xe_list = get_cars(session, CarFilter())[:12]
+        today = date.today()
 
-    deals = []
-    for xe in xe_list:
-        deals.append({
-            "xe": xe,
-            "gia_goc": xe.gia,
-            "gia_khuyen_mai": int(xe.gia * 0.85),
-            "tiet_kiem": int(xe.gia * 0.15),
-            "phan_tram": 15,
-        })
+        active_deals = session.exec(
+            select(UuDai).where(
+                UuDai.ngay_bat_dau <= today,
+                UuDai.ngay_ket_thuc >= today,
+            )
+        ).all()
+
+        deal_map = {ud.xe_id: ud for ud in active_deals}
+        xe_ids   = list(deal_map.keys())
+        xe_list  = session.exec(
+            select(Car).where(Car.id.in_(xe_ids))
+        ).all() if xe_ids else []
+
+        deals = []
+        for xe in xe_list:
+            ud = deal_map[xe.id]
+            deals.append({
+                "xe": xe,
+                "uu_dai": ud,
+                "gia_goc": xe.gia,
+                "gia_khuyen_mai": int(xe.gia * (1 - ud.phan_tram_giam / 100)),
+                "tiet_kiem":      int(xe.gia * ud.phan_tram_giam / 100),
+                "phan_tram":      int(ud.phan_tram_giam),
+            })
+
+    is_admin = bool(user and user.role == UserRole.admin)
 
     return templates.TemplateResponse(
         request=request,
         name="uu_dai_thang.html",
-        context={"current_user": user, "deals": deals}
+        context={
+            "current_user": user,
+            "deals": deals,
+            "is_admin": is_admin,
+        }
     )
 
 @app.get("/huong-dan")
@@ -346,17 +370,45 @@ def dich_vu(request: Request):
 @app.get("/xe/{car_id}")
 def xe_detail_page(request: Request, car_id: int):
     from app.models.cars import Car
+    from app.models.uu_dai import UuDai
+    from app.models.user import UserRole
     from app.services.car_service import get_car_images
+    from sqlmodel import select
+    from datetime import date
+
     user = get_current_user_for_template(request)
+
     with Session(engine) as session:
         car = session.get(Car, car_id)
         if not car:
             return RedirectResponse("/mua-xe")
+
         images = get_car_images(session, car_id)
+
+        today  = date.today()
+        uu_dai = session.exec(
+            select(UuDai).where(
+                UuDai.xe_id == car_id,
+                UuDai.ngay_bat_dau <= today,
+                UuDai.ngay_ket_thuc >= today,
+            )
+        ).first()
+
+        gia_hien_thi = int(car.gia * (1 - uu_dai.phan_tram_giam / 100)) if uu_dai else car.gia
+
+    is_admin = bool(user and user.role == UserRole.admin)
+
     return templates.TemplateResponse(
         request=request,
         name="car_details.html",
-        context={"current_user": user, "car": car, "images": images}
+        context={
+            "current_user": user,
+            "car": car,
+            "images": images,
+            "uu_dai": uu_dai,
+            "gia_hien_thi": gia_hien_thi,
+            "is_admin": is_admin,
+        }
     )
 
 @app.get("/danh-sach-ban-xe")
