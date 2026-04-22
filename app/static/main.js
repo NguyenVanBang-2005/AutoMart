@@ -179,16 +179,26 @@ async function handleSellSubmit(e) {
 // ── Modal Helpers ────────────────────────────────────
 function switchModal(fromId, toId) { closeModal(fromId); setTimeout(() => openModal(toId), 200); }
 function openModal(modalId) {
-    const el = document.getElementById(modalId);
-    if (!el) { console.warn(`Modal không tồn tại: ${modalId}`); return; }
-    el.classList.add('active');
+  const modal = document.getElementById(modalId);
+  if (modal) modal.style.display = 'flex';
+}
+
+function openRegisterModal() {
+  var modal = document.getElementById('loginModal');
+  if (modal) modal.style.display = 'flex';
+  var err = document.getElementById('loginError');
+  if (err) err.style.display = 'none';
+  // Delay nhỏ để DOM render xong rồi mới switch tab
+  setTimeout(function() {
+    switchLoginTab('register');
+  }, 30);
 }
 
 function closeModal(modalId) {
-    const el = document.getElementById(modalId);
-    if (!el) return;
-    el.classList.remove('active');
+  const modal = document.getElementById(modalId);
+  if (modal) modal.style.display = 'none';
 }
+
 function showFormError(elementId, message) {
   const el = document.getElementById(elementId);
   if (!el) return; el.textContent = message; el.style.display = 'block';
@@ -452,7 +462,9 @@ function initMobileNav() {
   const menuToggle = document.getElementById('menuToggle');
   const navMenu    = document.getElementById('navMenu');
   const navActions = document.querySelector('.nav-actions');
+
   if (!menuToggle || !navMenu) return;
+
   let mobileActions = document.getElementById('mobileNavActions');
   if (!mobileActions) {
     mobileActions = document.createElement('li');
@@ -460,98 +472,213 @@ function initMobileNav() {
     mobileActions.innerHTML = navActions.innerHTML;
     navMenu.appendChild(mobileActions);
   }
+
   menuToggle.addEventListener('click', (e) => {
     e.stopPropagation();
     navMenu.classList.contains('open') ? closeMenu() : openMenu();
   });
-  document.addEventListener('click', (e) => { if (!e.target.closest('.nav-container')) closeMenu(); });
-  navMenu.querySelectorAll('a.nav-link').forEach(link => link.addEventListener('click', () => closeMenu()));
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-container')) closeMenu();
+  });
+
   function openMenu() {
     mobileActions.innerHTML = navActions.innerHTML;
-    mobileActions.querySelectorAll('.btn').forEach(btn => { btn.style.width = '100%'; btn.style.justifyContent = 'center'; });
-    navMenu.classList.add('open'); menuToggle.textContent = '✕'; menuToggle.setAttribute('aria-expanded', 'true');
+
+    // === FIX TẤT CẢ NÚT "ĐĂNG KÝ" (cả desktop copy + mobile) ===
+    const registerButtons = mobileActions.querySelectorAll('button, a');
+    registerButtons.forEach(btn => {
+      if (btn.textContent.trim().includes('Đăng ký') || btn.getAttribute('onclick')?.includes('registerModal')) {
+        btn.setAttribute('onclick', `openRegisterModal(); closeMenu();`);
+      }
+    });
+
+    mobileActions.querySelectorAll('.btn').forEach(btn => {
+      btn.style.width = '100%';
+      btn.style.justifyContent = 'center';
+    });
+
+    navMenu.classList.add('open');
+    menuToggle.textContent = '✕';
+    menuToggle.setAttribute('aria-expanded', 'true');
   }
+
   function closeMenu() {
-    navMenu.classList.remove('open'); menuToggle.textContent = '☰'; menuToggle.setAttribute('aria-expanded', 'false');
+    navMenu.classList.remove('open');
+    menuToggle.textContent = '☰';
+    menuToggle.setAttribute('aria-expanded', 'false');
   }
 }
 
 // ── Register Multi-step ──────────────────────────────
 let _regData = { ho_ten: '', email: '', phone: '', password: '' };
 
-function switchRegisterTab(tab) {
-  const isRegister = tab === 'register';
-  document.getElementById('registerSteps').style.display = isRegister ? 'block' : 'none';
-  document.getElementById('loginPanel').style.display    = isRegister ? 'none'  : 'block';
-  const tabReg = document.getElementById('tabRegister');
-  const tabLog = document.getElementById('tabLogin');
-  tabReg.style.background = isRegister ? 'var(--accent-primary)' : 'transparent';
-  tabReg.style.color       = isRegister ? '#fff' : '#64748b';
-  tabLog.style.background  = isRegister ? 'transparent' : 'var(--accent-primary)';
-  tabLog.style.color        = isRegister ? '#64748b' : '#fff';
-  if (isRegister) regShowStep(1);
+// ==================== HÀM GỬI OTP (định nghĩa trực tiếp) ====================
+async function sendOTP(email) {
+  try {
+    const res = await fetch(`${API_BASE}/users/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      showToast(result.detail || 'Gửi OTP thất bại!');
+      return false;
+    }
+
+    showToast(`Đã gửi mã OTP đến ${email}`);
+    return true;
+  } catch (err) {
+    console.error(err);
+    showToast('Không thể kết nối server!');
+    return false;
+  }
+}
+
+// ==================== HÀM XÁC THỰC OTP ====================
+async function verifyOTP(email, otp) {
+  try {
+    const res = await fetch(`${API_BASE}/users/register-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        ho_ten: _regData.ho_ten || 'Người dùng',
+        email: email,
+        so_dien_thoai: _regData.phone,
+        password: _regData.password,
+        otp: otp
+      })
+    });
+
+    const result = await res.json();
+    if (!res.ok) {
+      showToast(result.detail || 'Xác thực OTP thất bại!');
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error(err);
+    showToast('Không thể kết nối server!');
+    return false;
+  }
+}
+
+// ==================== CHUYỂN TAB ĐĂNG KÝ / ĐĂNG NHẬP ====================
+function switchLoginTab(tab) {
+  const loginPanel    = document.getElementById('loginPanel');
+  const registerPanel = document.getElementById('registerPanel');
+  const tabLogin      = document.getElementById('tabLogin');
+  const tabRegister   = document.getElementById('tabRegister');
+
+  if (!loginPanel || !registerPanel) return;
+
+  if (tab === 'login') {
+    loginPanel.style.display = 'block';
+    registerPanel.style.display = 'none';
+    tabLogin.style.background = 'var(--accent-primary)';
+    tabLogin.style.color = '#fff';
+    tabRegister.style.background = 'transparent';
+    tabRegister.style.color = '#64748b';
+  } else {
+    loginPanel.style.display = 'none';
+    registerPanel.style.display = 'block';
+    tabRegister.style.background = 'var(--accent-primary)';
+    tabRegister.style.color = '#fff';
+    tabLogin.style.background = 'transparent';
+    tabLogin.style.color = '#64748b';
+    regShowStep(1);
+  }
 }
 
 function regShowStep(step) {
-  [1, 2, 3].forEach(s => {
-    const el = document.getElementById(`regStep${s}`);
-    if (el) el.style.display = s === step ? 'block' : 'none';
-  });
-  ['regStep2Error', 'regStep3Error'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.style.display = 'none';
-  });
+  document.getElementById('regStep1').style.display = (step === 1) ? 'block' : 'none';
+  document.getElementById('regStep2').style.display = (step === 2) ? 'block' : 'none';
+  document.getElementById('regStep3').style.display = (step === 3) ? 'block' : 'none';
 }
 
 function regGoStep2() {
-  const email  = document.getElementById('regEmail').value.trim();
-  const phone  = document.getElementById('regPhone').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const phone = document.getElementById('regPhone').value.trim();
   const agreed = document.getElementById('regAgree').checked;
+
   if (!email || !email.includes('@')) { showToast('Vui lòng nhập email hợp lệ!'); return; }
-  if (!phone || phone.length < 9)    { showToast('Vui lòng nhập số điện thoại hợp lệ!'); return; }
-  if (!agreed)                        { showToast('Vui lòng đồng ý với điều khoản!'); return; }
-  _regData.email = email; _regData.phone = phone; regShowStep(2);
+  if (!phone || phone.length < 9)     { showToast('Vui lòng nhập số điện thoại hợp lệ!'); return; }
+  if (!agreed)                         { showToast('Vui lòng đồng ý với điều khoản!'); return; }
+
+  _regData.email = email;
+  _regData.phone = phone;
+  regShowStep(2);
 }
 
 async function regGoStep3() {
   const pw    = document.getElementById('regPassword').value;
   const pw2   = document.getElementById('regConfirmPassword').value;
   const errEl = document.getElementById('regStep2Error');
+
   if (pw.length < 6) { errEl.textContent = 'Mật khẩu phải có ít nhất 6 ký tự!'; errEl.style.display = 'block'; return; }
-  if (pw !== pw2)    { errEl.textContent = 'Mật khẩu xác nhận không khớp!';      errEl.style.display = 'block'; return; }
-  errEl.style.display = 'none'; _regData.password = pw;
-  try {
-    const res    = await fetch(`${API_BASE}/users/send-otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: _regData.email }) });
-    const result = await res.json();
-    if (!res.ok) { errEl.textContent = result.detail || 'Gửi OTP thất bại!'; errEl.style.display = 'block'; return; }
-    regShowStep(3); initOTPBoxes(); showToast(`Đã gửi OTP đến ${_regData.email}`);
-  } catch { errEl.textContent = 'Không thể kết nối server!'; errEl.style.display = 'block'; }
+  if (pw !== pw2)    { errEl.textContent = 'Mật khẩu xác nhận không khớp!'; errEl.style.display = 'block'; return; }
+
+  errEl.style.display = 'none';
+  _regData.password = pw;
+
+  const success = await sendOTP(_regData.email);
+  if (success) {
+    regShowStep(3);
+    initOTPBoxesForRegister();
+  }
 }
 
 async function regSubmitOTP() {
-  const boxes = document.querySelectorAll('.otp-box');
+  const boxes = document.querySelectorAll('#regStep3 .otp-box');
   const otp   = Array.from(boxes).map(b => b.value).join('');
   const errEl = document.getElementById('regStep3Error');
-  if (otp.length < 5) { errEl.textContent = 'Vui lòng nhập đủ 5 chữ số OTP!'; errEl.style.display = 'block'; return; }
-  errEl.style.display = 'none';
-  try {
-    const res    = await fetch(`${API_BASE}/users/register-otp`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-      body: JSON.stringify({ ho_ten: _regData.ho_ten || 'Người dùng', email: _regData.email, so_dien_thoai: _regData.phone, password: _regData.password, otp })
-    });
-    const result = await res.json();
-    if (!res.ok) { errEl.textContent = result.detail || 'Xác thực OTP thất bại!'; errEl.style.display = 'block'; return; }
-    showToast('Đăng ký thành công!'); closeModal('registerModal');
-    _regData = { ho_ten: '', email: '', phone: '', password: '' };
+
+  if (otp.length !== 6) {
+    errEl.textContent = 'Vui lòng nhập đủ 6 chữ số OTP!';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const success = await verifyOTP(_regData.email, otp);
+  if (success) {
+    showToast('Đăng ký tài khoản thành công!');
+    closeModal('loginModal');           // ← ĐÃ SỬA: không còn registerModal
+    _regData = { email: '', phone: '', password: '' };
     setTimeout(() => window.location.reload(), 800);
-  } catch { errEl.textContent = 'Không thể kết nối server!'; errEl.style.display = 'block'; }
+  }
 }
 
 async function regResendOTP(e) {
   e.preventDefault();
-  try {
-    await fetch(`${API_BASE}/users/send-otp`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: _regData.email }) });
+  const success = await sendOTP(_regData.email);
+  if (success) {
     showToast(`Đã gửi lại OTP đến ${_regData.email}`);
-  } catch { showToast('Gửi lại OTP thất bại!'); }
+    initOTPBoxesForRegister();
+  }
+}
+
+// ==================== TẠO 6 Ô OTP ====================
+function initOTPBoxesForRegister() {
+  const container = document.querySelector('#regStep3 > div[style*="display:flex"]');
+  if (!container) return;
+  container.innerHTML = '';
+
+  for (let i = 0; i < 6; i++) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 1;
+    input.className = 'otp-box';
+    input.style.cssText = 'width:48px;height:52px;text-align:center;font-size:24px;font-weight:700;border:2px solid #e2e8f0;border-radius:10px;outline:none;';
+    input.addEventListener('input', () => { if (input.value.length === 1 && input.nextElementSibling) input.nextElementSibling.focus(); });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Backspace' && !input.value && input.previousElementSibling) input.previousElementSibling.focus(); });
+    container.appendChild(input);
+  }
+  const first = container.querySelector('.otp-box');
+  if (first) first.focus();
 }
 
 // ── Modal overrides ───────────────────────────────────
@@ -559,10 +686,10 @@ const _origOpenModal = openModal;
 window.openModal = function(modalId) {
   _origOpenModal(modalId);
   if (modalId === 'loginModal') {
-    switchLoginPanel('social');
-    const err = document.getElementById('loginError'); if (err) err.style.display = 'none';
+    switchLoginTab('login');
+    var err = document.getElementById('loginError');
+    if (err) err.style.display = 'none';
   }
-  if (modalId === 'registerModal') switchRegisterTab('register');
 };
 
 function switchLoginPanel(panel) {
@@ -574,10 +701,182 @@ function switchLoginPanel(panel) {
 }
 
 function handleSocialLogin(provider) {
-  const urls = { google: `${API_BASE}/auth/google`, facebook: `${API_BASE}/auth/facebook`, twitter: `${API_BASE}/auth/twitter` };
-  const url  = urls[provider];
+  const urls = {
+    google: `${API_BASE}/auth/google`,
+    facebook: `${API_BASE}/auth/facebook`
+  };
+  const url = urls[provider];
   if (url) window.location.href = url;
   else showToast('Tính năng đang được phát triển!');
+}
+
+let forgotEmail = '';
+
+function showForgotPassword() {
+  closeModal('loginModal');
+  const modal = document.getElementById('forgotModal');
+  if (modal) modal.style.display = 'flex';
+}
+
+let currentResetEmail = '';
+
+async function sendForgotOTP() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) {
+    showToast('Vui lòng nhập email!');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/users/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, purpose: "reset" })
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      currentResetEmail = email;
+      showToast(`Đã gửi OTP đến ${email}`);
+
+      // Chuyển sang bước nhập OTP
+      document.getElementById('forgotStepEmail').style.display = 'none';
+      document.getElementById('forgotStepOTP').style.display = 'block';
+      document.getElementById('forgotTitle').textContent = 'Nhập mã OTP';
+
+      initForgotOTPBoxes();   // tạo 6 ô OTP
+    } else {
+      showToast(result.detail || 'Gửi OTP thất bại!');
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Không thể kết nối server!');
+  }
+}
+
+// Tạo 6 ô OTP cho forgot
+function initForgotOTPBoxes() {
+  const container = document.getElementById('forgotOtpContainer');
+  container.innerHTML = '';
+
+  for (let i = 0; i < 6; i++) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.maxLength = 1;
+    input.className = 'otp-box';
+    input.style.cssText = 'width:48px;height:52px;text-align:center;font-size:24px;font-weight:700;border:2px solid #e2e8f0;border-radius:10px;outline:none;';
+
+    input.addEventListener('input', function () {
+      if (this.value.length === 1) {
+        const next = this.nextElementSibling;
+        if (next) next.focus();
+      }
+    });
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Backspace' && this.value === '') {
+        const prev = this.previousElementSibling;
+        if (prev) prev.focus();
+      }
+    });
+
+    container.appendChild(input);
+  }
+
+  // Focus ô đầu tiên
+  setTimeout(() => container.querySelector('.otp-box').focus(), 100);
+}
+
+async function verifyForgotOTP() {
+  const boxes = document.querySelectorAll('#forgotOtpContainer .otp-box');
+  const otp = Array.from(boxes).map(b => b.value).join('');
+
+  if (otp.length !== 6) {
+    const err = document.getElementById('forgotOtpError');
+    err.textContent = 'Vui lòng nhập đủ 6 chữ số OTP!';
+    err.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/users/verify-otp`, {   // tạm thời dùng chung verify-otp
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: currentResetEmail,
+        otp: otp,
+        purpose: "reset"
+      })
+    });
+
+    if (res.ok) {
+      closeModal('forgotModal');
+      showResetPasswordModal();
+    } else {
+      const result = await res.json();
+      const err = document.getElementById('forgotOtpError');
+      err.textContent = result.detail || 'OTP không đúng hoặc đã hết hạn!';
+      err.style.display = 'block';
+    }
+  } catch (err) {
+    showToast('Không thể xác thực OTP!');
+  }
+}
+
+function showResetPasswordModal() {
+  console.log("✅ Đang mở modal Đặt lại mật khẩu");
+  const modal = document.getElementById('resetPasswordModal');
+  if (modal) {
+    modal.style.display = 'flex';     // Dùng display trực tiếp để chắc chắn mở
+  } else {
+    console.error("❌ Không tìm thấy modal #resetPasswordModal");
+  }
+}
+
+async function verifyForgotOTP() {
+  const boxes = document.querySelectorAll('#forgotOtpContainer .otp-box');
+  const otp = Array.from(boxes).map(b => b.value).join('');
+
+  if (otp.length !== 6) {
+    const err = document.getElementById('forgotOtpError');
+    err.textContent = 'Vui lòng nhập đủ 6 chữ số OTP!';
+    err.style.display = 'block';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/users/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: currentResetEmail,
+        otp: otp,
+        purpose: "reset"
+      })
+    });
+
+    if (res.ok) {
+      // Đóng modal forgot OTP một cách MẠNH MẼ (tương tự reset password)
+      const forgotModal = document.getElementById('forgotModal');
+      if (forgotModal) {
+        forgotModal.style.display = 'none';      // Đóng trực tiếp
+        forgotModal.classList.remove('active');  // Xóa class backup
+      }
+
+      showToast('Xác thực OTP thành công!');
+      showResetPasswordModal();   // Mở modal đặt lại mật khẩu
+
+    } else {
+      const result = await res.json();
+      const err = document.getElementById('forgotOtpError');
+      err.textContent = result.detail || 'OTP không đúng hoặc đã hết hạn!';
+      err.style.display = 'block';
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Không thể xác thực OTP!');
+  }
 }
 
 // ── Init ─────────────────────────────────────────────

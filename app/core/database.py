@@ -27,6 +27,7 @@ def init_db():
     # Import TẤT CẢ models ở đây để SQLModel.metadata biết các bảng cần tạo.
     from app.models.user import User          # noqa: F401
     from app.models.cars import Car, CarImage # noqa: F401
+    from app.models.uu_dai import UuDai
     from app.models.dang_tin import DangTin   # noqa: F401
     from app.models.news import News          # noqa: F401
     from app.models.lai_thu import LaiThu     # noqa: F401

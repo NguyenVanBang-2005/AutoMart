@@ -1,6 +1,7 @@
 import hashlib
 import base64
 import bcrypt
+from passlib.context import CryptContext
 import os
 from datetime import datetime, timedelta
 from typing import Optional
@@ -18,7 +19,7 @@ oauth2_scheme_optional = OAuth2PasswordBearer(
 )
 
 COOKIE_NAME = "automart_token"
-
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 # ── Password ──────────────────────────────────────────
 def _prepare_password(password: str) -> bytes:
@@ -33,11 +34,15 @@ def hash_password(password: str) -> str:
     ).decode()
 
 
-def verify_password(plain: str, hashed: str) -> bool:
-    return bcrypt.checkpw(
-        _prepare_password(plain),
-        hashed.encode()
-    )
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """
+    Xác thực mật khẩu sử dụng cùng scheme với lúc hash (argon2)
+    """
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception as e:
+        print(f"[VERIFY_PASSWORD] Lỗi xác thực: {e}")
+        return False
 
 
 # ── JWT ───────────────────────────────────────────────

@@ -1,58 +1,174 @@
 {% extends 'base.html' %}
-
 {% block title %}AutoMart - Ưu Đãi Tháng{% endblock %}
 
 {% block content %}
 
+{# Data bridge — tránh Jinja2-in-JS #}
+<div id="pageData"
+     data-is-admin="{{ 'true' if is_admin else 'false' }}"
+     style="display:none;"></div>
+
 <section class="section section-gray">
   <div class="container">
     <div class="section-header-row" style="margin-bottom:28px;">
-      <h2 class="section-title">Ưu đãi tháng <span class="section-title-accent" id="dealMonth"></span></h2>
+      <h2 class="section-title">
+        Ưu đãi tháng <span class="section-title-accent" id="dealMonth"></span>
+      </h2>
     </div>
 
+    {% if deals %}
     <div class="car-grid">
-      {% for xe in deals %}
-      <div class="car-card">
-        <div class="car-image">
-          {% if xe.anh %}
-            <img src="{{ xe.anh }}" alt="{{ xe.hang }} {{ xe.dong }}">
+      {% for item in deals %}
+      <div class="car-card" id="card-{{ item.xe.id }}">
+
+        {# ── Ảnh + badge ── #}
+        <div class="car-image" style="position:relative;">
+          {% if item.xe.anh %}
+            <img src="{{ item.xe.anh }}" alt="{{ item.xe.hang }} {{ item.xe.dong }}">
           {% else %}
             <div class="car-image-placeholder"></div>
           {% endif %}
-          <div class="car-badge-deal">-15%</div>
+
+          <div class="car-badge-deal" id="badge-{{ item.xe.id }}">
+            -{{ item.uu_dai.phan_tram_giam | int }}%
+          </div>
+
+          {# Nút sửa — JS sẽ bật lên nếu là admin #}
+          <button class="btn-admin-edit"
+                  id="editBtn-{{ item.xe.id }}"
+                  style="display:none; position:absolute; top:8px; right:8px;
+                         background:rgba(0,0,0,0.65); color:#fff; border:none;
+                         border-radius:8px; padding:6px 10px; font-size:12px;
+                         cursor:pointer; display:none; align-items:center; gap:4px;"
+                  onclick="toggleEditForm({{ item.xe.id }})">
+            <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+            Sửa ưu đãi
+          </button>
         </div>
+
+        {# ── Body card ── #}
         <div class="car-body">
-          <div class="car-title">{{ xe.hang }} {{ xe.dong }}</div>
+          <div class="car-title">{{ item.xe.hang }} {{ item.xe.dong }}</div>
+
+          {# Giá #}
           <div style="margin-bottom:10px;">
-            <span style="font-size:18px; font-weight:800; color:var(--price-color);">
-              {{ (xe.gia * 0.85) | int }} triệu
+            <span id="giaKM-{{ item.xe.id }}"
+                  style="font-size:18px;font-weight:800;color:var(--price-color);">
+              {{ item.gia_khuyen_mai }} triệu
             </span>
-            <span style="font-size:12px; color:#aaa; text-decoration:line-through; margin-left:8px;">
-              {{ xe.gia }} triệu
+            <span id="giaGoc-{{ item.xe.id }}"
+                  style="font-size:12px;color:#aaa;text-decoration:line-through;margin-left:8px;">
+              {{ item.gia_goc }} triệu
             </span>
-            <span style="font-size:11px; color:#fff; background:#e03030; border-radius:4px; padding:2px 6px; margin-left:6px; font-weight:700;">
-              Tiết kiệm {{ (xe.gia * 0.15) | int }} tr
+            <span id="tietKiem-{{ item.xe.id }}"
+                  style="font-size:11px;color:#fff;background:#e03030;border-radius:4px;
+                         padding:2px 6px;margin-left:6px;font-weight:700;">
+              Tiết kiệm {{ item.tiet_kiem }} tr
             </span>
           </div>
+
+          {# ── Inline edit form (ẩn mặc định) ── #}
+          <div id="editForm-{{ item.xe.id }}" style="display:none;">
+            <div style="background:#fffbf0;border:1px solid #f0d080;
+                        border-radius:10px;padding:14px;margin-bottom:12px;">
+              <div style="font-size:12px;font-weight:700;margin-bottom:10px;color:#92400e;">
+                Chỉnh ưu đãi xe này
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+
+                <div>
+                  <label style="font-size:11px;color:#666;">% Giảm giá</label>
+                  <input type="number" class="form-control"
+                         id="pct-{{ item.xe.id }}"
+                         min="1" max="99"
+                         value="{{ item.uu_dai.phan_tram_giam | int }}"
+                         style="padding:6px 10px;font-size:13px;">
+                </div>
+
+                <div>
+                  <label style="font-size:11px;color:#666;">Ngày bắt đầu</label>
+                  <input type="date" class="form-control"
+                         id="start-{{ item.xe.id }}"
+                         value="{{ item.uu_dai.ngay_bat_dau }}"
+                         style="padding:6px 10px;font-size:13px;">
+                </div>
+
+                <div>
+                  <label style="font-size:11px;color:#666;">Ngày kết thúc</label>
+                  <input type="date" class="form-control"
+                         id="end-{{ item.xe.id }}"
+                         value="{{ item.uu_dai.ngay_ket_thuc }}"
+                         style="padding:6px 10px;font-size:13px;">
+                </div>
+
+                <div>
+                  <label style="font-size:11px;color:#666;">Mô tả</label>
+                  <input type="text" class="form-control"
+                         id="desc-{{ item.xe.id }}"
+                         value="{{ item.uu_dai.mo_ta or '' }}"
+                         placeholder="VD: Ưu đãi tháng 4"
+                         style="padding:6px 10px;font-size:13px;">
+                </div>
+
+                <div style="display:flex;gap:8px;margin-top:4px;">
+                  <button onclick="saveUuDai({{ item.xe.id }}, {{ item.gia_goc }})"
+                          style="flex:1;padding:8px;background:var(--accent-primary);
+                                 color:#fff;border:none;border-radius:8px;
+                                 font-size:12px;font-weight:700;cursor:pointer;">
+                    Lưu
+                  </button>
+                  <button onclick="deleteUuDai({{ item.xe.id }})"
+                          style="padding:8px 12px;background:#fee2e2;color:#b91c1c;
+                                 border:none;border-radius:8px;font-size:12px;cursor:pointer;">
+                    Xóa
+                  </button>
+                  <button onclick="toggleEditForm({{ item.xe.id }})"
+                          style="padding:8px 12px;background:#f1f5f9;color:#64748b;
+                                 border:none;border-radius:8px;font-size:12px;cursor:pointer;">
+                    Hủy
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {# Specs #}
           <div class="car-specs">
             <span class="car-spec">
-              <i data-lucide="calendar" style="width:12px; height:12px;"></i> {{ xe.nam }}
+              <i data-lucide="calendar" style="width:12px;height:12px;"></i>
+              {{ item.xe.nam }}
             </span>
             <span class="car-spec">
-              <i data-lucide="gauge" style="width:12px; height:12px;"></i> {{ xe.km }} km
+              <i data-lucide="gauge" style="width:12px;height:12px;"></i>
+              {{ item.xe.km }} km
             </span>
             <span class="car-spec">
-              <i data-lucide="map-pin" style="width:12px; height:12px;"></i> Hà Nội
+              <i data-lucide="map-pin" style="width:12px;height:12px;"></i>
+              {{ item.xe.khu_vuc or 'Việt Nam' }}
             </span>
           </div>
+
           <div class="car-footer">
-            <button class="btn-quote" onclick="openModal('quoteModal')">Nhận báo giá</button>
-            <button class="btn-trial">Đăng kí lái thử</button>
+            <button class="btn-quote"
+                    onclick="window.location.href='/xe/{{ item.xe.id }}'">
+              Nhận báo giá
+            </button>
+            <button class="btn-trial"
+                    onclick="window.location.href='/dich-vu'">
+              Đăng ký lái thử
+            </button>
           </div>
         </div>
       </div>
       {% endfor %}
     </div>
+
+    {% else %}
+    <div style="text-align:center;padding:60px 20px;color:#888;">
+      <i data-lucide="tag" style="width:48px;height:48px;margin-bottom:16px;opacity:.4;"></i>
+      <p>Hiện chưa có ưu đãi nào đang diễn ra.</p>
+    </div>
+    {% endif %}
 
   </div>
 </section>
@@ -61,7 +177,75 @@
 
 {% block extra_scripts %}
 <script>
-  lucide.createIcons();
-  document.getElementById('dealMonth').textContent = 'Tháng ' + (new Date().getMonth() + 1);
+lucide.createIcons();
+document.getElementById('dealMonth').textContent = 'Thang ' + (new Date().getMonth() + 1);
+
+var isAdmin = document.getElementById('pageData').dataset.isAdmin === 'true';
+
+// Bật nút edit cho admin
+if (isAdmin) {
+  var editBtns = document.querySelectorAll('.btn-admin-edit');
+  for (var i = 0; i < editBtns.length; i++) {
+    editBtns[i].style.display = 'flex';
+  }
+}
+
+function toggleEditForm(xeId) {
+  var form = document.getElementById('editForm-' + xeId);
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function saveUuDai(xeId, giaGoc) {
+  var pct    = parseFloat(document.getElementById('pct-'   + xeId).value);
+  var start  = document.getElementById('start-' + xeId).value;
+  var end    = document.getElementById('end-'   + xeId).value;
+  var desc   = document.getElementById('desc-'  + xeId).value;
+
+  if (!pct || !start || !end) {
+    alert('Vui long dien day du % giam, ngay bat dau va ket thuc');
+    return;
+  }
+
+  var url = '/api/v1/uu-dai/' + xeId
+    + '?phan_tram_giam=' + pct
+    + '&ngay_bat_dau='   + start
+    + '&ngay_ket_thuc='  + end
+    + '&mo_ta='          + encodeURIComponent(desc);
+
+  fetch(url, { method: 'POST' })
+    .then(function(r) {
+      if (!r.ok) { return r.json().then(function(e) { throw new Error(e.detail); }); }
+      return r.json();
+    })
+    .then(function(data) {
+      // Cập nhật card ngay — không cần reload
+      var giaKM    = Math.round(giaGoc * (1 - pct / 100));
+      var tietKiem = Math.round(giaGoc * pct / 100);
+
+      document.getElementById('giaKM-'    + xeId).textContent = giaKM    + ' trieu';
+      document.getElementById('giaGoc-'   + xeId).textContent = giaGoc   + ' trieu';
+      document.getElementById('tietKiem-' + xeId).textContent = 'Tiet kiem ' + tietKiem + ' tr';
+      document.getElementById('badge-'    + xeId).textContent = '-' + Math.round(pct) + '%';
+
+      toggleEditForm(xeId);
+      alert('Da luu uu dai!');
+    })
+    .catch(function(err) { alert('Loi: ' + err.message); });
+}
+
+function deleteUuDai(xeId) {
+  if (!confirm('Xac nhan xoa uu dai nay?')) return;
+
+  fetch('/api/v1/uu-dai/' + xeId, { method: 'DELETE' })
+    .then(function(r) {
+      if (!r.ok) { return r.json().then(function(e) { throw new Error(e.detail); }); }
+      return r.json();
+    })
+    .then(function() {
+      var card = document.getElementById('card-' + xeId);
+      card.parentNode.removeChild(card);
+    })
+    .catch(function(err) { alert('Loi: ' + err.message); });
+}
 </script>
 {% endblock %}

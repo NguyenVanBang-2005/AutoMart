@@ -1,56 +1,66 @@
-import smtplib
-import random
+import secrets
+import logging
+from datetime import datetime, timedelta
+from typing import Optional
+
+from sqlmodel import Session, select
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime, timedelta
+import smtplib
 
-# Lưu OTP tạm trong memory
-# key = email, value = { otp, expires }
-_otp_store: dict[str, dict] = {}
+from app.core.config import settings
+from app.models.user import OTP
+
+logger = logging.getLogger(__name__)
+
 
 def _make_otp() -> str:
-    return str(random.randint(10000, 99999))
+    """Tạo OTP 6 số an toàn"""
+    return f"{secrets.randbelow(900000) + 100000}"
 
-async def send_otp(email: str) -> bool:
-    from app.core.config import settings
 
-    otp = _make_otp()
-    _otp_store[email] = {
-        "otp":     otp,
-        "expires": datetime.utcnow() + timedelta(minutes=5)
-    }
+async def send_otp(email: str, session: Session) -> bool:
+    """Gửi OTP và lưu vào database - ĐÃ CÓ LOG CHI TIẾT"""
+    if not settings.gmail_user or not settings.gmail_app_password:
+        logger.error("❌ Gmail credentials chưa được cấu hình")
+        return False
 
+    # Xóa tất cả OTP cũ của email này
+    old_otps = session.exec(select(OTP).where(OTP.email == email)).all()
+    for old in old_otps:
+        session.delete(old)
+    session.commit()
+
+    # Tạo OTP mới
+    otp_code = _make_otp()
+    expires_at = datetime.utcnow() + timedelta(minutes=10)
+
+    otp_record = OTP(
+        email=email,
+        otp=otp_code,
+        expires_at=expires_at
+    )
+    session.add(otp_record)
+    session.commit()
+
+    logger.info(f"🔑 OTP ĐÃ TẠO cho {email} | Mã: {otp_code} | Hết hạn: {expires_at}")
+
+    # === Phần gửi email (giữ nguyên) ===
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = "[AutoMart] Mã xác thực đăng ký tài khoản"
-    msg["From"]    = f"AutoMart <{settings.gmail_user}>"
-    msg["To"]      = email
+    msg["Subject"] = "[AutoMart] Mã xác thực"
+    msg["From"] = f"AutoMart <{settings.gmail_user}>"
+    msg["To"] = email
 
     html = f"""
-    <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;
-                padding:32px;background:#f8fafc;border-radius:16px;">
-      <div style="text-align:center;margin-bottom:24px;">
-        <h2 style="color:#1a1a1a;margin:0;">
-          Auto<span style="color:#c8a96e;">Mart</span>
-        </h2>
-      </div>
+    <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#f8fafc;border-radius:16px;">
+      <h2 style="color:#1a1a1a;text-align:center;">Auto<span style="color:#c8a96e;">Mart</span></h2>
       <div style="background:#fff;border-radius:12px;padding:32px;text-align:center;">
-        <p style="color:#374151;font-size:15px;margin-bottom:8px;">
-          Mã xác thực của bạn là:
-        </p>
-        <div style="font-size:36px;font-weight:800;letter-spacing:12px;
-                    color:#c8a96e;margin:16px 0;">
-          {otp}
+        <p style="color:#374151;font-size:15px;">Mã xác thực của bạn là:</p>
+        <div style="font-size:42px;font-weight:800;letter-spacing:12px;color:#c8a96e;margin:20px 0;">
+          {otp_code}
         </div>
-        <p style="color:#64748b;font-size:13px;">
-          Mã có hiệu lực trong <strong>5 phút</strong>.
-        </p>
-        <p style="color:#64748b;font-size:13px;">
-          Không chia sẻ mã này với bất kỳ ai.
-        </p>
+        <p style="color:#64748b;font-size:14px;">Mã có hiệu lực trong <strong>10 phút</strong>.<br>Không chia sẻ với ai.</p>
       </div>
-      <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:24px;">
-        © 2025 AutoMart. Nếu bạn không yêu cầu mã này, hãy bỏ qua email.
-      </p>
     </div>
     """
 
@@ -60,21 +70,39 @@ async def send_otp(email: str) -> bool:
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
             server.login(settings.gmail_user, settings.gmail_app_password)
             server.sendmail(settings.gmail_user, email, msg.as_string())
+
+        logger.info(f"✅ OTP đã gửi thành công đến {email}")
         return True
+
     except Exception as e:
-        import traceback
-        print(f"Gmail SMTP error: {e}")
-        traceback.print_exc()
+        logger.error(f"❌ Gửi OTP thất bại cho {email}: {e}")
+        session.rollback()
         return False
 
-def verify_otp(email: str, otp: str) -> bool:
-    record = _otp_store.get(email)
+
+def verify_otp(email: str, otp: str, session: Session, purpose: str = "register") -> bool:
+    """Kiểm tra OTP - ĐÃ CÓ LOG CHI TIẾT ĐỂ DEBUG"""
+    logger.info(f"🔍 VERIFY OTP | Email: {email} | Nhập: {otp} | Purpose: {purpose}")
+
+    record = session.exec(
+        select(OTP)
+        .where(OTP.email == email)
+        .where(OTP.expires_at > datetime.utcnow())
+    ).first()
+
     if not record:
+        logger.warning(f"❌ Không tìm thấy OTP hợp lệ cho {email}")
         return False
-    if datetime.utcnow() > record["expires"]:
-        _otp_store.pop(email, None)
+
+    logger.info(f"📦 OTP trong DB: {record.otp} | Hết hạn: {record.expires_at}")
+
+    if record.otp != otp:
+        logger.warning(f"❌ OTP KHÔNG KHỚP! Nhập: {otp} | DB: {record.otp}")
         return False
-    if record["otp"] != otp:
-        return False
-    _otp_store.pop(email, None)
+
+    # Xóa OTP sau khi verify thành công
+    session.delete(record)
+    session.commit()
+
+    logger.info(f"✅ OTP XÁC THỰC THÀNH CÔNG cho {email} (purpose: {purpose})")
     return True

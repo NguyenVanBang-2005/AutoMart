@@ -171,6 +171,52 @@ async function sendAiMessage() {
     ai.busy = false;
 }
 
+// ====================== TÍNH KHOẢN VAY ======================
+function calcLoan() {
+  const carData = document.getElementById('carData');
+  if (!carData) return;
+
+  const price = parseFloat(carData.dataset.price) || 0;          // Giá xe (triệu)
+  if (price <= 0) return;
+
+  // Trả trước (%)
+  const downPct = parseFloat(document.getElementById('downPaymentPct').value) || 30;
+  document.getElementById('downPctLabel').textContent = downPct + '%';
+
+  // Thời hạn vay (tháng)
+  const months = parseInt(document.getElementById('loanTerm').value) || 36;
+
+  // Tính toán vay
+  const annualRate = 0.09;                    // 9%/năm
+  const monthlyRate = annualRate / 12;
+  const loanAmount = price * (1 - downPct / 100);   // Số tiền vay
+
+  let monthlyPayment = 0;
+  if (monthlyRate > 0) {
+    monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) /
+                     (Math.pow(1 + monthlyRate, months) - 1);
+  } else {
+    monthlyPayment = loanAmount / months;
+  }
+
+  // Hiển thị kết quả
+  const displayEl = document.getElementById('monthlyPayment');
+  if (displayEl) {
+    displayEl.textContent = monthlyPayment.toFixed(2);
+  }
+}
+
+// Gọi lần đầu khi trang load để hiển thị giá trị mặc định
+function initLoanCalculator() {
+  const slider = document.getElementById('downPaymentPct');
+  const select = document.getElementById('loanTerm');
+  if (slider) slider.addEventListener('input', calcLoan);
+  if (select) select.addEventListener('change', calcLoan);
+  calcLoan();   // Tính ngay khi load
+}
+
+initLoanCalculator();
+
 // Khởi tạo
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('✅ car_detail.js loaded');

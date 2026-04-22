@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   if(hn&&tv.user.name) hn.value=tv.user.name;
   if(ph&&tv.user.phone) ph.value=tv.user.phone;
   tvChips(['Xe 500 trieu','Tu van vay xe','Toyota vs Honda','Xe dien tot','SUV gia dinh']);
-  tvBotMsg('Xin chao! Minh la tro ly AI AutoMart.\nMinh giup ban tim xe, so sanh, tu van vay.\nBan can tim xe nhu the nao?');
+  tvBotMsg('Xin chào, mình là AutoMart AI của trang web bán xe cũ AutoMart. \nMình giúp bạn tìm xe, so sánh, và tư vấn vay.\nVậy, bạn cần tìm một chiếc xe như thế nào?');
   if(window.lucide) lucide.createIcons();
 });
 
