@@ -296,57 +296,28 @@ def tin_tuc_detail(request: Request, news_id: int):
 
 @app.get("/uu-dai-thang")
 def uu_dai_thang(request: Request):
-    user = get_current_user_for_template(request)
-    from app.models.user import UserRole
     from app.services.car_service import get_cars
     from app.models.cars import CarFilter
-    from app.models.uu_dai import UuDai
-    from sqlmodel import select
-    from datetime import date
+
+    user = get_current_user_for_template(request)
 
     with Session(engine) as session:
-        today = date.today()
+        xe_list = get_cars(session, CarFilter())[:12]
 
-        # Lấy tất cả ưu đãi còn hiệu lực
-        active_deals = session.exec(
-            select(UuDai).where(
-                UuDai.ngay_bat_dau <= today,
-                UuDai.ngay_ket_thuc >= today,
-            )
-        ).all()
-
-        deal_map = {ud.xe_id: ud for ud in active_deals}
-        xe_ids = list(deal_map.keys())
-
-        if xe_ids:
-            from app.models.cars import Car
-            xe_list = session.exec(
-                select(Car).where(Car.id.in_(xe_ids))
-            ).all()
-        else:
-            xe_list = []
-
-        deals = []
-        for xe in xe_list:
-            ud = deal_map[xe.id]
-            deals.append({
-                "xe": xe,
-                "uu_dai": ud,
-                "gia_goc": xe.gia,
-                "gia_khuyen_mai": int(xe.gia * (1 - ud.phan_tram_giam / 100)),
-                "tiet_kiem": int(xe.gia * ud.phan_tram_giam / 100),
-            })
-
-    is_admin = bool(user and user.role == UserRole.admin)
+    deals = []
+    for xe in xe_list:
+        deals.append({
+            "xe": xe,
+            "gia_goc": xe.gia,
+            "gia_khuyen_mai": int(xe.gia * 0.85),
+            "tiet_kiem": int(xe.gia * 0.15),
+            "phan_tram": 15,
+        })
 
     return templates.TemplateResponse(
         request=request,
         name="uu_dai_thang.html",
-        context={
-            "current_user": user,
-            "deals": deals,
-            "is_admin": is_admin,
-        }
+        context={"current_user": user, "deals": deals}
     )
 
 @app.get("/huong-dan")
