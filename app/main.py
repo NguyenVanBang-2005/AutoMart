@@ -100,6 +100,7 @@ def home(request: Request):
         name="index.html",
         context={
             "current_user": user,
+            "current_user": user,
             "news_list": news_list,
             "hoi_dap_list": hoi_dap_list,
             "is_news_page": True,
@@ -298,12 +299,53 @@ def uu_dai_thang(request: Request):
     user = get_current_user_for_template(request)
     from app.services.car_service import get_cars
     from app.models.cars import CarFilter
+    from app.models.uu_dai import UuDai
+    from sqlmodel import select
+    from datetime import date
+
     with Session(engine) as session:
-        deals = get_cars(session, CarFilter())[:12]
+        today = date.today()
+
+        # Lấy tất cả ưu đãi còn hiệu lực
+        active_deals = session.exec(
+            select(UuDai).where(
+                UuDai.ngay_bat_dau <= today,
+                UuDai.ngay_ket_thuc >= today,
+            )
+        ).all()
+
+        deal_map = {ud.xe_id: ud for ud in active_deals}
+        xe_ids = list(deal_map.keys())
+
+        if xe_ids:
+            from app.models.cars import Car
+            xe_list = session.exec(
+                select(Car).where(Car.id.in_(xe_ids))
+            ).all()
+        else:
+            xe_list = []
+
+        deals = []
+        for xe in xe_list:
+            ud = deal_map[xe.id]
+            deals.append({
+                "xe": xe,
+                "uu_dai": ud,
+                "gia_goc": xe.gia,
+                "gia_khuyen_mai": int(xe.gia * (1 - ud.phan_tram_giam / 100)),
+                "tiet_kiem": int(xe.gia * ud.phan_tram_giam / 100),
+            })
+
+    is_admin = bool(user and user.role == UserRole.admin)
+
     return templates.TemplateResponse(
         request=request,
         name="uu_dai_thang.html",
-        context={"current_user": user, "deals": list(deals)}
+        context={
+            "current_user": user,
+            "deals": deals,
+            "is_admin": is_admin,
+        }
     )
 
 @app.get("/huong-dan")
