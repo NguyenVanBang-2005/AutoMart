@@ -70,7 +70,7 @@ def uu_dai_thang(
 
 # ─── API: Upsert ưu đãi (admin only) ─────────────────────────────────────────
 
-@router.post("/api/v1/uu-dai/{xe_id}")
+@router.post("/uu-dai/{xe_id}")
 def upsert_uu_dai(
     xe_id: int,
     request: Request,
@@ -110,7 +110,7 @@ def upsert_uu_dai(
 
 # ─── API: Xóa ưu đãi (admin only) ────────────────────────────────────────────
 
-@router.delete("/api/v1/uu-dai/{xe_id}")
+@router.delete("/uu-dai/{xe_id}")
 def delete_uu_dai(
     xe_id: int,
     request: Request,
