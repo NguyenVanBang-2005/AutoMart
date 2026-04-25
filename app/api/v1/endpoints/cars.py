@@ -53,6 +53,22 @@ async def add_car(
 
     return {"message": "Đăng xe thành công", "car_id": car.id}
 
+@router.delete("/{car_id}")
+def delete_car(car_id: int, session: Session = Depends(get_session)):
+    from sqlmodel import select
+    from app.models.cars import Car, CarImage
+
+    car = session.get(Car, car_id)
+    if not car:
+        raise HTTPException(status_code=404, detail="Không tìm thấy xe")
+
+    images = session.exec(select(CarImage).where(CarImage.car_id == car_id)).all()
+    for img in images:
+        session.delete(img)
+
+    session.delete(car)
+    session.commit()
+    return {"message": "Xóa xe thành công", "car_id": car_id}
 
 @router.get("/{car_id}/images")
 def list_car_images(car_id: int, session: Session = Depends(get_session)):
