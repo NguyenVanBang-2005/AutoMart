@@ -1,4 +1,4 @@
-console.log("✅ mua_xe.js loaded successfully");
+console.log("mua_xe.js loaded successfully");
 
 // ==================== LOAD & RENDER ====================
 async function loadCars() {
@@ -241,14 +241,14 @@ async function confirmXoaXe() {
       // Xóa khỏi allCars để filter sau vẫn đúng
       allCars = allCars.filter(function(c) { return c.id !== _xoaXeId; });
       closeModalXoaXe();
-      alert('✅ Đã xóa xe thành công');
+      alert('Đã xóa xe thành công');
     } else {
       var data = await res.json().catch(function() { return {}; });
-      alert('❌ ' + (data.detail || 'Xóa xe thất bại'));
+      alert((data.detail || 'Xóa xe thất bại'));
     }
   } catch (err) {
     console.error('Delete car error:', err);
-    alert('❌ Lỗi kết nối, vui lòng thử lại');
+    alert('Lỗi kết nối, vui lòng thử lại');
   } finally {
     if (btn) {
       btn.disabled = false;

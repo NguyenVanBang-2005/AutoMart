@@ -14,32 +14,9 @@
    </div>
   </div>
   <div class="hero-illustration">
-   <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg" width="320" height="200">
-    <!-- Body xe -->
-    <ellipse cx="160" cy="148" rx="140" ry="12" fill="rgba(249,115,22,0.15)"/>
-    <rect x="40" y="110" width="240" height="42" rx="8" fill="#f97316" opacity="0.9"/>
-    <!-- Cabin -->
-    <path d="M90 110 Q100 68 145 62 L195 62 Q230 65 240 110Z" fill="#fb923c"/>
-    <!-- Kính trước -->
-    <path d="M155 68 Q170 65 195 68 L232 108 L215 108Z" fill="rgba(255,255,255,0.25)"/>
-    <!-- Kính sau -->
-    <path d="M95 108 L112 108 Q100 78 105 70 L142 66 Q115 70 110 108Z" fill="rgba(255,255,255,0.18)"/>
-    <!-- Trụ giữa -->
-    <rect x="145" y="65" width="5" height="45" rx="2" fill="rgba(0,0,0,0.2)"/>
-    <!-- Bánh xe -->
-    <circle cx="95"  cy="152" r="22" fill="#1e293b"/>
-    <circle cx="95"  cy="152" r="13" fill="#334155"/>
-    <circle cx="95"  cy="152" r="5"  fill="#64748b"/>
-    <circle cx="225" cy="152" r="22" fill="#1e293b"/>
-    <circle cx="225" cy="152" r="13" fill="#334155"/>
-    <circle cx="225" cy="152" r="5"  fill="#64748b"/>
-    <!-- Đèn trước -->
-    <ellipse cx="278" cy="122" rx="8" ry="6" fill="#fef3c7" opacity="0.9"/>
-    <!-- Đèn sau -->
-    <rect x="38" y="116" width="6" height="14" rx="2" fill="#fca5a5" opacity="0.9"/>
-    <!-- Highlight -->
-    <path d="M100 88 Q160 72 230 80" stroke="rgba(255,255,255,0.3)" stroke-width="2" fill="none" stroke-linecap="round"/>
-   </svg>
+    <img src="{{ url_for('static', path='Logo.png') }}"
+         alt="AutoMart Logo"
+         style="width:320px; height:auto; object-fit:contain; drop-shadow(0 8px 32px rgba(0,0,0,0.3));">
   </div>
  </div>
 </section>
