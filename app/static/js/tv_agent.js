@@ -1,247 +1,402 @@
-const TV_API = window.location.origin + '/api/v1';
-const tv = { messages: [], cars: [], user: {}, busy: false };
+/* ═══════════════════════════════════════════════════════════
+   tv_agent.js — AutoMart AI Chat + Config Panel
+   ═══════════════════════════════════════════════════════════ */
 
-document.addEventListener('DOMContentLoaded', async function() {
-  var pd = document.getElementById('pageData');
-  if (pd) { tv.user = { name: pd.dataset.userName||'', phone: pd.dataset.userPhone||'' }; }
-  try {
-    var r = await fetch(TV_API+'/cars',{credentials:'include'});
-    if (r.ok) {
-      var d = await r.json();
-      tv.cars = (d.cars||[]).map(function(c){
-        return {id:c.id,brand:c.hang||'',model:c.dong||'',year:c.nam||0,price:c.gia||0,km:c.km||0,fuel:c.nhien_lieu||'',location:c.khu_vuc||'',image:c.anh||''};
-      });
-    }
-  } catch(e){}
-  var hn=document.getElementById('tvHoTen'),ph=document.getElementById('tvPhone');
-  if(hn&&tv.user.name) hn.value=tv.user.name;
-  if(ph&&tv.user.phone) ph.value=tv.user.phone;
-  tvChips(['Xe 500 trieu','Tu van vay xe','Toyota vs Honda','Xe dien tot','SUV gia dinh']);
-  tvBotMsg('Xin chào, mình là AutoMart AI của trang web bán xe cũ AutoMart. \nMình giúp bạn tìm xe, so sánh, và tư vấn vay.\nVậy, bạn cần tìm một chiếc xe như thế nào?');
-  if(window.lucide) lucide.createIcons();
-});
+// ── State ──────────────────────────────────────────────────
+let tvHistory = [];          // [{role, content}]
+let tvLoading = false;
+let tvPanelOpen = false;
 
-function tvSend() {
-  var inp=document.getElementById('tvInput');
-  var txt=inp?inp.value.trim():'';
-  if(!txt||tv.busy) return;
-  inp.value=''; inp.style.height='auto';
-  document.getElementById('tvChips').innerHTML='';
-  var slot=document.getElementById('tvCarSlot');
-  if(slot){slot.style.display='none';slot.innerHTML='';}
-  tvUserMsg(txt);
-  tv.messages.push({role:'user',content:txt});
-  tvCall();
+let tvConfig = {
+  persona: 'thân thiện',
+  focus:   'tìm xe phù hợp',
+  budget:  5,                // 0-5, 5 = mọi mức
+  brands:  [],               // [] = tất cả
+  year:    '',               // '' = tất cả
+};
+
+const TV_BUDGET_LABELS = [
+  'Mọi mức', 'dưới 300 triệu', '300–500 triệu',
+  '500 triệu–1 tỷ', '1–1.5 tỷ', '1.5–2 tỷ', 'trên 2 tỷ'
+];
+
+// ── System prompt builder ──────────────────────────────────
+function tvBuildSystemPrompt() {
+  const budget = tvConfig.budget === 5
+    ? 'mọi mức giá'
+    : TV_BUDGET_LABELS[tvConfig.budget];
+
+  const brands = tvConfig.brands.length
+    ? tvConfig.brands.join(', ')
+    : 'tất cả hãng xe';
+
+  const year = tvConfig.year || 'mọi năm sản xuất';
+
+  let toneGuide = '';
+  if (tvConfig.persona === 'thân thiện')    toneGuide = 'Nói chuyện thân thiện, gần gũi, dùng từ ngữ đời thường.';
+  if (tvConfig.persona === 'chuyên nghiệp') toneGuide = 'Phong cách chuyên nghiệp, chính xác, trích dẫn số liệu cụ thể.';
+  if (tvConfig.persona === 'ngắn gọn')      toneGuide = 'Trả lời ngắn gọn, súc tích, tối đa 3-4 câu mỗi lượt.';
+
+  return `Bạn là AutoMart AI, trợ lý tư vấn xe cũ thông minh của AutoMart Việt Nam — nền tảng mua bán xe uy tín tại Việt Nam.
+
+CÁCH GIAO TIẾP: ${toneGuide}
+LĨNH VỰC TRỌNG TÂM: ${tvConfig.focus}.
+NGÂN SÁCH KHÁCH HÀNG: ${budget}.
+HÃNG XE ƯU TIÊN: ${brands}.
+NĂM SẢN XUẤT: ${year}.
+
+QUY TẮC:
+- Luôn trả lời bằng tiếng Việt.
+- Khi gợi ý xe, đưa ra tối đa 3 xe cụ thể, nêu tên model, giá ước tính, ưu điểm nổi bật.
+- Ưu tiên các xe phù hợp với ngân sách và hãng đã cấu hình.
+- Nếu không có xe phù hợp, hãy nói thật và gợi ý thay thế hợp lý.
+- Không bịa đặt thông tin. Nếu không chắc, hãy nói "Bạn nên liên hệ nhân viên AutoMart để xác nhận chính xác."
+- Cuối mỗi câu trả lời dài, hỏi thêm 1 câu để hiểu thêm nhu cầu khách hàng.`;
 }
 
-async function tvCall() {
-  tv.busy=true;
-  var btn=document.getElementById('tvSendBtn');
-  if(btn) btn.disabled=true;
-  tvTyping(true);
+// ── Panel toggle ───────────────────────────────────────────
+function tvTogglePanel() {
+  tvPanelOpen = !tvPanelOpen;
+  const body    = document.getElementById('tvPanelBody');
+  const chevron = document.getElementById('tvPanelChevron');
 
-  try {
-    var r = await fetch(TV_API+'/ai/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      credentials:'include',
-      body:JSON.stringify({system:buildSystemPrompt(),messages:tv.messages})
-    });
-
-    var d = await r.json();
-
-    if(!r.ok) {
-      tvTyping(false);
-      tvBotMsg(String(d.error || d.detail || 'Loi ket noi. Thu lai sau.'));
-      tv.busy=false; if(btn) btn.disabled=false;
-      return;
-    }
-
-    tvTyping(false);
-    var raw = '';
-    if(d.content && Array.isArray(d.content)) {
-      raw = d.content.filter(function(b){return b.type==='text';}).map(function(b){return b.text||'';}).join('');
-    }
-    if(!raw) raw = d.error || d.detail || 'Khong co phan hoi.';
-    raw = String(raw);
-
-    var ids=[], re=/\[\[XE:(\d+)\]\]/g, m;
-    while((m=re.exec(raw))!==null) ids.push(parseInt(m[1]));
-    var clean=raw.replace(/\[\[XE:\d+\]\]/g,'').trim();
-    var low=raw.toLowerCase();
-    if(['tu van vien','dang ky','nhan vien'].some(function(w){return low.indexOf(w)!==-1;})) tvShowForm();
-    tv.messages.push({role:'assistant',content:raw});
-    tvBotMsg(clean);
-    if(ids.length){
-      var found=ids.map(function(id){return tv.cars.find(function(c){return c.id===id;});}).filter(Boolean).slice(0,4);
-      if(found.length) tvShowCars(found);
-    }
-    var t=raw.toLowerCase(), chips;
-    if(t.indexOf('trieu')!==-1||t.indexOf('ngan sach')!==-1) chips=['Xe SUV tam gia','Sedan phu hop','Xe dien re'];
-    else if(t.indexOf('vay')!==-1) chips=['Dieu kien vay','Vay bao nhieu?','Ngan hang tot?'];
-    else if(t.indexOf('so sanh')!==-1) chips=['So sanh xe khac','Xe nao ben?','Chi phi bao duong?'];
-    else if(t.indexOf('vinfast')!==-1||t.indexOf('dien')!==-1) chips=['Chi phi sac','VF8 vs VF6','Tram sac o dau?'];
-    else chips=['Xem them xe','Tu van vay','Gap tu van vien'];
-    tvChips(chips);
-  } catch(e) {
-    tvTyping(false);
-    tvBotMsg('Gap su co. Thu lai hoac goi 1900 1234.');
-    console.error('[AI Agent]', e);
+  if (tvPanelOpen) {
+    body.style.maxHeight = body.scrollHeight + 800 + 'px';
+    body.style.opacity   = '1';
+    chevron.style.transform = 'rotate(180deg)';
+    // Render Lucide icons bên trong panel sau khi mở
+    setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
+  } else {
+    body.style.maxHeight = '0';
+    body.style.opacity   = '0';
+    chevron.style.transform = 'rotate(0deg)';
   }
-  tv.busy=false;
-  if(btn) btn.disabled=false;
 }
 
-function buildSystemPrompt() {
-  var carList = tv.cars.length
-    ? tv.cars.map(function(c){
-        return '[ID:'+c.id+'] '+c.brand+' '+c.model+' | Nam:'+c.year+' | Gia:'+c.price+'tr | ODO:'+c.km+'km | NL:'+c.fuel+' | KV:'+c.location;
-      }).join('\n')
-    : 'Chua co du lieu xe.';
+// ── Tab switch ─────────────────────────────────────────────
+function tvSwitchTab(n) {
+  document.getElementById('tvConfigPane').style.display = n === 1 ? 'block' : 'none';
+  document.getElementById('tvFormPane').style.display   = n === 2 ? 'block' : 'none';
+  document.getElementById('tvTab1').classList.toggle('tv-tab-active', n === 1);
+  document.getElementById('tvTab2').classList.toggle('tv-tab-active', n === 2);
 
-  var userCtx = tv.user.name
-    ? 'Khach hang: '+tv.user.name+(tv.user.phone?', SDT:'+tv.user.phone:'')+'.'
-    : 'Khach chua dang nhap.';
-
-  return 'Ban la tro ly AI cua AutoMart - san mua ban xe cu tai Viet Nam.\n'
-    + userCtx + '\n\n'
-    + 'NHIEM VU:\n'
-    + '- Tu van khach tim xe phu hop ngan sach, nhu cau, khu vuc\n'
-    + '- So sanh cac dong xe trong kho\n'
-    + '- Giai thich thong tin ky thuat xe\n'
-    + '- Tu van so bo ve vay mua xe, bao hiem, dang ky xe\n'
-    + '- Khi goi y xe cu the: dung [[XE:ID]], toi da 4 xe\n\n'
-    + 'KIEN THUC CO BAN:\n'
-    + '- Chi phi sac xe dien tai nha: 1.500-2.500 VND/kWh, trung binh 50.000-80.000 VND/lan sac day\n'
-    + '- Sac tai tram cong cong VinFast: 3.858 VND/kWh (AC), 4.500-5.000 VND/kWh (DC fast charge)\n'
-    + '- Thue truoc ba: 2-6% tuy tinh (Ha Noi, HCM: 6%, tinh khac: 2%)\n'
-    + '- Phi dang ky bien so: 1-2 trieu VND\n'
-    + '- Bao hiem bat buoc TNDS: 600.000-700.000 VND/nam\n'
-    + '- Bao hiem than xe: 1-1.5% gia tri xe/nam\n'
-    + '- Chi phi bao duong xe xang: 3-5 trieu/nam\n'
-    + '- Chi phi bao duong xe dien: thap hon 40-60% so xe xang\n'
-    + '- Lai suat vay mua xe: 7-9%/nam (ngan hang), 8-11% (cong ty tai chinh)\n'
-    + '- Ty le vay toi da: 70-80% gia tri xe, ky han 5-8 nam\n\n'
-    + 'NGUYEN TAC BAT BUOC:\n'
-    + '1. Chi tra loi dua tren KIEN THUC CO BAN hoac DANH SACH XE ben duoi\n'
-    + '2. NEU KHONG BIET chinh xac: noi "Minh chua co thong tin chinh xac, ban lien he truc tiep de duoc ho tro"\n'
-    + '3. KHONG bao gio tu y bia dat so lieu, chi phi, chinh sach\n'
-    + '4. KHONG nham lan "phi tu van" va "chi phi mua xe" - AutoMart tu van MIEN PHI\n'
-    + '5. Tra loi ngan gon, dung trong tam, than thien, bang Tieng Viet\n'
-    + '6. Cuoi moi tu van ve xe: nhac khach dang ky gap tu van vien\n\n'
-    + 'DANH SACH XE TRONG KHO (' + tv.cars.length + ' xe):\n'
-    + carList;
+  // Recalc panel height
+  const body = document.getElementById('tvPanelBody');
+  if (tvPanelOpen) {
+    body.style.maxHeight = body.scrollHeight + 800 + 'px';
+  }
+  // Re-render icons
+  setTimeout(() => { if (window.lucide) lucide.createIcons(); }, 50);
 }
 
-function tvShowForm() {
-  var w=document.getElementById('tvFormWrapper');
-  if(!w||w.style.display!=='none') return;
-  w.style.display='block';
-  if(window.innerWidth<=960) setTimeout(function(){w.scrollIntoView({behavior:'smooth'});},100);
-  tvBotMsg('Form dang ky da mo - dien thong tin de nhan vien lien he trong 30 phut!');
-  if(window.lucide) lucide.createIcons();
+// ── Pill picker (single select) ────────────────────────────
+function tvPickPill(el, groupId) {
+  document.querySelectorAll(`#${groupId} .tv-pill`).forEach(b => b.classList.remove('tv-pill-active'));
+  el.classList.add('tv-pill-active');
 }
 
-function tvShowCars(cars) {
-  var slot=document.getElementById('tvCarSlot');
-  if(!slot) return;
-  slot.style.display='block';
-  slot.innerHTML='<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:8px;">Xe goi y</div>'
-    +'<div style="display:flex;gap:10px;">'
-    +cars.map(function(c){
-      var img=c.image?'<img src="'+c.image+'" style="width:100%;height:100%;object-fit:cover;">':'';
-      return '<a class="tv-mini-card" href="/xe/'+c.id+'">'
-        +'<div class="tv-mini-img">'+img+'</div>'
-        +'<div class="tv-mini-body">'
-        +'<div class="tv-mini-title">'+c.brand+' '+c.model+'</div>'
-        +'<div class="tv-mini-price">'+Number(c.price).toLocaleString('vi-VN')+' tr</div>'
-        +'<div class="tv-mini-spec">'+c.year+' - '+Number(c.km).toLocaleString('vi-VN')+'km</div>'
-        +'</div>'
-        +'<span class="tv-mini-cta">Xem chi tiet</span></a>';
-    }).join('')+'</div>';
+// ── Pill picker (multi select) cho brand ──────────────────
+function tvPickPillMulti(el, groupId, isAll) {
+  const group = document.getElementById(groupId);
+  const allBtn = group.querySelector('[data-val=""]');
+
+  if (isAll) {
+    // "Tất cả" được chọn → bỏ hết, chỉ active "Tất cả"
+    group.querySelectorAll('.tv-pill').forEach(b => b.classList.remove('tv-pill-active'));
+    allBtn.classList.add('tv-pill-active');
+    return;
+  }
+
+  // Bỏ active "Tất cả"
+  allBtn.classList.remove('tv-pill-active');
+  el.classList.toggle('tv-pill-active');
+
+  // Nếu không còn hãng nào được chọn → quay về "Tất cả"
+  const anyActive = [...group.querySelectorAll('.tv-pill:not([data-val=""])')].some(b => b.classList.contains('tv-pill-active'));
+  if (!anyActive) allBtn.classList.add('tv-pill-active');
 }
 
-function tvUserMsg(text) {
-  var box=document.getElementById('tvMessages'); if(!box) return;
-  var el=document.createElement('div'); el.className='tv-bubble tv-bubble-user';
-  el.innerHTML='<div class="tv-avatar tv-avatar-user"><i data-lucide="user" style="width:16px;height:16px;color:#888;"></i></div>'
-    +'<div class="tv-text tv-text-user">'+tvEsc(text)+'</div>';
-  box.appendChild(el); box.scrollTop=box.scrollHeight;
-  if(window.lucide) lucide.createIcons();
+// ── Budget slider ──────────────────────────────────────────
+function tvBudgetChange(val) {
+  const v = parseInt(val);
+  const labels = ['Mọi mức', '< 300tr', '300–500tr', '500tr–1 tỷ', '1–1.5 tỷ', '1.5–2 tỷ', '> 2 tỷ'];
+  document.getElementById('tvBudgetLabel').textContent = labels[v] || 'Mọi mức';
+
+  // Update track fill
+  const pct = (v / 5) * 100;
+  document.getElementById('tvBudgetTrack').style.width = pct + '%';
 }
 
-function tvBotMsg(text) {
-  var box=document.getElementById('tvMessages'); if(!box) return;
-  var el=document.createElement('div'); el.className='tv-bubble tv-bubble-bot';
-  el.innerHTML='<div class="tv-avatar tv-avatar-bot"><i data-lucide="bot" style="width:16px;height:16px;color:#fff;"></i></div>'
-    +'<div class="tv-text tv-text-bot" style="white-space:pre-wrap;">'+tvEsc(text)+'</div>';
-  box.appendChild(el); box.scrollTop=box.scrollHeight;
-  if(window.lucide) lucide.createIcons();
+// ── Apply config & reset chat ──────────────────────────────
+function tvApplyConfig() {
+  // Đọc persona
+  const personaEl = document.querySelector('#tvPersonaGroup .tv-pill-active');
+  if (personaEl) tvConfig.persona = personaEl.dataset.val;
+
+  // Đọc focus
+  const focusEl = document.querySelector('#tvFocusGroup .tv-pill-active');
+  if (focusEl) tvConfig.focus = focusEl.dataset.val;
+
+  // Đọc budget
+  tvConfig.budget = parseInt(document.getElementById('tvBudget').value);
+
+  // Đọc brands
+  tvConfig.brands = [...document.querySelectorAll('#tvBrandGroup .tv-pill-active')]
+    .map(b => b.dataset.val)
+    .filter(v => v !== '');
+
+  // Đọc year
+  const yearEl = document.querySelector('#tvYearGroup .tv-pill-active');
+  tvConfig.year = yearEl ? yearEl.dataset.val : '';
+
+  // Update subtitle
+  tvUpdateSubtitle();
+
+  // Reset chat với config mới
+  tvClearChat();
+
+  // Hiện thông báo
+  const applied = document.getElementById('tvConfigApplied');
+  applied.style.display = 'block';
+  setTimeout(() => { applied.style.display = 'none'; }, 2500);
 }
 
-function tvTyping(show) {
-  var box=document.getElementById('tvMessages'); if(!box) return;
-  var old=document.getElementById('tvTyping'); if(old) old.remove();
-  if(!show) return;
-  var el=document.createElement('div'); el.id='tvTyping'; el.className='tv-bubble tv-bubble-bot';
-  el.innerHTML='<div class="tv-avatar tv-avatar-bot"><i data-lucide="bot" style="width:16px;height:16px;color:#fff;"></i></div>'
-    +'<div class="tv-text tv-text-bot" style="padding:10px 16px;">'
-    +'<div style="display:flex;gap:5px;align-items:center;">'
-    +'<div class="tv-dot"></div><div class="tv-dot"></div><div class="tv-dot"></div>'
-    +'</div></div>';
-  box.appendChild(el); box.scrollTop=box.scrollHeight;
-  if(window.lucide) lucide.createIcons();
+// ── Update subtitle header ─────────────────────────────────
+function tvUpdateSubtitle() {
+  const budgetLabels = ['Mọi mức', '<300tr', '300–500tr', '500tr–1tỷ', '1–1.5tỷ', '1.5–2tỷ', '>2tỷ'];
+  const budget = budgetLabels[tvConfig.budget] || 'Mọi mức';
+
+  const personaMap = { 'thân thiện': 'Thân thiện', 'chuyên nghiệp': 'Chuyên nghiệp', 'ngắn gọn': 'Ngắn gọn' };
+  const focusMap = {
+    'tìm xe phù hợp': 'Tìm xe',
+    'tư vấn vay vốn mua xe': 'Vay vốn',
+    'bảo hành & bảo hiểm xe': 'Bảo hành',
+    'định giá xe cũ': 'Định giá',
+  };
+
+  const persona = personaMap[tvConfig.persona] || tvConfig.persona;
+  const focus   = focusMap[tvConfig.focus] || tvConfig.focus;
+
+  document.getElementById('tvPanelSubtitle').textContent = `${persona} · ${focus} · ${budget}`;
 }
 
-function tvChips(items) {
-  var box=document.getElementById('tvChips'); if(!box) return;
-  box.innerHTML=items.map(function(it){
-    return '<button class="tv-chip" onclick="tvChipClick(this)">'+it+'</button>';
-  }).join('');
+// ── Clear chat ─────────────────────────────────────────────
+function tvClearChat() {
+  tvHistory = [];
+  tvLoading = false;
+  document.getElementById('tvMessages').innerHTML = '';
+  document.getElementById('tvCarSlot').style.display  = 'none';
+  document.getElementById('tvCarSlot').innerHTML      = '';
+  document.getElementById('tvChips').innerHTML        = '';
+  tvShowWelcome();
 }
 
-function tvChipClick(btn) {
-  var inp=document.getElementById('tvInput');
-  if(inp){inp.value=btn.textContent;inp.focus();}
+// ── Welcome message ────────────────────────────────────────
+function tvShowWelcome() {
+  const focusMap = {
+    'tìm xe phù hợp':        'Bạn cần tìm một chiếc xe như thế nào?',
+    'tư vấn vay vốn mua xe':  'Bạn muốn tư vấn gói vay mua xe nào?',
+    'bảo hành & bảo hiểm xe': 'Bạn cần tư vấn bảo hành cho dòng xe nào?',
+    'định giá xe cũ':         'Bạn muốn định giá chiếc xe nào?',
+  };
+  const question = focusMap[tvConfig.focus] || 'Bạn cần tìm một chiếc xe như thế nào?';
+
+  tvAppendBot(`Xin chào, mình là AutoMart AI của trang web bán xe cũ AutoMart.\nMình giúp bạn tìm xe, so sánh, và tư vấn vay.\nVậy, ${question}`);
+
+  tvSetChips([
+    'Xe dưới 500 triệu',
+    'Toyota phổ biến',
+    'Xe gia đình 7 chỗ',
+    'Xe tiết kiệm xăng',
+    'Xe mới nhập 2022+',
+  ]);
+}
+
+// ── Append bot message ─────────────────────────────────────
+function tvAppendBot(text) {
+  const wrap = document.getElementById('tvMessages');
+  const div  = document.createElement('div');
+  div.className = 'tv-bubble tv-bubble-bot';
+  div.innerHTML = `
+    <div class="tv-avatar tv-avatar-bot">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        <line x1="12" y1="15" x2="12" y2="17"/>
+      </svg>
+    </div>
+    <div class="tv-text tv-text-bot" style="white-space:pre-line;">${tvEscape(text)}</div>`;
+  wrap.appendChild(div);
+  tvScrollBottom();
+}
+
+// ── Append user message ────────────────────────────────────
+function tvAppendUser(text) {
+  const wrap = document.getElementById('tvMessages');
+  const div  = document.createElement('div');
+  div.className = 'tv-bubble tv-bubble-user';
+  div.innerHTML = `
+    <div class="tv-avatar tv-avatar-user">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+    </div>
+    <div class="tv-text tv-text-user">${tvEscape(text)}</div>`;
+  wrap.appendChild(div);
+  tvScrollBottom();
+}
+
+// ── Typing indicator ───────────────────────────────────────
+function tvShowTyping() {
+  const wrap = document.getElementById('tvMessages');
+  const div  = document.createElement('div');
+  div.className = 'tv-bubble tv-bubble-bot';
+  div.id = 'tvTypingIndicator';
+  div.innerHTML = `
+    <div class="tv-avatar tv-avatar-bot">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        <line x1="12" y1="15" x2="12" y2="17"/>
+      </svg>
+    </div>
+    <div class="tv-text tv-text-bot" style="display:flex;gap:5px;align-items:center;padding:12px 16px;">
+      <span class="tv-dot"></span><span class="tv-dot"></span><span class="tv-dot"></span>
+    </div>`;
+  wrap.appendChild(div);
+  tvScrollBottom();
+}
+
+function tvHideTyping() {
+  const el = document.getElementById('tvTypingIndicator');
+  if (el) el.remove();
+}
+
+// ── Quick chips ────────────────────────────────────────────
+function tvSetChips(chips) {
+  const el = document.getElementById('tvChips');
+  el.innerHTML = chips.map(c =>
+    `<button class="tv-chip" onclick="tvChipClick(this,'${tvEscape(c)}')">${tvEscape(c)}</button>`
+  ).join('');
+}
+
+function tvChipClick(el, text) {
+  document.getElementById('tvInput').value = text;
   tvSend();
 }
 
-function tvClearChat() {
-  tv.messages=[];
-  var box=document.getElementById('tvMessages'); if(box) box.innerHTML='';
-  var slot=document.getElementById('tvCarSlot'); if(slot){slot.style.display='none';slot.innerHTML='';}
-  tvChips(['Xe 500 trieu','Tu van vay xe','Toyota vs Honda','Xe dien tot','SUV gia dinh']);
-  tvBotMsg('Xin chao! Minh la tro ly AI AutoMart.\nBan can tim xe nhu the nao?');
+// ── Send message ───────────────────────────────────────────
+async function tvSend() {
+  if (tvLoading) return;
+  const input = document.getElementById('tvInput');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  tvResize(input);
+  document.getElementById('tvChips').innerHTML = '';
+
+  tvAppendUser(text);
+  tvHistory.push({ role: 'user', content: text });
+
+  tvLoading = true;
+  tvShowTyping();
+
+  try {
+    const res = await fetch('/api/v1/tu-van/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages:      tvHistory,
+        system_prompt: tvBuildSystemPrompt(),
+      }),
+    });
+
+    tvHideTyping();
+
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const data = await res.json();
+    const reply = data.reply || data.message || '(Không có phản hồi)';
+
+    tvAppendBot(reply);
+    tvHistory.push({ role: 'assistant', content: reply });
+
+    // Gợi ý chips tiếp theo
+    tvSetChips(['Xem thêm xe khác', 'So sánh 2 xe', 'Tư vấn vay vốn', 'Đặt lịch xem xe']);
+
+  } catch (err) {
+    tvHideTyping();
+    tvAppendBot('Xin lỗi, hiện tại không thể kết nối. Vui lòng thử lại sau hoặc gọi Hotline 1900 1234.');
+    console.error('[tv_agent]', err);
+  }
+
+  tvLoading = false;
 }
 
-function tvKeyDown(e) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();tvSend();} }
-function tvResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+// ── Keyboard handler ───────────────────────────────────────
+function tvKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    tvSend();
+  }
+}
 
+// ── Auto-resize textarea ───────────────────────────────────
+function tvResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ── Scroll to bottom ───────────────────────────────────────
+function tvScrollBottom() {
+  const el = document.getElementById('tvMessages');
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── HTML escape ────────────────────────────────────────────
+function tvEscape(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ── Form submit ────────────────────────────────────────────
 async function tvFormSubmit(e) {
   e.preventDefault();
-  var form=e.target, btn=form.querySelector('button[type=submit]');
-  var data=Object.fromEntries(new FormData(form));
-  if(!data.ho_ten||!data.so_dien_thoai){if(typeof showToast==='function')showToast('Dien ho ten va SDT!');return;}
-  if(tv.messages.length>0){
-    data.mo_ta=(data.mo_ta?data.mo_ta+'\n\n':'')+'[Chat AI]\n'+
-      tv.messages.map(function(m){return(m.role==='user'?'Khach':'AI')+': '+m.content;}).join('\n');
-  }
-  if(btn){btn.disabled=true;btn.classList.add('btn-loading');}
+  const form    = document.getElementById('tvForm');
+  const data    = Object.fromEntries(new FormData(form));
+  const success = document.getElementById('tvFormSuccess');
+
   try {
-    var r=await fetch(TV_API+'/tu-van',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify(data)});
-    var res=await r.json();
-    if(!r.ok){if(typeof showToast==='function')showToast(res.detail||'Gui that bai!');return;}
-    var s=document.getElementById('tvFormSuccess');
-    if(s){s.style.display='flex';if(window.lucide)lucide.createIcons();}
-    if(btn) btn.style.display='none';
-    form.reset();
-    var hn=document.getElementById('tvHoTen'),ph=document.getElementById('tvPhone');
-    if(hn&&tv.user.name)hn.value=tv.user.name;
-    if(ph&&tv.user.phone)ph.value=tv.user.phone;
-    if(typeof showToast==='function') showToast('Dang ky thanh cong!');
-    tvBotMsg('Da dang ky thanh cong! Nhan vien se lien he trong 30 phut.');
-  } catch(err){if(typeof showToast==='function')showToast('Khong the ket noi!');}
-  finally{if(btn){btn.disabled=false;btn.classList.remove('btn-loading');}}
+    const res = await fetch('/api/v1/tu-van', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(data),
+    });
+    if (res.ok) {
+      success.style.display = 'flex';
+      form.reset();
+      setTimeout(() => { success.style.display = 'none'; }, 4000);
+    }
+  } catch (err) {
+    console.error('[tvForm]', err);
+  }
 }
 
-function tvEsc(s){s=s==null?'':String(s);return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+// ── Init ───────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Prefill form từ user đang đăng nhập (nếu có)
+  const pageData = document.getElementById('pageData');
+  if (pageData) {
+    const name  = pageData.dataset.userName;
+    const phone = pageData.dataset.userPhone;
+    if (name)  { const el = document.getElementById('tvHoTen');  if (el) el.value = name; }
+    if (phone) { const el = document.getElementById('tvPhone');  if (el) el.value = phone; }
+  }
+
+  // Budget track init (slider bắt đầu ở max = "Mọi mức")
+  tvBudgetChange(5);
+
+  // Hiện welcome message
+  tvShowWelcome();
+});

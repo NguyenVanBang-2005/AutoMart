@@ -39,12 +39,14 @@
       </div>
     </div>
 
+    <!-- Main layout: chat + right panel -->
     <div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start;" id="tuvanLayout">
 
-      <!-- Chat panel -->
+      <!-- ── CHAT PANEL ── -->
       <div>
         <div class="search-box" style="padding:0;overflow:hidden;display:flex;flex-direction:column;height:clamp(540px,72vh,780px);">
 
+          <!-- Chat header -->
           <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#1a1a1a;flex-shrink:0;">
             <div style="display:flex;align-items:center;gap:10px;">
               <div style="width:36px;height:36px;border-radius:50%;background:#c8a96e;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -63,12 +65,16 @@
             </button>
           </div>
 
+          <!-- Messages -->
           <div id="tvMessages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;background:#f8f8f5;scroll-behavior:smooth;"></div>
 
+          <!-- Car slot -->
           <div id="tvCarSlot" style="display:none;padding:10px 14px;background:#f3f2ee;border-top:1px solid #eaeae0;overflow-x:auto;flex-shrink:0;"></div>
 
+          <!-- Quick chips -->
           <div id="tvChips" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px 0;flex-shrink:0;background:#fff;min-height:38px;"></div>
 
+          <!-- Input bar -->
           <div style="display:flex;gap:8px;align-items:flex-end;padding:12px 14px;background:#fff;border-top:1px solid #eaeae0;flex-shrink:0;">
             <textarea id="tvInput" rows="1"
               placeholder="Nhập câu hỏi của bạn..."
@@ -84,90 +90,217 @@
         </div>
       </div>
 
-      <!-- Form panel -->
+      <!-- ── RIGHT PANEL: AI Config + Form tabs ── -->
       <div>
-        <div id="tvFormWrapper" class="search-box" style="display:none;position:sticky;top:88px;">
-          <h3 class="search-title">
-            <i data-lucide="user-round" style="width:20px;height:20px;"></i>
-            Đăng ký gặp tư vấn viên
-          </h3>
-          <p style="font-size:13px;color:#888880;margin-bottom:18px;margin-top:-8px;">
-            Để lại thông tin — nhân viên liên hệ trong 30 phút.
-          </p>
-          <form id="tvForm" onsubmit="tvFormSubmit(event)">
-            <div class="form-group" style="margin-bottom:12px;">
-              <label class="form-label">Họ tên *</label>
-              <input id="tvHoTen" name="ho_ten" type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+        <div id="tvRightPanel" class="search-box" style="position:sticky;top:88px;padding:0;overflow:hidden;">
+
+          <!-- Panel header / toggle -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#1a1a1a;cursor:pointer;" onclick="tvTogglePanel()">
+            <div style="display:flex;align-items:center;gap:9px;">
+              <div style="width:30px;height:30px;border-radius:8px;background:rgba(200,169,110,0.18);display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="sliders-horizontal" style="width:16px;height:16px;color:#c8a96e;"></i>
+              </div>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#fff;">Tùy chỉnh AI</div>
+                <div id="tvPanelSubtitle" style="font-size:10px;color:#888880;margin-top:1px;">Thân thiện · Tìm xe · Mọi ngân sách</div>
+              </div>
             </div>
-            <div class="form-group" style="margin-bottom:12px;">
-              <label class="form-label">Số điện thoại *</label>
-              <input id="tvPhone" name="so_dien_thoai" type="tel" class="form-control" placeholder="0901 234 567" required>
-            </div>
-            <div class="form-group" style="margin-bottom:12px;">
-              <label class="form-label">Chủ đề</label>
-              <select name="chu_de" class="form-control">
-                <option value="">Chọn chủ đề</option>
-                <option>Mua xe phù hợp ngân sách</option>
-                <option>Vay mua xe</option>
-                <option>Kiểm định xe trước khi mua</option>
-                <option>Đổi xe cũ lấy xe mới</option>
-                <option>Bảo hành & bảo hiểm</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:12px;">
-              <label class="form-label">Thời gian liên hệ</label>
-              <select name="thoi_gian" class="form-control">
-                <option value="">Bất kỳ lúc nào</option>
-                <option>Sáng (8:00 - 12:00)</option>
-                <option>Chiều (12:00 - 17:00)</option>
-                <option>Tối (17:00 - 20:00)</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:18px;">
-              <label class="form-label">Ghi chú</label>
-              <textarea name="mo_ta" class="form-control" rows="3" placeholder="Mô tả nhu cầu..."></textarea>
-            </div>
-            <div id="tvFormSuccess" style="display:none;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;font-size:13px;color:#166534;font-weight:500;margin-bottom:12px;">
-              <i data-lucide="circle-check" style="width:20px;height:20px;color:#22c55e;"></i>
-              Đăng ký thành công! Nhân viên sẽ liên hệ sớm.
-            </div>
-            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
-              Đăng ký tư vấn
-            </button>
-          </form>
-          <div style="display:flex;align-items:flex-start;gap:12px;margin-top:20px;padding:14px 16px;background:#faf8f3;border:1px solid #ede8d8;border-radius:10px;">
-            <i data-lucide="phone" style="width:18px;height:18px;color:#c8a96e;flex-shrink:0;margin-top:2px;"></i>
-            <div>
-              <div style="font-size:11px;color:#888880;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Hotline</div>
-              <div style="font-size:17px;font-weight:800;color:#c8a96e;">1900 1234</div>
-              <div style="font-size:11px;color:#a8a898;">Thứ 2 – CN, 8:00 – 20:00</div>
-            </div>
+            <i data-lucide="chevron-down" id="tvPanelChevron" style="width:18px;height:18px;color:#888880;transition:transform .25s;"></i>
           </div>
+
+          <!-- Collapsible body -->
+          <div id="tvPanelBody" style="overflow:hidden;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .25s;max-height:0;opacity:0;">
+
+            <!-- Tabs -->
+            <div style="display:flex;border-bottom:1px solid #eaeae0;">
+              <button class="tv-tab tv-tab-active" id="tvTab1" onclick="tvSwitchTab(1)" style="flex:1;">
+                <i data-lucide="sliders-horizontal" style="width:13px;height:13px;"></i> Cấu hình AI
+              </button>
+              <button class="tv-tab" id="tvTab2" onclick="tvSwitchTab(2)" style="flex:1;">
+                <i data-lucide="user-round" style="width:13px;height:13px;"></i> Đăng ký tư vấn
+              </button>
+            </div>
+
+            <!-- Tab 1: AI Config -->
+            <div id="tvConfigPane" style="padding:16px 18px 20px;">
+
+              <!-- Persona -->
+              <div style="margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#888880;margin-bottom:8px;">
+                  <i data-lucide="message-circle" style="width:11px;height:11px;display:inline;vertical-align:middle;margin-right:4px;"></i>Giọng điệu AI
+                </div>
+                <div style="display:flex;gap:7px;flex-wrap:wrap;" id="tvPersonaGroup">
+                  <button class="tv-pill tv-pill-active" data-val="thân thiện" onclick="tvPickPill(this,'tvPersonaGroup')"><i data-lucide="smile" style="width:12px;height:12px;"></i> Thân thiện</button>
+                  <button class="tv-pill" data-val="chuyên nghiệp" onclick="tvPickPill(this,'tvPersonaGroup')"><i data-lucide="briefcase" style="width:12px;height:12px;"></i> Chuyên nghiệp</button>
+                  <button class="tv-pill" data-val="ngắn gọn" onclick="tvPickPill(this,'tvPersonaGroup')"><i data-lucide="zap" style="width:12px;height:12px;"></i> Ngắn gọn</button>
+                </div>
+              </div>
+
+              <!-- Focus area -->
+              <div style="margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#888880;margin-bottom:8px;">
+                  <i data-lucide="target" style="width:11px;height:11px;display:inline;vertical-align:middle;margin-right:4px;"></i>Tập trung vào
+                </div>
+                <div style="display:flex;gap:7px;flex-wrap:wrap;" id="tvFocusGroup">
+                  <button class="tv-pill tv-pill-active" data-val="tìm xe phù hợp" onclick="tvPickPill(this,'tvFocusGroup')"><i data-lucide="search" style="width:12px;height:12px;"></i> Tìm xe</button>
+                  <button class="tv-pill" data-val="tư vấn vay vốn mua xe" onclick="tvPickPill(this,'tvFocusGroup')"><i data-lucide="landmark" style="width:12px;height:12px;"></i> Vay vốn</button>
+                  <button class="tv-pill" data-val="bảo hành & bảo hiểm xe" onclick="tvPickPill(this,'tvFocusGroup')"><i data-lucide="shield-check" style="width:12px;height:12px;"></i> Bảo hành</button>
+                  <button class="tv-pill" data-val="định giá xe cũ" onclick="tvPickPill(this,'tvFocusGroup')"><i data-lucide="circle-dollar-sign" style="width:12px;height:12px;"></i> Định giá</button>
+                </div>
+              </div>
+
+              <!-- Budget slider -->
+              <div style="margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#888880;">Ngân sách</div>
+                  <div id="tvBudgetLabel" style="font-size:12px;font-weight:700;color:#c8a96e;">Mọi mức</div>
+                </div>
+                <div style="position:relative;height:4px;background:#e2e2da;border-radius:2px;margin:0 4px 10px;">
+                  <div id="tvBudgetTrack" style="position:absolute;left:0;top:0;height:100%;background:#c8a96e;border-radius:2px;width:100%;transition:width .1s;"></div>
+                </div>
+                <input type="range" id="tvBudget" min="0" max="5" step="1" value="5"
+                  oninput="tvBudgetChange(this.value)"
+                  style="width:100%;accent-color:#c8a96e;cursor:pointer;">
+                <div style="display:flex;justify-content:space-between;margin-top:4px;">
+                  <span style="font-size:10px;color:#a8a898;">Mọi mức</span>
+                  <span style="font-size:10px;color:#a8a898;">&gt;2 tỷ</span>
+                </div>
+              </div>
+
+              <!-- Brand filter -->
+              <div style="margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#888880;margin-bottom:8px;">
+                  <i data-lucide="car" style="width:11px;height:11px;display:inline;vertical-align:middle;margin-right:4px;"></i>Hãng xe ưu tiên
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;" id="tvBrandGroup">
+                  <button class="tv-pill tv-pill-active" data-val="" onclick="tvPickPillMulti(this,'tvBrandGroup',true)"><i data-lucide="layout-grid" style="width:12px;height:12px;"></i> Tất cả</button>
+                  <button class="tv-pill" data-val="Toyota" onclick="tvPickPillMulti(this,'tvBrandGroup')">Toyota</button>
+                  <button class="tv-pill" data-val="Honda" onclick="tvPickPillMulti(this,'tvBrandGroup')">Honda</button>
+                  <button class="tv-pill" data-val="Mazda" onclick="tvPickPillMulti(this,'tvBrandGroup')">Mazda</button>
+                  <button class="tv-pill" data-val="Kia" onclick="tvPickPillMulti(this,'tvBrandGroup')">Kia</button>
+                  <button class="tv-pill" data-val="Hyundai" onclick="tvPickPillMulti(this,'tvBrandGroup')">Hyundai</button>
+                  <button class="tv-pill" data-val="Ford" onclick="tvPickPillMulti(this,'tvBrandGroup')">Ford</button>
+                  <button class="tv-pill" data-val="BMW" onclick="tvPickPillMulti(this,'tvBrandGroup')">BMW</button>
+                  <button class="tv-pill" data-val="Mercedes" onclick="tvPickPillMulti(this,'tvBrandGroup')">Mercedes</button>
+                  <button class="tv-pill" data-val="VinFast" onclick="tvPickPillMulti(this,'tvBrandGroup')">VinFast</button>
+                </div>
+              </div>
+
+              <!-- Year filter -->
+              <div style="margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#888880;margin-bottom:8px;">
+                  <i data-lucide="calendar" style="width:11px;height:11px;display:inline;vertical-align:middle;margin-right:4px;"></i>Năm sản xuất
+                </div>
+                <div style="display:flex;gap:7px;flex-wrap:wrap;" id="tvYearGroup">
+                  <button class="tv-pill tv-pill-active" data-val="" onclick="tvPickPill(this,'tvYearGroup')"><i data-lucide="layout-grid" style="width:12px;height:12px;"></i> Tất cả</button>
+                  <button class="tv-pill" data-val="từ 2020 trở lên" onclick="tvPickPill(this,'tvYearGroup')">2020+</button>
+                  <button class="tv-pill" data-val="từ 2017–2019" onclick="tvPickPill(this,'tvYearGroup')">2017–2019</button>
+                  <button class="tv-pill" data-val="trước 2017" onclick="tvPickPill(this,'tvYearGroup')">Trước 2017</button>
+                </div>
+              </div>
+
+              <!-- Apply -->
+              <button onclick="tvApplyConfig()" class="btn btn-primary" style="width:100%;justify-content:center;font-size:13px;padding:10px 0;">
+                <i data-lucide="check" style="width:15px;height:15px;"></i>
+                Áp dụng & Reset chat
+              </button>
+              <div id="tvConfigApplied" style="display:none;text-align:center;font-size:12px;color:#22c55e;margin-top:8px;font-weight:600;">
+                ✓ Đã áp dụng cấu hình mới
+              </div>
+            </div>
+
+            <!-- Tab 2: Form đăng ký -->
+            <div id="tvFormPane" style="display:none;padding:16px 18px 20px;">
+              <p style="font-size:13px;color:#888880;margin-bottom:16px;margin-top:0;">
+                Để lại thông tin — nhân viên liên hệ trong 30 phút.
+              </p>
+              <form id="tvForm" onsubmit="tvFormSubmit(event)">
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Họ tên *</label>
+                  <input id="tvHoTen" name="ho_ten" type="text" class="form-control" placeholder="Nguyễn Văn A" required>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Số điện thoại *</label>
+                  <input id="tvPhone" name="so_dien_thoai" type="tel" class="form-control" placeholder="0901 234 567" required>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Chủ đề</label>
+                  <select name="chu_de" class="form-control">
+                    <option value="">Chọn chủ đề</option>
+                    <option>Mua xe phù hợp ngân sách</option>
+                    <option>Vay mua xe</option>
+                    <option>Kiểm định xe trước khi mua</option>
+                    <option>Đổi xe cũ lấy xe mới</option>
+                    <option>Bảo hành & bảo hiểm</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Thời gian liên hệ</label>
+                  <select name="thoi_gian" class="form-control">
+                    <option value="">Bất kỳ lúc nào</option>
+                    <option>Sáng (8:00 - 12:00)</option>
+                    <option>Chiều (12:00 - 17:00)</option>
+                    <option>Tối (17:00 - 20:00)</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom:18px;">
+                  <label class="form-label">Ghi chú</label>
+                  <textarea name="mo_ta" class="form-control" rows="3" placeholder="Mô tả nhu cầu..."></textarea>
+                </div>
+                <div id="tvFormSuccess" style="display:none;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;font-size:13px;color:#166534;font-weight:500;margin-bottom:12px;">
+                  <i data-lucide="circle-check" style="width:20px;height:20px;color:#22c55e;"></i>
+                  Đăng ký thành công! Nhân viên sẽ liên hệ sớm.
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
+                  Đăng ký tư vấn
+                </button>
+              </form>
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-top:16px;padding:14px 16px;background:#faf8f3;border:1px solid #ede8d8;border-radius:10px;">
+                <i data-lucide="phone" style="width:18px;height:18px;color:#c8a96e;flex-shrink:0;margin-top:2px;"></i>
+                <div>
+                  <div style="font-size:11px;color:#888880;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Hotline</div>
+                  <div style="font-size:17px;font-weight:800;color:#c8a96e;">1900 1234</div>
+                  <div style="font-size:11px;color:#a8a898;">Thứ 2 – CN, 8:00 – 20:00</div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /tvPanelBody -->
         </div>
       </div>
+      <!-- ── END RIGHT PANEL ── -->
 
-    </div>
+    </div><!-- /tuvanLayout -->
   </div>
 </section>
 
 <style>
+/* ── Animations ── */
 @keyframes tvPulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-.tv-bubble { display:flex; gap:8px; align-items:flex-end; animation:tvFade 0.22s ease; }
+@keyframes tvFade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── Chat bubbles ── */
+.tv-bubble { display:flex;gap:8px;align-items:flex-end;animation:tvFade 0.22s ease; }
 .tv-bubble-bot { flex-direction:row; }
 .tv-bubble-user { flex-direction:row-reverse; }
-@keyframes tvFade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 .tv-avatar { width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
 .tv-avatar-bot { background:#c8a96e; }
 .tv-avatar-user { background:#e2e2da; }
 .tv-text { max-width:78%;padding:10px 14px;font-size:13.5px;line-height:1.6;box-shadow:0 1px 4px rgba(0,0,0,.07); }
 .tv-text-bot { background:#fff;color:#1a1a1a;border-radius:4px 14px 14px 14px; }
 .tv-text-user { background:#c8a96e;color:#fff;border-radius:14px 4px 14px 14px; }
+
+/* ── Quick chips ── */
 .tv-chip { border:1.5px solid #c8a96e;background:transparent;color:#c8a96e;border-radius:20px;padding:5px 13px;font-size:12px;cursor:pointer;font-family:inherit;transition:all .18s; }
 .tv-chip:hover { background:#c8a96e;color:#fff; }
+
+/* ── Typing dots ── */
 .tv-dot { width:7px;height:7px;border-radius:50%;background:#c8a96e; }
 .tv-dot:nth-child(1){animation:tvPulse .8s 0s infinite}
 .tv-dot:nth-child(2){animation:tvPulse .8s .2s infinite}
 .tv-dot:nth-child(3){animation:tvPulse .8s .4s infinite}
+
+/* ── Mini car cards ── */
 .tv-mini-card { background:#fff;border-radius:10px;border:1px solid #eaeae0;overflow:hidden;flex-shrink:0;width:180px;text-decoration:none;color:inherit;display:inline-block;transition:all .25s;vertical-align:top; }
 .tv-mini-card:hover { transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.1);border-color:#c8a96e; }
 .tv-mini-img { height:100px;background:#e0e0d8;overflow:hidden;position:relative; }
@@ -177,9 +310,34 @@
 .tv-mini-price { font-size:12px;font-weight:800;color:#c8722a;margin-bottom:4px; }
 .tv-mini-spec { font-size:10px;color:#a8a898; }
 .tv-mini-cta { display:block;text-align:center;background:#c8a96e;color:#fff;font-size:11px;font-weight:700;padding:5px;margin:6px 8px 8px;border-radius:5px;text-decoration:none; }
+
+/* ── Right panel tabs ── */
+.tv-tab {
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  padding:10px 6px;font-size:12px;font-weight:600;
+  background:transparent;border:none;cursor:pointer;
+  color:#888880;border-bottom:2px solid transparent;
+  transition:all .18s;font-family:inherit;
+}
+.tv-tab-active { color:#c8a96e;border-bottom-color:#c8a96e; }
+.tv-tab:hover:not(.tv-tab-active) { color:#1a1a1a; }
+
+/* ── Pill buttons ── */
+.tv-pill {
+  border:1.5px solid #e2e2da;background:#fff;color:#555550;
+  border-radius:20px;padding:4px 11px;font-size:11px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:all .15s;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.tv-pill-active { background:#1a1a1a;border-color:#1a1a1a;color:#fff; }
+.tv-pill-active i { stroke:#fff; }
+.tv-pill:hover:not(.tv-pill-active) { border-color:#c8a96e;color:#c8a96e; }
+.tv-pill:hover:not(.tv-pill-active) i { stroke:#c8a96e; }
+
+/* ── Responsive ── */
 @media(max-width:960px){
   #tuvanLayout { grid-template-columns:1fr !important; }
-  #tvFormWrapper { position:static !important; }
+  #tvRightPanel { position:static !important; }
 }
 </style>
 {% endblock %}

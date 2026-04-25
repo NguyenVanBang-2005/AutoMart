@@ -37,7 +37,6 @@ api_router.include_router(lien_he.router, tags=["Liên hệ"])
 api_router.include_router(
     tu_van.router,
     tags=["Tư vấn"],
-    dependencies=[Depends(get_current_user_required)]
 )
 
 # Test route để kiểm tra router có hoạt động không

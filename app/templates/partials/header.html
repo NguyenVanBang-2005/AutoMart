@@ -1,6 +1,10 @@
 <header class="header">
  <nav class="nav-container">
-  <a href="/" class="logo" id="siteLogo">Auto<span class="logo-accent">Mart</span></a>
+    <a href="/" class="logo" id="siteLogo" style="display:flex;align-items:center;flex-shrink:0;">
+      <img src="{{ url_for('static', path='Logo.png') }}"
+           alt="AutoMart"
+           style="height:clamp(40px, 5vw, 52px);width:auto;display:block;object-fit:contain;">
+    </a>
   <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">☰</button>
   <ul class="nav-menu" id="navMenu">
    <li><a href="/" class="nav-link">Trang chủ</a></li>

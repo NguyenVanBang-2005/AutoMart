@@ -140,19 +140,39 @@
       <!-- Panel Overlay (chỉ hiện khi chưa login) -->
       {% if not current_user %}
       <div class="sell-login-gate">
-        <div class="sell-login-gate-icon">
-          <i data-lucide="lock" style="width:32px;height:32px;color:#d4af37;"></i>
-        </div>
-        <h3>Đăng nhập để sử dụng</h3>
-        <p>Bạn cần đăng nhập để đăng tin bán xe và sử dụng AI tư vấn bán xe.</p>
-        <div class="sell-login-gate-actions">
-          <button class="btn btn-primary" onclick="bxOpenModal('loginModal')">
-            <i data-lucide="log-in" style="width:16px;height:16px;"></i>
-            Đăng nhập ngay
-          </button>
-          <button class="btn btn-outline" onclick="bxOpenModal('registerModal')">
-            Tạo tài khoản miễn phí
-          </button>
+        <div class="sell-gate-card">
+          <!-- Icon lock với ring -->
+          <div class="sell-gate-icon-wrap">
+            <div class="sell-gate-icon-ring"></div>
+            <div class="sell-gate-icon">
+              <i data-lucide="lock" style="width:22px;height:22px;color:#c8a96e;"></i>
+            </div>
+          </div>
+
+          <!-- Text -->
+          <div class="sell-gate-body">
+            <h3 class="sell-gate-title">Đăng nhập để tiếp tục</h3>
+            <p class="sell-gate-desc">
+              Đăng nhập để đăng tin bán xe và nhận tư vấn định giá từ AI trong vài giây.
+            </p>
+          </div>
+
+          <!-- Actions -->
+          <div class="sell-gate-actions">
+            <button class="btn btn-primary sell-gate-btn-login" onclick="bxOpenModal('loginModal')">
+              <i data-lucide="log-in" style="width:15px;height:15px;"></i>
+              Đăng nhập
+            </button>
+            <button class="btn btn-outline sell-gate-btn-register" onclick="openRegisterModal()">
+              Tạo tài khoản miễn phí
+            </button>
+          </div>
+
+          <!-- Divider hint -->
+          <p class="sell-gate-note">
+            <i data-lucide="shield-check" style="width:12px;height:12px;"></i>
+            Miễn phí · Bảo mật · Không spam
+          </p>
         </div>
       </div>
       {% endif %}

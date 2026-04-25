@@ -405,13 +405,14 @@ async function handleLienHeSubmit(e) {
 
 // ── Element SDK ──────────────────────────────────────
 async function onConfigChange(config) {
-  const siteName = config.site_name || defaultConfig.site_name;
-  const parts    = siteName.match(/^([A-Za-z]+)([A-Za-z]+)$/) || [siteName, siteName.slice(0, -4), siteName.slice(-4)];
-  const logoHTML = `${parts[1]}<span class="logo-accent">${parts[2]}</span>`;
-  const siteLogo   = document.getElementById('siteLogo');
-  const footerBrand = document.getElementById('footerBrand');
-  if (siteLogo)    siteLogo.innerHTML   = logoHTML;
-  if (footerBrand) footerBrand.innerHTML = logoHTML;
+    const siteName = config.site_name || defaultConfig.site_name;
+    const parts    = siteName.match(/^([A-Za-z]+)([A-Za-z]+)$/) || [siteName, siteName.slice(0, -4), siteName.slice(-4)];
+    const logoHTML = `${parts[1]}<span class="logo-accent">${parts[2]}</span>`;
+    const siteLogo    = document.getElementById('siteLogo');
+    const footerBrand = document.getElementById('footerBrand');
+    // Không ghi đè nếu logo là ảnh
+    if (siteLogo && !siteLogo.querySelector('img')) siteLogo.innerHTML = logoHTML;
+    if (footerBrand) footerBrand.innerHTML = logoHTML;
   const heroTitle    = document.getElementById('heroTitle');
   const heroSubtitle = document.getElementById('heroSubtitle');
   const contactPhone = document.getElementById('contactPhone');
