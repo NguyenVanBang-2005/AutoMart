@@ -8,28 +8,13 @@
      style="display:none;"></div>
 <section class="section" id="cars">
  <div class="container">
-  <div class="section-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-   <div>
-    <h2 class="section-title">Tìm xe của bạn</h2>
-    <p class="section-subtitle">Hàng nghìn xe chất lượng, giá tốt nhất thị trường</p>
-   </div>
-
-   <!-- Nút Thêm xe - chỉ hiện với Admin & Staff -->
-   {% if current_user and current_user.role %}
-    {% if current_user.role == 'admin' or current_user.role == 'staff' or
-          (current_user.role.value == 'admin' or current_user.role.value == 'staff') %}
-    <button id="btnAddCar"
-            class="btn btn-primary"
-            style="padding:10px 24px; font-size:15px; display:flex; align-items:center; gap:8px;">
-      <i data-lucide="plus-circle" style="width:20px;height:20px;"></i>
-      Thêm xe mới
-    </button>
-    {% endif %}
-  {% endif %}
+  <div class="section-header" style="margin-bottom:24px;">
+   <h2 class="section-title">Tìm xe của bạn</h2>
+   <p class="section-subtitle">Hàng nghìn xe chất lượng, giá tốt nhất thị trường</p>
   </div>
 
   <!-- Bộ lọc -->
-  <div class="search-box" style="margin-bottom: 40px;">
+  <div class="search-box" style="margin-bottom: 24px;">
    <h3 class="search-title"><span class="icon-search"></span> Lọc xe</h3>
    <form id="searchForm" onsubmit="handleSearch(event)">
     <div class="search-grid">
@@ -91,6 +76,21 @@
    </form>
   </div>
 
+  <!-- Nút Thêm xe - chỉ hiện với Admin & Staff -->
+  {% if current_user and current_user.role %}
+   {% if current_user.role == 'admin' or current_user.role == 'staff' or
+         (current_user.role.value == 'admin' or current_user.role.value == 'staff') %}
+   <div style="display:flex; justify-content:flex-end; margin-bottom:20px;">
+     <button id="btnAddCar"
+             class="btn btn-primary"
+             style="padding:10px 24px; font-size:15px; display:flex; align-items:center; gap:8px;">
+       <i data-lucide="plus-circle" style="width:20px;height:20px;"></i>
+       Thêm xe mới
+     </button>
+   </div>
+   {% endif %}
+  {% endif %}
+
   <!-- Danh sách xe -->
   <div class="car-grid" id="carGrid"></div>
 
@@ -111,8 +111,6 @@
     </div>
     <div class="modal-body">
       <form id="addCarForm" onsubmit="handleAddCar(event)">
-
-        <!-- Các trường thông tin xe cũ -->
         <div class="form-group">
           <label class="form-label">Hãng xe *</label>
           <input type="text" id="carHang" class="form-control" required>
@@ -145,8 +143,6 @@
             <option value="Coupe">Coupe</option>
           </select>
         </div>
-
-        <!-- Phần upload ảnh xe (mới thêm) -->
         <div class="form-group">
           <label class="form-label">Ảnh xe (tối đa 3 ảnh)</label>
           <input type="file" id="carImages" class="form-control" accept="image/*" multiple>
@@ -155,13 +151,52 @@
           </small>
           <div id="imagePreview" style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;"></div>
         </div>
-
         <div class="form-group">
           <button type="submit" class="btn btn-primary" style="width:100%;">
             <i data-lucide="plus"></i> Thêm xe vào hệ thống
           </button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Xác nhận Xóa Xe -->
+<div id="modalXoaXe"
+     style="display:none; position:fixed; inset:0; z-index:2000;
+            background:rgba(0,0,0,0.55); backdrop-filter:blur(4px);
+            align-items:center; justify-content:center; padding:20px;"
+     onclick="if(event.target===this)closeModalXoaXe()">
+  <div style="background:#fff; border-radius:20px; width:100%; max-width:380px;
+              padding:28px; box-shadow:0 24px 64px rgba(0,0,0,0.25);">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+      <div style="width:40px; height:40px; border-radius:50%; background:#fdecea;
+                  display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <i data-lucide="trash-2" style="width:20px; height:20px; color:#e03030;"></i>
+      </div>
+      <div>
+        <div style="font-size:16px; font-weight:700; color:#1a1a1a;">Xóa xe khỏi hệ thống</div>
+        <div style="font-size:13px; color:#888; margin-top:2px;">Hành động này không thể hoàn tác</div>
+      </div>
+    </div>
+
+    <div id="xoaXeInfo"
+         style="background:#f8f8f6; border-radius:10px; padding:12px; margin-bottom:20px;
+                font-size:14px; font-weight:600; color:#333; text-align:center;"></div>
+
+    <div style="display:flex; gap:10px;">
+      <button onclick="closeModalXoaXe()"
+              style="flex:1; padding:11px; border:1.5px solid #ddd; border-radius:10px;
+                     background:#fff; font-size:14px; font-weight:600; cursor:pointer; color:#555;">
+        Hủy
+      </button>
+      <button onclick="confirmXoaXe()"
+              style="flex:1; padding:11px; background:#e03030; border:none; border-radius:10px;
+                     color:#fff; font-size:14px; font-weight:700; cursor:pointer;
+                     display:flex; align-items:center; justify-content:center; gap:6px;">
+        <i data-lucide="trash-2" style="width:15px; height:15px;"></i>
+        Xóa xe
+      </button>
     </div>
   </div>
 </div>
@@ -184,7 +219,6 @@
               style="background:none;border:none;cursor:pointer;font-size:20px;color:#888;line-height:1;">✕</button>
     </div>
 
-    <!-- Preview xe đang chọn -->
     <div id="modalXeInfo"
          style="background:#f8f8f6;border-radius:10px;padding:12px;
                 display:flex;align-items:center;gap:12px;margin-bottom:20px;">
@@ -205,7 +239,6 @@
                style="padding:10px 14px;font-size:14px;font-weight:600;">
       </div>
 
-      <!-- Preview giá realtime -->
       <div id="modalPricePreview"
            style="display:none;flex-direction:column;gap:4px;
                   background:#fffbf0;border-radius:10px;padding:12px;">
