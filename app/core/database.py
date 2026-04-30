@@ -1,8 +1,31 @@
+import os
+
 from sqlmodel import SQLModel, create_engine, Session
 from app.core.config import settings
 
-# Sửa quan trọng cho Render
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 DATABASE_URL = settings.DATABASE_URL
+
+# debugging
+print("="*60)
+print("DEBUG DATABASE_URL:")
+print("Raw value từ settings :", repr(settings.DATABASE_URL))   # quan trọng nhất
+print("Từ os.getenv         :", repr(os.getenv("DATABASE_URL")))
+print("="*60)
+
+# Thử parse
+try:
+    engine = create_engine(
+        settings.DATABASE_URL,
+        echo=False,
+        pool_pre_ping=True
+    )
+    print("✅ Parse URL thành công!")
+except Exception as e:
+    print("❌ Lỗi parse:", e)
 
 # Thêm sslmode=require nếu chưa có
 if DATABASE_URL and "sslmode" not in DATABASE_URL:
@@ -20,18 +43,17 @@ engine = create_engine(
     max_overflow=20,
     pool_timeout=30,
     pool_recycle=1800,
-    pool_pre_ping=True,        # Rất quan trọng khi deploy
+    pool_pre_ping=True,        
 )
 
 def init_db():
-    # Import TẤT CẢ models ở đây để SQLModel.metadata biết các bảng cần tạo.
-    from app.models.user import User          # noqa: F401
-    from app.models.cars import Car, CarImage # noqa: F401
+    from app.models.user import User          
+    from app.models.cars import Car, CarImage 
     from app.models.uu_dai import UuDai
-    from app.models.dang_tin import DangTin   # noqa: F401
-    from app.models.news import News          # noqa: F401
-    from app.models.lai_thu import LaiThu     # noqa: F401
-    from app.models.lien_he import LienHe     # noqa: F401
+    from app.models.dang_tin import DangTin   
+    from app.models.news import News          
+    from app.models.lai_thu import LaiThu     
+    from app.models.lien_he import LienHe     
 
     SQLModel.metadata.create_all(engine)
 

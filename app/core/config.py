@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     gmail_user: str = ""
     gmail_app_password: str = ""
 
+    JINA_API_KEY: str = ""
+
     # OAuth
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""

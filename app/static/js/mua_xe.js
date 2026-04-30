@@ -341,6 +341,65 @@ function submitUuDai() {
     .catch(function(err) { alert('Lỗi: ' + err.message); });
 }
 
+// ==================== SEMANTIC SEARCH (RAG) ====================
+async function semanticSearch() {
+  const input = document.getElementById('semanticInput');
+  const query = input.value.trim();
+  if (!query) return;
+
+  const btn    = document.getElementById('btnSemanticSearch');
+  const status = document.getElementById('semanticStatus');
+
+  btn.disabled    = true;
+  btn.textContent = '...';
+  status.style.display = 'block';
+  status.textContent   = 'Đang tìm xe phù hợp...';
+
+  try {
+    const res = await fetch('/api/v1/cars/semantic-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: query, k: 12 })
+    });
+
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const data = await res.json();
+
+    if (data.cars && data.cars.length > 0) {
+      renderCars(data.cars);
+      status.textContent = 'Tìm thấy ' + data.cars.length + ' xe tương tự với "' + query + '" (sắp xếp theo độ phù hợp)';
+      status.style.color = '#2a7a2a';
+    } else {
+      document.getElementById('carGrid').innerHTML =
+        '<p style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#888;">' +
+        'Không tìm thấy xe phù hợp với mô tả này.</p>';
+      status.textContent = 'Không tìm thấy kết quả cho "' + query + '"';
+      status.style.color = '#e03030';
+    }
+  } catch (err) {
+    console.error('[SemanticSearch]', err);
+    status.textContent = 'Lỗi tìm kiếm, vui lòng thử lại';
+    status.style.color = '#e03030';
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = 'Tìm AI';
+  }
+}
+
+// Reset về danh sách đầy đủ khi xóa input
+document.addEventListener('DOMContentLoaded', function() {
+  const input = document.getElementById('semanticInput');
+  if (input) {
+    input.addEventListener('input', function() {
+      if (!this.value.trim()) {
+        renderCars(allCars);
+        const status = document.getElementById('semanticStatus');
+        if (status) status.style.display = 'none';
+      }
+    });
+  }
+});
+
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', function() {
   var pageData = document.getElementById('pageData');

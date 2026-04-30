@@ -7,6 +7,7 @@ from app.models.user import UserRole
 from app.services.news_service import get_all_news, get_news_by_id, create_news, delete_news
 from fastapi import Request
 from typing import Optional
+from sqlalchemy import text
 
 router = APIRouter(prefix="/tin-tuc")
 
@@ -16,6 +17,23 @@ def _require_admin(request: Request, session: Session = Depends(get_session)):
     if not user or user.role != UserRole.admin:
         raise HTTPException(status_code=403, detail="Yêu cầu quyền Admin")
     return user
+
+
+async def _index_news(session: Session, news):
+    """Embed và lưu vector cho 1 bài tin tức."""
+    try:
+        from app.services.embedding_service import get_embedding
+        text_content = f"{news.title or ''} {news.description or ''} {news.content or ''}"
+        emb = await get_embedding(text_content)
+        vec_str = "[" + ",".join(str(x) for x in emb) + "]"
+        session.execute(
+            text("UPDATE news SET embedding = CAST(:vec AS vector) WHERE id = :id"),
+            {"vec": vec_str, "id": news.id}
+        )
+        session.commit()
+        print(f"[RAG] Indexed news {news.id}: {news.title}")
+    except Exception as e:
+        print(f"[RAG] Index error news {news.id}: {e}")
 
 
 @router.get("", response_model=list[NewsOut])
@@ -35,12 +53,15 @@ def get_news(news_id: int, session: Session = Depends(get_session)):
 
 
 @router.post("", response_model=NewsOut, status_code=201)
-def post_news(
+async def post_news(
     data: NewsCreate,
     session: Session = Depends(get_session),
     admin=Depends(_require_admin)
 ):
-    return create_news(session, data)
+    news = create_news(session, data)
+    # Auto-index embedding sau khi tạo bài viết
+    await _index_news(session, news)
+    return news
 
 
 @router.delete("/{news_id}", status_code=204)
