@@ -1,36 +1,30 @@
 <!-- ══ TOOLBAR: SEARCH + ĐĂNG TIN ══ -->
-<section style="background:#fff; padding:16px 24px; border-bottom:1px solid #eaeae0; position:relative; z-index:100;">
-  <div class="container">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <div class="news-search-wrapper">
-        <div style="display:flex; align-items:center; gap:10px;
-                    border:1.5px solid #deded4; border-radius:24px;
-                    padding:10px 18px; background:#fafaf8;">
-          <i data-lucide="search" style="width:18px;height:18px;color:#888;flex-shrink:0;"></i>
-          <input type="text" id="newsSearchInput" placeholder="Tìm kiếm tin tức..."
-            autocomplete="off"
-            style="border:none;outline:none;font-size:15px;width:100%;
-                   background:transparent;font-family:inherit;color:var(--text-primary);">
-          <button id="newsSearchClear" onclick="clearNewsSearch()"
-            style="display:none;background:none;border:none;cursor:pointer;color:#888;padding:0;">
-            <i data-lucide="x" style="width:15px;height:15px;"></i>
-          </button>
-        </div>
-        <div class="news-search-panel" id="newsSearchPanel"></div>
+<section class="news-toolbar">
+  <div class="news-toolbar-inner">
+    <div class="news-search-wrapper">
+      <div class="news-search-box">
+        <i data-lucide="search" class="news-search-icon"></i>
+        <input type="text" id="newsSearchInput"
+               placeholder="Tìm kiếm tin tức..."
+               autocomplete="off">
+        <button class="news-search-clear" id="newsSearchClear"
+                onclick="clearNewsSearch()">
+          <i data-lucide="x" style="width:15px;height:15px;"></i>
+        </button>
       </div>
-      {% if current_user and current_user.role.value == 'admin' %}
-      <button onclick="openNewsModal()"
-        class="btn btn-primary btn-small"
-        style="display:inline-flex; align-items:center; gap:6px; flex-shrink:0;">
-        <i data-lucide="plus" style="width:15px;height:15px;"></i>
-        Đăng tin mới
-      </button>
-      {% endif %}
+      <div class="news-search-panel" id="newsSearchPanel"></div>
     </div>
+
+    {% if current_user and current_user.role.value == 'admin' %}
+    <button onclick="openNewsModal()" class="btn btn-primary btn-small">
+      <i data-lucide="plus" style="width:15px;height:15px;"></i>
+      Đăng tin mới
+    </button>
+    {% endif %}
   </div>
 </section>
 
-<!-- Modal — chỉ render với admin -->
+<!-- ══ MODAL ĐĂNG TIN (admin only) ══ -->
 {% if current_user and current_user.role.value == 'admin' %}
 <div id="newsModal" class="modal">
   <div class="modal-content" style="max-width:600px;">
@@ -42,7 +36,7 @@
       <button class="modal-close" onclick="closeNewsModal()">✕</button>
     </div>
     <div class="modal-body">
-      <div style="display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex;flex-direction:column;gap:14px;">
         <div class="form-group">
           <label class="form-label">Tiêu đề *</label>
           <input id="newsTitle" type="text" class="form-control" placeholder="Nhập tiêu đề bài viết...">
@@ -92,48 +86,31 @@
 <!-- ══ TIN TỨC NỔI BẬT ══ -->
 <section class="section section-white" id="news">
   <div class="container">
-    <div class="section-header-row">
-      <h2 class="section-title">Tin tức nổi bật</h2>
-    </div>
+    <h2 class="news-section-title">Tin tức nổi bật</h2>
 
     {% if news_list %}
-    <div style="display:flex; flex-direction:column; gap:20px;" id="newsContainer">
+    <div id="newsContainer">
 
+      {# --- Featured article --- #}
       {% set featured = news_list[0] %}
-      <a href="/tin-tuc/{{ featured.id }}"
-         style="display:flex; gap:24px; align-items:flex-start;
-                background:#fff; border-radius:12px; padding:20px;
-                border:1px solid #eaeae0; text-decoration:none; color:inherit;
-                transition:box-shadow 0.2s, border-color 0.2s;"
-         onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.09)';this.style.borderColor='#d8d8ce'"
-         onmouseout="this.style.boxShadow='none';this.style.borderColor='#eaeae0'">
-        <div style="width:280px; height:180px; border-radius:10px;
-                    overflow:hidden; flex-shrink:0; background:#e8e8de;">
+      <a href="/tin-tuc/{{ featured.id }}" class="nf-card">
+        <div class="nf-image">
           {% if featured.thumbnail_url %}
             <img src="{{ featured.thumbnail_url }}" alt="{{ featured.title }}"
-                 style="width:100%;height:100%;object-fit:cover;"
                  onerror="this.style.display='none'">
           {% endif %}
         </div>
-        <div style="flex:1; min-width:0; padding:4px 0;">
-          <span class="news-tag" style="margin-bottom:10px;">TIN TỨC MỚI</span>
-          <div style="font-size:20px; font-weight:700; color:var(--text-primary);
-                      line-height:1.4; margin-bottom:10px;">
-            {{ featured.title }}
-          </div>
-          <div style="font-size:14px; color:#666; line-height:1.7; margin-bottom:14px;
-                      display:-webkit-box; -webkit-line-clamp:3;
-                      -webkit-box-orient:vertical; overflow:hidden;">
-            {{ featured.description }}
-          </div>
-          <div style="font-size:12px; color:#a8a898; display:flex; align-items:center; gap:6px;">
-            <div class="news-meta-avatar"></div>
+        <div class="nf-body">
+          <span class="news-tag">TIN TỨC MỚI</span>
+          <div class="nf-title">{{ featured.title }}</div>
+          <div class="nf-desc">{{ featured.description }}</div>
+          <div class="nf-meta">
+            <div class="nf-avatar"></div>
             <span>{{ featured.author }}</span>
             <span>•</span>
             <span>{{ featured.created_at.strftime('%d/%m/%Y') }}</span>
             {% if current_user and current_user.role.value == 'admin' %}
-            <button onclick="deleteNews({{ featured.id }}, event)"
-              style="margin-left:auto;background:none;border:none;color:#ef4444;cursor:pointer;padding:0;">
+            <button class="nf-delete" onclick="deleteNews({{ featured.id }}, event)">
               <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
             </button>
             {% endif %}
@@ -141,38 +118,25 @@
         </div>
       </a>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      {# --- Grid bài còn lại --- #}
+      <div class="ni-grid">
         {% for item in news_list[1:7] %}
-        <a href="/tin-tuc/{{ item.id }}"
-           style="display:flex; gap:16px; align-items:center;
-                  background:#fff; border-radius:12px; padding:16px;
-                  border:1px solid #eaeae0; text-decoration:none; color:inherit;
-                  transition:box-shadow 0.2s, border-color 0.2s;"
-           onmouseover="this.style.boxShadow='0 6px 24px rgba(0,0,0,0.09)';this.style.borderColor='#d8d8ce'"
-           onmouseout="this.style.boxShadow='none';this.style.borderColor='#eaeae0'">
-          <div style="width:120px; height:84px; border-radius:8px;
-                      overflow:hidden; flex-shrink:0; background:#e8e8de;">
+        <a href="/tin-tuc/{{ item.id }}" class="ni-card">
+          <div class="ni-image">
             {% if item.thumbnail_url %}
               <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}"
-                   style="width:100%;height:100%;object-fit:cover;"
                    onerror="this.style.display='none'">
             {% endif %}
           </div>
-          <div style="flex:1; min-width:0;">
-            <div style="font-size:15px; font-weight:600; color:var(--text-primary);
-                        line-height:1.45; margin-bottom:8px;
-                        display:-webkit-box; -webkit-line-clamp:2;
-                        -webkit-box-orient:vertical; overflow:hidden;">
-              {{ item.title }}
-            </div>
-            <div style="font-size:12px; color:#a8a898; display:flex; align-items:center; gap:5px;">
-              <div class="news-meta-avatar"></div>
+          <div class="ni-body">
+            <div class="ni-title">{{ item.title }}</div>
+            <div class="ni-meta">
+              <div class="nf-avatar"></div>
               <span>{{ item.author }}</span>
               <span>•</span>
               <span>{{ item.created_at.strftime('%d/%m/%Y') }}</span>
               {% if current_user and current_user.role.value == 'admin' %}
-              <button onclick="deleteNews({{ item.id }}, event)"
-                style="margin-left:auto;background:none;border:none;color:#ef4444;cursor:pointer;padding:0;">
+              <button class="nf-delete" onclick="deleteNews({{ item.id }}, event)">
                 <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
               </button>
               {% endif %}
@@ -185,8 +149,13 @@
     </div>
     {% else %}
     <div style="text-align:center;padding:48px 0;color:#888;">
-      <i data-lucide="newspaper" style="width:40px;height:40px;margin-bottom:12px;opacity:0.3;display:block;margin-inline:auto;"></i>
-      <p>Chưa có tin tức nào. {% if current_user and current_user.role.value == 'admin' %}Hãy đăng bài đầu tiên!{% endif %}</p>
+      <i data-lucide="newspaper"
+         style="width:40px;height:40px;margin-bottom:12px;opacity:0.3;display:block;margin-inline:auto;"></i>
+      <p>Chưa có tin tức nào.
+        {% if current_user and current_user.role.value == 'admin' %}
+          Hãy đăng bài đầu tiên!
+        {% endif %}
+      </p>
     </div>
     {% endif %}
   </div>
@@ -194,70 +163,67 @@
 
 <!-- ══ HỎI ĐÁP ══ -->
 {% if hoi_dap_list %}
-<section class="section section-white">
+<section class="section" style="background:#f5f5f0;">
   <div class="container">
-    <div class="section-header-row">
-      <h2 class="section-title">Hỏi đáp</h2>
-    </div>
-    <div class="news-grid">
-      {% set featured_qa = hoi_dap_list[0] %}
-      <a href="/tin-tuc/{{ featured_qa.id }}" class="news-featured">
-        <div class="news-featured-image">
-          {% if featured_qa.thumbnail_url %}
-            <img src="{{ featured_qa.thumbnail_url }}" alt="{{ featured_qa.title }}"
-                 style="width:100%;height:100%;object-fit:cover;">
-          {% else %}
-            <div class="news-featured-image-placeholder"></div>
+    <h2 class="news-section-title">Hỏi đáp</h2>
+
+    {% set featured_qa = hoi_dap_list[0] %}
+    <a href="/tin-tuc/{{ featured_qa.id }}" class="nf-card">
+      <div class="nf-image">
+        {% if featured_qa.thumbnail_url %}
+          <img src="{{ featured_qa.thumbnail_url }}" alt="{{ featured_qa.title }}"
+               onerror="this.style.display='none'">
+        {% else %}
+          <div style="width:100%;height:100%;background:linear-gradient(135deg,#d8d8ce,#e8e8de);"></div>
+        {% endif %}
+      </div>
+      <div class="nf-body">
+        <span class="news-tag news-tag-qa">HỎI ĐÁP</span>
+        <div class="nf-title">{{ featured_qa.title }}</div>
+        <div class="nf-desc">{{ featured_qa.description }}</div>
+        <div class="nf-meta">
+          <div class="nf-avatar"></div>
+          <span>{{ featured_qa.author }}</span>
+          <span>•</span>
+          <span>{{ featured_qa.created_at.strftime('%d/%m/%Y') }}</span>
+          {% if current_user and current_user.role.value == 'admin' %}
+          <button class="nf-delete" onclick="deleteNews({{ featured_qa.id }}, event)">
+            <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+          </button>
           {% endif %}
         </div>
-        <div class="news-featured-body">
-          <span class="news-tag">HỎI ĐÁP</span>
-          <h3 class="news-featured-title">{{ featured_qa.title }}</h3>
-          <p class="news-featured-desc">{{ featured_qa.description }}</p>
-          <div class="news-meta">
-            <div class="news-meta-avatar"></div>
-            <span>{{ featured_qa.author }}</span>
+      </div>
+    </a>
+
+    <div class="ni-grid">
+      {% for item in hoi_dap_list[1:7] %}
+      <a href="/tin-tuc/{{ item.id }}" class="ni-card">
+        <div class="ni-image">
+          {% if item.thumbnail_url %}
+            <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}"
+                 onerror="this.style.display='none'">
+          {% else %}
+            <div style="width:100%;height:100%;background:#e8e8de;"></div>
+          {% endif %}
+        </div>
+        <div class="ni-body">
+          <div class="ni-title">{{ item.title }}</div>
+          <div class="ni-meta">
+            <div class="nf-avatar"></div>
+            <span>{{ item.author }}</span>
             <span>•</span>
-            <span>{{ featured_qa.created_at.strftime('%d/%m/%Y') }}</span>
+            <span>{{ item.created_at.strftime('%d/%m/%Y') }}</span>
             {% if current_user and current_user.role.value == 'admin' %}
-            <button onclick="deleteNews({{ featured_qa.id }}, event)"
-              style="margin-left:auto;background:none;border:none;color:#ef4444;cursor:pointer;font-size:12px;padding:0;">
+            <button class="nf-delete" onclick="deleteNews({{ item.id }}, event)">
               <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
             </button>
             {% endif %}
           </div>
         </div>
       </a>
-      <div class="news-list">
-        {% for item in hoi_dap_list[1:7] %}
-        <a href="/tin-tuc/{{ item.id }}" class="news-item">
-          <div class="news-item-image">
-            {% if item.thumbnail_url %}
-              <img src="{{ item.thumbnail_url }}" alt="{{ item.title }}"
-                   style="width:100%;height:100%;object-fit:cover;">
-            {% else %}
-              <div class="news-item-image-placeholder"></div>
-            {% endif %}
-          </div>
-          <div class="news-item-body">
-            <div class="news-item-title">{{ item.title }}</div>
-            <div class="news-item-meta">
-              <div class="news-item-meta-avatar"></div>
-              <span>{{ item.author }}</span>
-              <span>•</span>
-              <span>{{ item.created_at.strftime('%d/%m/%Y') }}</span>
-              {% if current_user and current_user.role.value == 'admin' %}
-              <button onclick="deleteNews({{ item.id }}, event)"
-                style="margin-left:auto;background:none;border:none;color:#ef4444;cursor:pointer;padding:0;">
-                <i data-lucide="trash-2" style="width:12px;height:12px;"></i>
-              </button>
-              {% endif %}
-            </div>
-          </div>
-        </a>
-        {% endfor %}
-      </div>
+      {% endfor %}
     </div>
+
   </div>
 </section>
 {% endif %}

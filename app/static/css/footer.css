@@ -1,0 +1,165 @@
+/* ══════════════════════════════════════════════════
+   FOOTER.CSS — AutoMart (mobile-first)
+   ══════════════════════════════════════════════════ */
+
+.footer {
+  background: var(--bg-primary);
+  color: #fff;
+  padding: 0;
+  margin-top: auto;
+}
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ── Top: 3 cols links ── */
+.footer-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  padding: 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.footer-col-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.footer-links {
+  list-style: none;
+}
+.footer-links li {
+  margin-bottom: 9px;
+}
+.footer-links a {
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  font-size: 13.5px;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.footer-links a:hover { color: var(--accent-primary); }
+
+/* Social icons */
+.footer-social-icon {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.footer-social-fb { background: #1877f2; color: #fff; }
+.footer-social-yt { background: #ff0000; color: #fff; }
+.footer-social-x  { background: #000; color: #fff; border: 1px solid #444; }
+
+/* ── Middle: info bar ── */
+.footer-info-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Logo block */
+.footer-logo-link {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.footer-logo-link img {
+  height: 44px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+/* Contacts */
+.footer-info-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.footer-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.5;
+}
+.footer-info-icon { flex-shrink: 0; margin-top: 2px; }
+.footer-info-row strong { color: rgba(255,255,255,0.88); }
+.footer-info-note {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.35);
+  margin-top: 2px;
+}
+.footer-info-note span { line-height: 1.6; }
+
+/* Legal */
+.footer-legal-inline {
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.footer-legal-text p {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════ */
+
+/* Tablet 640px+ */
+@media (min-width: 640px) {
+  .footer-cols {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    padding: 32px 28px;
+  }
+  /* col 3 (social) chiếm full width hàng thứ 2 */
+  .footer-col:last-child {
+    grid-column: 1 / -1;
+  }
+  .footer-info-bar {
+    padding: 28px;
+  }
+}
+
+/* Desktop 900px+ */
+@media (min-width: 900px) {
+  .footer-cols {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 48px;
+    padding: 36px 32px 32px;
+  }
+  .footer-col:last-child {
+    grid-column: auto; /* reset */
+  }
+
+  .footer-info-bar {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr;
+    align-items: start;
+    gap: 32px;
+    padding: 28px 32px;
+  }
+  .footer-logo-link img {
+    height: clamp(40px, 5vw, 52px);
+  }
+  .footer-legal-inline {
+    padding-top: 0;
+    border-top: none;
+    border-left: 1px solid rgba(255,255,255,0.07);
+    padding-left: 24px;
+  }
+}
