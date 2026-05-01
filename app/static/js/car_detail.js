@@ -1,4 +1,4 @@
-// car_detail.js - AI Chat cho trang chi tiết xe (tương tự tv_agent.js)
+// car_detail.js
 
 const API_BASE = `${window.location.origin}/api/v1`;
 
@@ -9,7 +9,32 @@ const ai = {
     busy: false
 };
 
-// Lấy thông tin xe đang xem
+// ── Fix: khai báo global để onclick trong HTML gọi được ──
+window.switchImage = function(url, thumbEl) {
+    const main = document.getElementById('mainImage');
+    if (main) main.src = url;
+
+    // Cập nhật active thumb
+    document.querySelectorAll('.cd-thumb').forEach(t => t.classList.remove('active'));
+    if (thumbEl) thumbEl.classList.add('active');
+};
+
+window.handleService = function(name) {
+    const input = document.getElementById('aiInput');
+    if (input) {
+        input.value = 'Tư vấn về dịch vụ: ' + name;
+        sendAiMessage();
+    }
+};
+
+window.aiQuickAsk = function(text) {
+    const input = document.getElementById('aiInput');
+    if (input) {
+        input.value = text;
+        sendAiMessage();
+    }
+};
+
 function getCurrentCar() {
     const el = document.getElementById('carData');
     if (!el) return null;
@@ -19,7 +44,6 @@ function getCurrentCar() {
     };
 }
 
-// Load danh sách xe từ database
 async function loadRealCars() {
     try {
         const res = await fetch(`${API_BASE}/cars`, { credentials: 'include' });
@@ -36,20 +60,17 @@ async function loadRealCars() {
                 fuel: c.nhien_lieu || '',
                 location: c.khu_vuc || ''
             }));
-            console.log(`✅ Đã load ${ai.cars.length} xe từ DB`);
         }
     } catch (e) {
         console.warn('Không load được danh sách xe', e);
     }
 }
 
-// System prompt chất lượng cao (có thông tin xe đang xem)
 function buildSystemPrompt() {
     const car = ai.currentCar;
     const carContext = car
         ? `Xe đang xem: ${car.name} - Giá ${car.price} triệu\n`
         : '';
-
     const carList = ai.cars.length
         ? ai.cars.map(c => `[ID:${c.id}] ${c.brand} ${c.model} | ${c.year} | ${c.price}tr | ${c.km}km`).join('\n')
         : 'Chưa có xe nào trong kho.';
@@ -66,16 +87,12 @@ DANH SÁCH XE TRONG KHO:
 ${carList}`;
 }
 
-// Helper functions
 function aiUserMsg(text) {
     const box = document.getElementById('aiMessages');
     if (!box) return;
     const div = document.createElement('div');
     div.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:12px;';
-    div.innerHTML = `
-        <div style="max-width:75%;background:var(--accent-primary);color:white;padding:10px 14px;border-radius:12px 4px 12px 12px;">
-            ${text}
-        </div>`;
+    div.innerHTML = `<div style="max-width:75%;background:var(--accent-primary);color:white;padding:10px 14px;border-radius:12px 4px 12px 12px;">${text}</div>`;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
@@ -85,10 +102,7 @@ function aiBotMsg(text) {
     if (!box) return;
     const div = document.createElement('div');
     div.style.cssText = 'display:flex;margin-bottom:12px;';
-    div.innerHTML = `
-        <div style="max-width:75%;background:#fff;padding:10px 14px;border-radius:4px 12px 12px 12px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
-            ${text}
-        </div>`;
+    div.innerHTML = `<div style="max-width:75%;background:#fff;padding:10px 14px;border-radius:4px 12px 12px 12px;box-shadow:0 1px 4px rgba(0,0,0,.08);">${text}</div>`;
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
@@ -99,10 +113,9 @@ function aiShowTyping() {
     const typing = document.createElement('div');
     typing.id = 'aiTyping';
     typing.style.cssText = 'display:flex;margin-bottom:12px;';
-    typing.innerHTML = `
-        <div style="background:#fff;padding:10px 14px;border-radius:4px 12px 12px 12px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;gap:5px;">
-            <div class="tv-dot"></div><div class="tv-dot"></div><div class="tv-dot"></div>
-        </div>`;
+    typing.innerHTML = `<div style="background:#fff;padding:10px 14px;border-radius:4px 12px 12px 12px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;gap:5px;">
+        <div class="tv-dot"></div><div class="tv-dot"></div><div class="tv-dot"></div>
+    </div>`;
     box.appendChild(typing);
     box.scrollTop = box.scrollHeight;
 }
@@ -116,20 +129,11 @@ function aiShowSuggestions(items) {
     const box = document.getElementById('aiSuggestions');
     if (!box) return;
     box.innerHTML = items.map(item =>
-        `<button onclick="aiQuickAsk('${item}')" style="font-size:12px;padding:4px 12px;border:1px solid #d4af37;color:#d4af37;background:transparent;border-radius:9999px;margin-right:6px;margin-bottom:6px;cursor:pointer;">${item}</button>`
+        `<button onclick="aiQuickAsk('${item}')" style="font-size:12px;padding:4px 12px;border:1px solid #d4af37;color:#d4af37;background:transparent;border-radius:9999px;cursor:pointer;">${item}</button>`
     ).join('');
 }
 
-function aiQuickAsk(text) {
-    const input = document.getElementById('aiInput');
-    if (input) {
-        input.value = text;
-        sendAiMessage();
-    }
-}
-
-// Gửi tin nhắn AI
-async function sendAiMessage() {
+window.sendAiMessage = async function() {
     const input = document.getElementById('aiInput');
     const text = input ? input.value.trim() : '';
     if (!text || ai.busy) return;
@@ -137,7 +141,6 @@ async function sendAiMessage() {
     input.value = '';
     aiUserMsg(text);
     ai.messages.push({ role: 'user', content: text });
-
     ai.busy = true;
     aiShowTyping();
 
@@ -151,97 +154,65 @@ async function sendAiMessage() {
                 messages: ai.messages
             })
         });
-
         const data = await res.json();
         aiHideTyping();
-
         const reply = data.content?.[0]?.text || data.reply || 'Xin lỗi, tôi chưa hiểu rõ.';
         aiBotMsg(reply);
         ai.messages.push({ role: 'assistant', content: reply });
-
-        // Gợi ý tiếp theo
         aiShowSuggestions(['So sánh xe khác', 'Chi phí vay', 'Bảo hiểm', 'Lái thử', 'Xem thêm xe']);
-
     } catch (e) {
         aiHideTyping();
         aiBotMsg('Không thể kết nối AI. Vui lòng thử lại sau.');
-        console.error(e);
     }
-
     ai.busy = false;
-}
+};
 
-// ====================== TÍNH KHOẢN VAY ======================
-function calcLoan() {
-  const carData = document.getElementById('carData');
-  if (!carData) return;
+// ── Tính khoản vay ──
+window.calcLoan = function() {
+    const carData = document.getElementById('carData');
+    if (!carData) return;
+    const price = parseFloat(carData.dataset.price) || 0;
+    if (price <= 0) return;
 
-  const price = parseFloat(carData.dataset.price) || 0;          // Giá xe (triệu)
-  if (price <= 0) return;
+    const downPct = parseFloat(document.getElementById('downPaymentPct').value) || 30;
+    document.getElementById('downPctLabel').textContent = downPct + '%';
 
-  // Trả trước (%)
-  const downPct = parseFloat(document.getElementById('downPaymentPct').value) || 30;
-  document.getElementById('downPctLabel').textContent = downPct + '%';
+    const months = parseInt(document.getElementById('loanTerm').value) || 36;
+    const monthlyRate = 0.09 / 12;
+    const loanAmount = price * (1 - downPct / 100);
+    const monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) /
+                           (Math.pow(1 + monthlyRate, months) - 1);
 
-  // Thời hạn vay (tháng)
-  const months = parseInt(document.getElementById('loanTerm').value) || 36;
+    const el = document.getElementById('monthlyPayment');
+    if (el) el.textContent = monthlyPayment.toFixed(2);
+};
 
-  // Tính toán vay
-  const annualRate = 0.09;                    // 9%/năm
-  const monthlyRate = annualRate / 12;
-  const loanAmount = price * (1 - downPct / 100);   // Số tiền vay
-
-  let monthlyPayment = 0;
-  if (monthlyRate > 0) {
-    monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) /
-                     (Math.pow(1 + monthlyRate, months) - 1);
-  } else {
-    monthlyPayment = loanAmount / months;
-  }
-
-  // Hiển thị kết quả
-  const displayEl = document.getElementById('monthlyPayment');
-  if (displayEl) {
-    displayEl.textContent = monthlyPayment.toFixed(2);
-  }
-}
-
-// Gọi lần đầu khi trang load để hiển thị giá trị mặc định
-function initLoanCalculator() {
-  const slider = document.getElementById('downPaymentPct');
-  const select = document.getElementById('loanTerm');
-  if (slider) slider.addEventListener('input', calcLoan);
-  if (select) select.addEventListener('change', calcLoan);
-  calcLoan();   // Tính ngay khi load
-}
-
-initLoanCalculator();
-
-// Khởi tạo
+// ── Init ──
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('✅ car_detail.js loaded');
-
     ai.currentCar = getCurrentCar();
     await loadRealCars();
 
-    // Khởi tạo chat
+    // Chat welcome
     const initialMsg = ai.currentCar
-        ? `Chào bạn! Bạn đang xem xe <strong>${ai.currentCar.name}</strong> giá ${ai.currentCar.price} triệu.<br>Mình có thể tư vấn gì cho bạn về xe này?`
+        ? `Chào bạn! Bạn đang xem xe <strong>${ai.currentCar.name}</strong> giá ${ai.currentCar.price} triệu.<br>Mình có thể tư vấn gì cho bạn?`
         : 'Chào bạn! Bạn muốn hỏi gì về xe này?';
-
     aiBotMsg(initialMsg);
     aiShowSuggestions(['Giá có thương lượng không?', 'Chi phí bảo dưỡng?', 'So sánh với xe khác', 'Tính vay mua xe', 'Đăng ký lái thử']);
 
     // Enter để gửi
     const input = document.getElementById('aiInput');
     if (input) {
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendAiMessage();
-            }
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); sendAiMessage(); }
         });
     }
+
+    // Loan calculator — dùng addEventListener thay oninput inline
+    const slider = document.getElementById('downPaymentPct');
+    const select = document.getElementById('loanTerm');
+    if (slider) slider.addEventListener('input', calcLoan);
+    if (select) select.addEventListener('change', calcLoan);
+    calcLoan();
 
     if (window.lucide) lucide.createIcons();
 });
