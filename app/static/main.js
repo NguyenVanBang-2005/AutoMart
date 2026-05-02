@@ -789,42 +789,6 @@ function initForgotOTPBoxes() {
   setTimeout(() => container.querySelector('.otp-box').focus(), 100);
 }
 
-async function verifyForgotOTP() {
-  const boxes = document.querySelectorAll('#forgotOtpContainer .otp-box');
-  const otp = Array.from(boxes).map(b => b.value).join('');
-
-  if (otp.length !== 6) {
-    const err = document.getElementById('forgotOtpError');
-    err.textContent = 'Vui lòng nhập đủ 6 chữ số OTP!';
-    err.style.display = 'block';
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/users/verify-otp`, {   // tạm thời dùng chung verify-otp
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: currentResetEmail,
-        otp: otp,
-        purpose: "reset"
-      })
-    });
-
-    if (res.ok) {
-      closeModal('forgotModal');
-      showResetPasswordModal();
-    } else {
-      const result = await res.json();
-      const err = document.getElementById('forgotOtpError');
-      err.textContent = result.detail || 'OTP không đúng hoặc đã hết hạn!';
-      err.style.display = 'block';
-    }
-  } catch (err) {
-    showToast('Không thể xác thực OTP!');
-  }
-}
-
 function showResetPasswordModal() {
   console.log("✅ Đang mở modal Đặt lại mật khẩu");
   const modal = document.getElementById('resetPasswordModal');

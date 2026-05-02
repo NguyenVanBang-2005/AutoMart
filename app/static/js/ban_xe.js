@@ -1,5 +1,4 @@
 // ── ban_xe.js ──────────────────────────────────────────────────────────────
-// Login gate được xử lý bởi Jinja2 trong ban_xe.html — JS không cần làm việc đó
 
 // Safe modal opener — không phụ thuộc main.js
 function bxOpenModal(id) {
@@ -97,7 +96,6 @@ async function loadRealCars() {
       km: c.km || 0,
       fuel: c.loai || ''
     }));
-    console.log(`✅ Đã load ${bxState.cars.length} xe từ database`);
   } catch (e) {
     console.warn('Không load được danh sách xe:', e);
   }
@@ -217,7 +215,6 @@ function initBxChat() {
 
 // ==================== KHỞI TẠO ====================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('✅ ban_xe.js loaded');
   await loadRealCars();
   initBxChat();
 });
