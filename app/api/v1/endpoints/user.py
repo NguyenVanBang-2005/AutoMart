@@ -67,45 +67,31 @@ async def send_otp_route(
     data: SendOTPRequest,
     session: Session = Depends(get_session)
 ):
-    """Gửi mã OTP qua email - Hỗ trợ cả đăng ký và reset mật khẩu"""
+    import traceback
+    try:
+        user = find_user_by_email(session, data.email)
 
-    user = find_user_by_email(session, data.email)
+        if data.purpose == "register":
+            if user:
+                raise HTTPException(status_code=400, detail="Email này đã được sử dụng để đăng ký")
+        elif data.purpose == "reset":
+            if not user:
+                raise HTTPException(status_code=400, detail="Email này chưa được đăng ký trên hệ thống")
+        else:
+            raise HTTPException(status_code=400, detail="Purpose không hợp lệ")
 
-    if data.purpose == "register":
-        # Đăng ký: email phải CHƯA tồn tại
-        if user:
-            raise HTTPException(
-                status_code=400,
-                detail="Email này đã được sử dụng để đăng ký"
-            )
+        success = await send_otp(data.email, session)
 
-    elif data.purpose == "reset":
-        # Quên mật khẩu: email PHẢI đã tồn tại
-        if not user:
-            raise HTTPException(
-                status_code=400,
-                detail="Email này chưa được đăng ký trên hệ thống"
-            )
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail="Purpose không hợp lệ. Chỉ chấp nhận 'register' hoặc 'reset'"
-        )
+        if not success:
+            raise HTTPException(status_code=500, detail="Không thể gửi OTP. Vui lòng thử lại sau.")
 
-    # Gửi OTP
-    success = await send_otp(data.email, session)
+        return {"success": True, "message": "Đã gửi mã OTP đến email của bạn", "purpose": data.purpose}
 
-    if not success:
-        raise HTTPException(
-            status_code=500,
-            detail="Không thể gửi OTP. Vui lòng thử lại sau."
-        )
-
-    return {
-        "success": True,
-        "message": "Đã gửi mã OTP đến email của bạn",
-        "purpose": data.purpose
-    }
+    except HTTPException:
+        raise
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Lỗi server: {str(e)}")
 
 
 @public_router.post("/register-otp", response_model=TokenOut, status_code=201)
