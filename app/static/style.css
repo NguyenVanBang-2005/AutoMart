@@ -606,6 +606,18 @@ textarea.form-control { resize: vertical; }
   color: #888880; font-size: 14px;
 }
 
+/* Lien He */
+.lh-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+@media (min-width: 640px) {
+  .lh-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+}
+
 /* ── Dashboard responsive ── */
 @media (max-width: 768px) {
   .dashboard-wrapper { padding: 20px 16px; }

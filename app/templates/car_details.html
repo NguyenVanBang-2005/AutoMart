@@ -19,12 +19,11 @@
       <span>{{ car.hang }} {{ car.dong }}</span>
     </div>
 
-    <!-- Grid chính — class để CSS responsive control -->
+    <!-- Grid chính — 3 direct children: cd-images | cd-right | cd-left -->
     <div class="cd-main-grid">
 
-      <!-- CỘT TRÁI -->
-      <div>
-        <!-- Ảnh chính -->
+      <!-- ① ẢNH -->
+      <div class="cd-images">
         <div class="cd-main-image-wrap">
           {% if images %}
             <img id="mainImage" src="{{ images[0].url }}" alt="{{ car.hang }} {{ car.dong }}">
@@ -40,8 +39,6 @@
             </div>
           {% endif %}
         </div>
-
-        <!-- Thumbnail strip -->
         {% if images|length > 1 %}
         <div class="cd-thumbs">
           {% for img in images %}
@@ -53,12 +50,129 @@
           {% endfor %}
         </div>
         {% endif %}
+      </div><!-- /cd-images -->
 
-        <!-- Tên + giá -->
+      <!-- ② CỘT PHẢI: price-box + sidebar gộp, span 2 rows trên desktop -->
+      <div class="cd-right">
+
+        <!-- Box giá & CTA -->
+        <div class="cd-price-box">
+          <div style="font-size:13px;color:#888;margin-bottom:4px;">Giá bán</div>
+          {% if uu_dai %}
+          <div style="font-size:14px;color:#999;text-decoration:line-through;margin-bottom:2px;">
+            {{ "{:,}".format(car.gia) }} triệu
+          </div>
+          <div style="font-size:30px;font-weight:800;color:#e74c3c;margin-bottom:6px;">
+            {{ "{:,}".format(gia_hien_thi) }} triệu
+          </div>
+          <div style="background:#fff5f5;border:1px solid #fcc;border-radius:8px;
+            padding:8px 12px;font-size:12px;color:#e74c3c;font-weight:600;margin-bottom:20px;">
+            🔥 Tiết kiệm {{ "{:,}".format(car.gia - gia_hien_thi) }} triệu • -{{ uu_dai.phan_tram_giam|int }}%
+          </div>
+          {% else %}
+          <div style="font-size:30px;font-weight:800;color:var(--accent-primary);margin-bottom:20px;">
+            {{ "{:,}".format(car.gia) }} triệu
+          </div>
+          {% endif %}
+          <button onclick="window.location.href='/lien-he'"
+            style="width:100%;padding:14px;background:var(--accent-primary);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i data-lucide="phone" style="width:18px;height:18px;"></i>
+            Liên hệ ngay
+          </button>
+          <button onclick="window.location.href='/dich-vu'"
+            style="width:100%;padding:12px;background:transparent;color:var(--accent-primary);border:2px solid var(--accent-primary);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i data-lucide="car" style="width:16px;height:16px;"></i>
+            Đăng ký lái thử
+          </button>
+        </div><!-- /cd-price-box -->
+
+        <!-- Sidebar phụ -->
+        <div class="cd-sidebar">
+
+          <!-- Thông tin liên hệ -->
+          <div style="background:#f8f8f6;border-radius:14px;padding:20px;">
+            <div style="font-weight:700;margin-bottom:12px;">Thông tin liên hệ</div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <i data-lucide="map-pin" style="width:15px;height:15px;color:var(--accent-primary);flex-shrink:0;"></i>
+                {{ car.khu_vuc or 'Việt Nam' }}
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <i data-lucide="phone" style="width:15px;height:15px;color:var(--accent-primary);flex-shrink:0;"></i>
+                <strong>1900 1234</strong>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <i data-lucide="mail" style="width:15px;height:15px;color:var(--accent-primary);flex-shrink:0;"></i>
+                contact@automart.vn
+              </div>
+            </div>
+          </div>
+
+          <!-- Tính khoản vay -->
+          <div style="background:#fffbf0;border:1px solid #f0d080;border-radius:14px;padding:20px;">
+            <div style="font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+              <i data-lucide="landmark" style="width:16px;height:16px;color:var(--accent-primary);"></i>
+              Tính khoản vay
+            </div>
+            <div style="font-size:12px;color:#666;margin-bottom:12px;">Lãi suất tham khảo 9%/năm</div>
+            <div style="margin-bottom:8px;">
+              <label style="font-size:12px;color:#888;">Trả trước</label>
+              <input id="downPaymentPct" type="range" min="20" max="80" value="30"
+                oninput="calcLoan()" style="width:100%;accent-color:var(--accent-primary);">
+              <div style="display:flex;justify-content:space-between;font-size:12px;">
+                <span>20%</span>
+                <span id="downPctLabel" style="font-weight:700;color:var(--accent-primary);">30%</span>
+                <span>80%</span>
+              </div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <label style="font-size:12px;color:#888;">Thời hạn vay</label>
+              <select id="loanTerm" onchange="calcLoan()"
+                style="width:100%;padding:6px 10px;border:1px solid #e2e2da;border-radius:8px;font-size:13px;margin-top:4px;">
+                <option value="12">12 tháng</option>
+                <option value="24">24 tháng</option>
+                <option value="36" selected>36 tháng</option>
+                <option value="48">48 tháng</option>
+                <option value="60">60 tháng</option>
+              </select>
+            </div>
+            <div style="background:#fff;border-radius:10px;padding:12px;text-align:center;">
+              <div style="font-size:11px;color:#888;">Trả góp mỗi tháng ~</div>
+              <div id="monthlyPayment" style="font-size:22px;font-weight:800;color:var(--accent-primary);">—</div>
+              <div style="font-size:11px;color:#888;">triệu / tháng</div>
+            </div>
+          </div>
+
+        </div><!-- /cd-sidebar -->
+
+      </div><!-- /cd-right -->
+
+      <!-- ③ NỘI DUNG TRÁI: tên, thông số, mô tả, dịch vụ, AI -->
+      <div class="cd-left">
+
+        <!-- Tên + giá inline -->
         <h1 style="font-size:26px;font-weight:700;margin-bottom:8px;">{{ car.hang }} {{ car.dong }}</h1>
+        {% if uu_dai %}
+        <div style="margin-bottom:6px;">
+          <span style="font-size:16px;color:#999;text-decoration:line-through;">
+            {{ "{:,}".format(car.gia) }} triệu
+          </span>
+          <span style="background:#e74c3c;color:#fff;font-size:11px;font-weight:700;
+            padding:2px 8px;border-radius:20px;margin-left:8px;">
+            -{{ uu_dai.phan_tram_giam|int }}%
+          </span>
+        </div>
+        <div style="font-size:28px;font-weight:800;color:#e74c3c;margin-bottom:4px;">
+          {{ "{:,}".format(gia_hien_thi) }} triệu
+        </div>
+        <div style="font-size:12px;color:#888;margin-bottom:24px;">
+          Tiết kiệm {{ "{:,}".format(car.gia - gia_hien_thi) }} triệu • {{ uu_dai.mo_ta or "Ưu đãi tháng này" }}
+        </div>
+        {% else %}
         <div style="font-size:28px;font-weight:800;color:var(--accent-primary);margin-bottom:24px;">
           {{ "{:,}".format(car.gia) }} triệu
         </div>
+        {% endif %}
 
         <!-- Thông số kỹ thuật -->
         <div style="background:#f8f8f6;border-radius:14px;padding:24px;margin-bottom:24px;">
@@ -153,89 +267,14 @@
             </button>
           </div>
         </div>
-      </div>
 
-      <!-- CỘT PHẢI -->
-      <div class="cd-sidebar">
+      </div><!-- /cd-left -->
 
-        <!-- Giá & CTA -->
-        <div style="background:#fff;border:2px solid var(--accent-primary);border-radius:16px;padding:24px;">
-          <div style="font-size:13px;color:#888;margin-bottom:4px;">Giá bán</div>
-          <div style="font-size:30px;font-weight:800;color:var(--accent-primary);margin-bottom:20px;">
-            {{ "{:,}".format(car.gia) }} triệu
-          </div>
-          <button onclick="window.location.href='/lien-he'"
-            style="width:100%;padding:14px;background:var(--accent-primary);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <i data-lucide="phone" style="width:18px;height:18px;"></i>
-            Liên hệ ngay
-          </button>
-          <button onclick="window.location.href='/dich-vu'"
-            style="width:100%;padding:12px;background:transparent;color:var(--accent-primary);border:2px solid var(--accent-primary);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <i data-lucide="car" style="width:16px;height:16px;"></i>
-            Đăng ký lái thử
-          </button>
-        </div>
-
-        <!-- Thông tin liên hệ -->
-        <div style="background:#f8f8f6;border-radius:14px;padding:20px;">
-          <div style="font-weight:700;margin-bottom:12px;">Thông tin liên hệ</div>
-          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <i data-lucide="map-pin" style="width:15px;height:15px;color:var(--accent-primary);flex-shrink:0;"></i>
-              {{ car.khu_vuc or 'Việt Nam' }}
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <i data-lucide="phone" style="width:15px;height:15px;color:var(--accent-primary);flex-shrink:0;"></i>
-              <strong>1900 1234</strong>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <i data-lucide="mail" style="width:15px;height:15px;color:var(--accent-primary);flex-shrink:0;"></i>
-              contact@automart.vn
-            </div>
-          </div>
-        </div>
-
-        <!-- Tính khoản vay -->
-        <div style="background:#fffbf0;border:1px solid #f0d080;border-radius:14px;padding:20px;">
-          <div style="font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
-            <i data-lucide="landmark" style="width:16px;height:16px;color:var(--accent-primary);"></i>
-            Tính khoản vay
-          </div>
-          <div style="font-size:12px;color:#666;margin-bottom:12px;">Lãi suất tham khảo 9%/năm</div>
-          <div style="margin-bottom:8px;">
-            <label style="font-size:12px;color:#888;">Trả trước</label>
-            <input id="downPaymentPct" type="range" min="20" max="80" value="30"
-              oninput="calcLoan()" style="width:100%;accent-color:var(--accent-primary);">
-            <div style="display:flex;justify-content:space-between;font-size:12px;">
-              <span>20%</span>
-              <span id="downPctLabel" style="font-weight:700;color:var(--accent-primary);">30%</span>
-              <span>80%</span>
-            </div>
-          </div>
-          <div style="margin-bottom:12px;">
-            <label style="font-size:12px;color:#888;">Thời hạn vay</label>
-            <select id="loanTerm" onchange="calcLoan()"
-              style="width:100%;padding:6px 10px;border:1px solid #e2e2da;border-radius:8px;font-size:13px;margin-top:4px;">
-              <option value="12">12 tháng</option>
-              <option value="24">24 tháng</option>
-              <option value="36" selected>36 tháng</option>
-              <option value="48">48 tháng</option>
-              <option value="60">60 tháng</option>
-            </select>
-          </div>
-          <div style="background:#fff;border-radius:10px;padding:12px;text-align:center;">
-            <div style="font-size:11px;color:#888;">Trả góp mỗi tháng ~</div>
-            <div id="monthlyPayment" style="font-size:22px;font-weight:800;color:var(--accent-primary);">—</div>
-            <div style="font-size:11px;color:#888;">triệu / tháng</div>
-          </div>
-        </div>
-
-      </div><!-- /cd-sidebar -->
     </div><!-- /cd-main-grid -->
   </div>
 </section>
 
-<div id="carData" data-price="{{ car.gia }}" data-name="{{ car.hang }} {{ car.dong }}" style="display:none;"></div>
+<div id="carData" data-price="{{ gia_hien_thi }}" data-name="{{ car.hang }} {{ car.dong }}" style="display:none;"></div>
 
 <script src="/static/js/car_detail.js"></script>
 <script>lucide.createIcons();</script>

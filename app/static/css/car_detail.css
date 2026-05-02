@@ -1,6 +1,10 @@
 /* ================================================
    CAR_DETAIL.CSS — AutoMart (mobile-first)
-   Chỉ xử lý responsive, không đụng logic JS
+   3 direct children của grid: cd-images | cd-right | cd-left
+   cd-right = flex column chứa cd-price-box + cd-sidebar
+
+   Mobile order : images(1) → right(2) → left(3)
+   Desktop      : 2 cột, images+left cột trái, right cột phải sticky
    ================================================ */
 
 .cd-section { padding: 24px 16px !important; }
@@ -14,16 +18,41 @@
 }
 .cd-breadcrumb a { color: var(--accent-primary); text-decoration: none; }
 
-/* ══════════════════
-   GRID CHÍNH
-   Mobile: 1 cột
-   Desktop: 2 cột
-   ══════════════════ */
+/* ══════════════════════════════════════════════
+   GRID CHÍNH — mobile: 1 cột, 3 children
+   ══════════════════════════════════════════════ */
 .cd-main-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
+  gap: 20px;
   align-items: start;
+}
+
+/* Mobile order */
+.cd-images { order: 1; }
+.cd-right  { order: 2; }
+.cd-left   { order: 3; }
+
+/* ── Cột phải: price-box + sidebar xếp dọc ── */
+.cd-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Style box giá ── */
+.cd-price-box {
+  background: #fff;
+  border: 2px solid var(--accent-primary);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+/* ── Sidebar stack dọc ── */
+.cd-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* ── Ảnh chính ── */
@@ -42,7 +71,7 @@
 .cd-thumbs {
   display: flex; gap: 8px;
   overflow-x: auto; padding-bottom: 4px;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   scrollbar-width: none;
 }
 .cd-thumbs::-webkit-scrollbar { display: none; }
@@ -69,28 +98,35 @@
   gap: 10px;
 }
 
-/* ── Sidebar: mobile hiển thị trước form ── */
-.cd-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 /* ══════════════════
-   RESPONSIVE
+   640px
    ══════════════════ */
-
 @media (min-width: 640px) {
   .cd-section { padding: 28px 24px !important; }
   .cd-services-grid { grid-template-columns: 1fr 1fr; }
   .cd-thumbs img { width: 80px; height: 58px; }
 }
 
+/* ══════════════════════════════════════════════
+   960px — Desktop 2 cột
+   grid-template-areas:
+     "images  right"
+     "left    right"
+   cd-right span 2 rows → không có khoảng trắng
+   ══════════════════════════════════════════════ */
 @media (min-width: 960px) {
   .cd-section { padding: 32px 24px !important; }
+
   .cd-main-grid {
     grid-template-columns: 1fr 360px;
+    grid-template-areas:
+      "images right"
+      "left   right";
     gap: 32px;
+    align-items: start;
   }
-  .cd-sidebar { position: sticky; top: 80px; }
+
+  .cd-images { order: 1; grid-area: images; }
+  .cd-right  { order: 2; grid-area: right; position: sticky; top: 80px; }
+  .cd-left   { order: 3; grid-area: left; }
 }
