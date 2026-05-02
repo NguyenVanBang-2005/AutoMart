@@ -16,17 +16,6 @@ print("Raw value từ settings :", repr(settings.DATABASE_URL))   # quan trọng
 print("Từ os.getenv         :", repr(os.getenv("DATABASE_URL")))
 print("="*60)
 
-# Thử parse
-try:
-    engine = create_engine(
-        settings.DATABASE_URL,
-        echo=False,
-        pool_pre_ping=True
-    )
-    print("✅ Parse URL thành công!")
-except Exception as e:
-    print("❌ Lỗi parse:", e)
-
 # Thêm sslmode=require nếu chưa có
 if DATABASE_URL and "sslmode" not in DATABASE_URL:
     if "?" in DATABASE_URL:

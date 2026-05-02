@@ -21,6 +21,11 @@ def _make_otp() -> str:
 
 async def send_otp(email: str, session: Session) -> bool:
     """Gửi OTP và lưu vào database - ĐÃ CÓ LOG CHI TIẾT"""
+
+    logger.info(f"📧 Gmail user: {settings.gmail_user}")
+    logger.info(f"📧 Gmail pass set: {bool(settings.gmail_app_password)}")
+    logger.info(f"📧 Gmail pass length: {len(settings.gmail_app_password) if settings.gmail_app_password else 0}")
+
     if not settings.gmail_user or not settings.gmail_app_password:
         logger.error("❌ Gmail credentials chưa được cấu hình")
         return False
