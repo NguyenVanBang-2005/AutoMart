@@ -1,5 +1,6 @@
 import secrets
 import logging
+import traceback
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -48,7 +49,7 @@ async def send_otp(email: str, session: Session) -> bool:
     session.add(otp_record)
     session.commit()
 
-    logger.info(f"🔑 OTP ĐÃ TẠO cho {email} | Mã: {otp_code} | Hết hạn: {expires_at}")
+    logger.info(f"OTP ĐÃ TẠO cho {email} | Mã: {otp_code} | Hết hạn: {expires_at}")
 
     # === Phần gửi email (giữ nguyên) ===
     msg = MIMEMultipart("alternative")
@@ -76,11 +77,12 @@ async def send_otp(email: str, session: Session) -> bool:
             server.login(settings.gmail_user, settings.gmail_app_password)
             server.sendmail(settings.gmail_user, email, msg.as_string())
 
-        logger.info(f"✅ OTP đã gửi thành công đến {email}")
+        logger.info(f"OTP đã gửi thành công đến {email}")
         return True
 
     except Exception as e:
-        logger.error(f"❌ Gửi OTP thất bại cho {email}: {e}")
+        logger.error(f"Gửi OTP thất bại cho {email}: {e}")
+        logger.error(traceback.format_exc())
         session.rollback()
         return False
 
