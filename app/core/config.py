@@ -6,8 +6,8 @@ from pydantic import Field
 load_dotenv()
 
 class Settings(BaseSettings):
-    gmail_user: str = ""
-    gmail_app_password: str = ""
+    gmail_user: str = Field(default="", env="GMAIL_USER")
+    gmail_app_password: str = Field(default="", env="GMAIL_APP_PASSWORD")
 
     JINA_API_KEY: str = ""
 
