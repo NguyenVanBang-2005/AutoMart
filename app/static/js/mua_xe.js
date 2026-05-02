@@ -1,5 +1,3 @@
-console.log("mua_xe.js loaded successfully");
-
 // ==================== LOAD & RENDER ====================
 async function loadCars() {
   try {
@@ -114,7 +112,7 @@ function loadMoreCars() {
 
 // ==================== MODAL THÊM XE ====================
 function showAddCarModal() {
-  console.log("🔥 Mở modal thêm xe");
+  console.log("Mở modal thêm xe");
   document.getElementById('addCarModal').style.display = 'flex';
   document.getElementById('imagePreview').innerHTML = '';
 }
@@ -182,7 +180,7 @@ async function handleAddCar(e) {
     const result = await res.json();
 
     if (res.ok) {
-      alert('✅ Thêm xe thành công! ID: ' + result.car_id);
+      alert('Thêm xe thành công! ID: ' + result.car_id);
       closeAddCarModal();
       document.getElementById('addCarForm').reset();
       document.getElementById('imagePreview').innerHTML = '';

@@ -11,12 +11,12 @@ let _regData = {
 let resendTimer = null;
 
 // ==================== GỬI OTP ====================
-async function sendOTP(email) {
+async function sendOTP(email, purpose = 'register') {
   try {
     const res = await fetch(`${API_BASE}/users/send-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email, purpose }),
     });
 
     const result = await res.json();
