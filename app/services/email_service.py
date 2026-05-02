@@ -73,7 +73,7 @@ async def send_otp(email: str, session: Session) -> bool:
     msg.attach(MIMEText(html, "html"))
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 587) as server:
             server.login(settings.gmail_user, settings.gmail_app_password)
             server.sendmail(settings.gmail_user, email, msg.as_string())
 
