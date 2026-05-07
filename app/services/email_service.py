@@ -1,12 +1,9 @@
 import secrets
 import logging
+import resend
 from datetime import datetime, timedelta
-from typing import Optional
 
 from sqlmodel import Session, select
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import smtplib
 
 from app.core.config import settings
 from app.models.user import OTP
@@ -20,9 +17,9 @@ def _make_otp() -> str:
 
 
 async def send_otp(email: str, session: Session) -> bool:
-    """Gửi OTP và lưu vào database - ĐÃ CÓ LOG CHI TIẾT"""
-    if not settings.gmail_user or not settings.gmail_app_password:
-        logger.error("❌ Gmail credentials chưa được cấu hình")
+    """Gửi OTP qua Resend và lưu vào database"""
+    if not settings.resend_api_key:
+        logger.error("RESEND_API_KEY chưa được cấu hình")
         return False
 
     # Xóa tất cả OTP cũ của email này
@@ -35,21 +32,11 @@ async def send_otp(email: str, session: Session) -> bool:
     otp_code = _make_otp()
     expires_at = datetime.utcnow() + timedelta(minutes=10)
 
-    otp_record = OTP(
-        email=email,
-        otp=otp_code,
-        expires_at=expires_at
-    )
+    otp_record = OTP(email=email, otp=otp_code, expires_at=expires_at)
     session.add(otp_record)
     session.commit()
 
     logger.info(f"🔑 OTP ĐÃ TẠO cho {email} | Mã: {otp_code} | Hết hạn: {expires_at}")
-
-    # === Phần gửi email (giữ nguyên) ===
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = "[AutoMart] Mã xác thực"
-    msg["From"] = f"AutoMart <{settings.gmail_user}>"
-    msg["To"] = email
 
     html = f"""
     <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#f8fafc;border-radius:16px;">
@@ -64,24 +51,26 @@ async def send_otp(email: str, session: Session) -> bool:
     </div>
     """
 
-    msg.attach(MIMEText(html, "html"))
-
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-            server.login(settings.gmail_user, settings.gmail_app_password)
-            server.sendmail(settings.gmail_user, email, msg.as_string())
-
-        logger.info(f"✅ OTP đã gửi thành công đến {email}")
+        resend.api_key = settings.resend_api_key
+        result = resend.Emails.send({
+            "from": "AutoMart <no-reply@automart.com.vn>",
+            "to": email,
+            "subject": "[AutoMart] Mã xác thực",
+            "html": html,
+        })
+        logger.info(f"OTP đã gửi thành công đến {email} | Resend ID: {result}")
         return True
 
     except Exception as e:
-        logger.error(f"❌ Gửi OTP thất bại cho {email}: {e}")
-        session.rollback()
+        logger.error(f"Gửi OTP thất bại cho {email}: {e}")
+        session.delete(otp_record)
+        session.commit()
         return False
 
 
 def verify_otp(email: str, otp: str, session: Session, purpose: str = "register") -> bool:
-    """Kiểm tra OTP - ĐÃ CÓ LOG CHI TIẾT ĐỂ DEBUG"""
+    """Kiểm tra OTP"""
     logger.info(f"🔍 VERIFY OTP | Email: {email} | Nhập: {otp} | Purpose: {purpose}")
 
     record = session.exec(
@@ -91,18 +80,17 @@ def verify_otp(email: str, otp: str, session: Session, purpose: str = "register"
     ).first()
 
     if not record:
-        logger.warning(f"❌ Không tìm thấy OTP hợp lệ cho {email}")
+        logger.warning(f"Không tìm thấy OTP hợp lệ cho {email}")
         return False
 
     logger.info(f"📦 OTP trong DB: {record.otp} | Hết hạn: {record.expires_at}")
 
     if record.otp != otp:
-        logger.warning(f"❌ OTP KHÔNG KHỚP! Nhập: {otp} | DB: {record.otp}")
+        logger.warning(f"OTP KHÔNG KHỚP! Nhập: {otp} | DB: {record.otp}")
         return False
 
-    # Xóa OTP sau khi verify thành công
     session.delete(record)
     session.commit()
 
-    logger.info(f"✅ OTP XÁC THỰC THÀNH CÔNG cho {email} (purpose: {purpose})")
+    logger.info(f"OTP XÁC THỰC THÀNH CÔNG cho {email} (purpose: {purpose})")
     return True

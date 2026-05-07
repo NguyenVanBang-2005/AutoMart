@@ -193,7 +193,6 @@ function openRegisterModal() {
   if (modal) modal.style.display = 'flex';
   var err = document.getElementById('loginError');
   if (err) err.style.display = 'none';
-  // Delay nhỏ để DOM render xong rồi mới switch tab
   setTimeout(function() {
     switchLoginTab('register');
   }, 30);
@@ -415,7 +414,6 @@ async function onConfigChange(config) {
     const logoHTML = `${parts[1]}<span class="logo-accent">${parts[2]}</span>`;
     const siteLogo    = document.getElementById('siteLogo');
     const footerBrand = document.getElementById('footerBrand');
-    // Không ghi đè nếu logo là ảnh
     if (siteLogo && !siteLogo.querySelector('img')) siteLogo.innerHTML = logoHTML;
     if (footerBrand) footerBrand.innerHTML = logoHTML;
   const heroTitle    = document.getElementById('heroTitle');
@@ -491,7 +489,6 @@ function initMobileNav() {
   function openMenu() {
     mobileActions.innerHTML = navActions.innerHTML;
 
-    // === FIX TẤT CẢ NÚT "ĐĂNG KÝ" (cả desktop copy + mobile) ===
     const registerButtons = mobileActions.querySelectorAll('button, a');
     registerButtons.forEach(btn => {
       if (btn.textContent.trim().includes('Đăng ký') || btn.getAttribute('onclick')?.includes('registerModal')) {
@@ -519,7 +516,7 @@ function initMobileNav() {
 // ── Register Multi-step ──────────────────────────────
 let _regData = { ho_ten: '', email: '', phone: '', password: '' };
 
-// ==================== HÀM GỬI OTP (định nghĩa trực tiếp) ====================
+// ==================== HÀM GỬI OTP ====================
 async function sendOTP(email, purpose = "register") {
   try {
     const res = await fetch(`${API_BASE}/users/send-otp`, {
@@ -652,7 +649,7 @@ async function regSubmitOTP() {
   const success = await verifyOTP(_regData.email, otp);
   if (success) {
     showToast('Đăng ký tài khoản thành công!');
-    closeModal('loginModal');           // ← ĐÃ SỬA: không còn registerModal
+    closeModal('loginModal');
     _regData = { email: '', phone: '', password: '' };
     setTimeout(() => window.location.reload(), 800);
   }
@@ -745,13 +742,10 @@ async function sendForgotOTP() {
     if (res.ok) {
       currentResetEmail = email;
       showToast(`Đã gửi OTP đến ${email}`);
-
-      // Chuyển sang bước nhập OTP
       document.getElementById('forgotStepEmail').style.display = 'none';
       document.getElementById('forgotStepOTP').style.display = 'block';
       document.getElementById('forgotTitle').textContent = 'Nhập mã OTP';
-
-      initForgotOTPBoxes();   // tạo 6 ô OTP
+      initForgotOTPBoxes();
     } else {
       showToast(result.detail || 'Gửi OTP thất bại!');
     }
@@ -790,54 +784,7 @@ function initForgotOTPBoxes() {
     container.appendChild(input);
   }
 
-  // Focus ô đầu tiên
   setTimeout(() => container.querySelector('.otp-box').focus(), 100);
-}
-
-async function verifyForgotOTP() {
-  const boxes = document.querySelectorAll('#forgotOtpContainer .otp-box');
-  const otp = Array.from(boxes).map(b => b.value).join('');
-
-  if (otp.length !== 6) {
-    const err = document.getElementById('forgotOtpError');
-    err.textContent = 'Vui lòng nhập đủ 6 chữ số OTP!';
-    err.style.display = 'block';
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/users/verify-otp`, {   // tạm thời dùng chung verify-otp
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: currentResetEmail,
-        otp: otp,
-        purpose: "reset"
-      })
-    });
-
-    if (res.ok) {
-      closeModal('forgotModal');
-      showResetPasswordModal();
-    } else {
-      const result = await res.json();
-      const err = document.getElementById('forgotOtpError');
-      err.textContent = result.detail || 'OTP không đúng hoặc đã hết hạn!';
-      err.style.display = 'block';
-    }
-  } catch (err) {
-    showToast('Không thể xác thực OTP!');
-  }
-}
-
-function showResetPasswordModal() {
-  console.log("✅ Đang mở modal Đặt lại mật khẩu");
-  const modal = document.getElementById('resetPasswordModal');
-  if (modal) {
-    modal.style.display = 'flex';     // Dùng display trực tiếp để chắc chắn mở
-  } else {
-    console.error("❌ Không tìm thấy modal #resetPasswordModal");
-  }
 }
 
 async function verifyForgotOTP() {
@@ -863,16 +810,13 @@ async function verifyForgotOTP() {
     });
 
     if (res.ok) {
-      // Đóng modal forgot OTP một cách MẠNH MẼ (tương tự reset password)
       const forgotModal = document.getElementById('forgotModal');
       if (forgotModal) {
-        forgotModal.style.display = 'none';      // Đóng trực tiếp
-        forgotModal.classList.remove('active');  // Xóa class backup
+        forgotModal.style.display = 'none';
+        forgotModal.classList.remove('active');
       }
-
       showToast('Xác thực OTP thành công!');
-      showResetPasswordModal();   // Mở modal đặt lại mật khẩu
-
+      showResetPasswordModal();
     } else {
       const result = await res.json();
       const err = document.getElementById('forgotOtpError');
@@ -882,6 +826,15 @@ async function verifyForgotOTP() {
   } catch (err) {
     console.error(err);
     showToast('Không thể xác thực OTP!');
+  }
+}
+
+function showResetPasswordModal() {
+  const modal = document.getElementById('resetPasswordModal');
+  if (modal) {
+    modal.style.display = 'flex';
+  } else {
+    console.error("Không tìm thấy modal #resetPasswordModal");
   }
 }
 
@@ -906,7 +859,6 @@ async function init() {
   } else {
     onConfigChange(defaultConfig);
   }
-  // ĐÃ XÓA: initConsultChat — đã chuyển sang tu_van.js
 }
 
 init();

@@ -6,6 +6,8 @@ from pydantic import Field
 load_dotenv()
 
 class Settings(BaseSettings):
+    resend_api_key: str = " "
+
     gmail_user: str = ""
     gmail_app_password: str = ""
 
