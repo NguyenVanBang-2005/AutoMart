@@ -235,6 +235,15 @@ def ban_xe(request: Request):
         context={"current_user": user}
     )
 
+@app.get("/quy-trinh-ban-xe")
+def quy_trinh_ban_xe(request: Request):
+    user = get_current_user_for_template(request)
+    return templates.TemplateResponse(
+        request=request,
+        name="quy_trinh_ban_xe.html",
+        context={"current_user": user}
+    )
+
 @app.get("/lien-he")
 def lien_he(request: Request):
     user = get_current_user_for_template(request)

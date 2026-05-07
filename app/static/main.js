@@ -664,6 +664,56 @@ async function regResendOTP(e) {
   }
 }
 
+// Chuyển tab
+function switchTab(tabId) {
+  // Ẩn tất cả panels
+  document.querySelectorAll('[id^="panel"]').forEach(panel => {
+    panel.style.display = 'none';
+  });
+
+  // Bỏ active tất cả tab buttons
+  document.querySelectorAll('.dv-tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  // Hiện panel tương ứng
+  const panelMap = {
+    'lai-thu': 'panelLaiThu',
+    'ho-tro':  'panelHoTro'
+  };
+  const panelId = panelMap[tabId];
+  if (panelId) {
+    const panel = document.getElementById(panelId);
+    if (panel) panel.style.display = 'block';
+  }
+
+  // Active tab button tương ứng
+  const activeBtn = document.querySelector(`.dv-tab-btn[data-tab="${tabId}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  // Re-render lucide icons vì panel mới được hiện
+  if (window.lucide) lucide.createIcons();
+}
+
+// ── FAQ toggle ────────────────────────────────────
+function toggleFaq(idx) {
+  const body = document.getElementById('faqBody' + idx);
+  const icon = document.getElementById('faqIcon' + idx);
+  if (!body) return;
+
+  const isOpen = body.classList.contains('open');
+
+  // Đóng tất cả FAQ khác
+  document.querySelectorAll('.dv-faq-body').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.dv-faq-icon').forEach(el => el.style.transform = 'rotate(0deg)');
+
+  // Toggle cái đang click
+  if (!isOpen) {
+    body.classList.add('open');
+    if (icon) icon.style.transform = 'rotate(180deg)';
+  }
+}
+
 // ==================== TẠO 6 Ô OTP ====================
 function initOTPBoxesForRegister() {
   const container = document.querySelector('#regStep3 > div[style*="display:flex"]');
