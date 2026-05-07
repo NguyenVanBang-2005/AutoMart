@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, UploadFile, File
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.core.database import get_session
 from app.core.security import (
@@ -7,6 +7,7 @@ from app.core.security import (
     set_auth_cookie,
     delete_auth_cookie,
     get_current_user_from_cookie,
+    hash_password,          # ← thêm import này
 )
 from app.models.user import (
     UserRegister,
@@ -17,7 +18,7 @@ from app.models.user import (
     TokenOut,
     SendOTPRequest,
     RegisterWithOTP,
-    OTP,                    # Import model OTP
+    OTP,
     ResetPasswordRequest,
 )
 from app.services.email_service import send_otp, verify_otp
@@ -30,9 +31,6 @@ from app.services.user_service import (
     change_password,
 )
 from app.services.upload_service import upload_image, delete_image
-
-from passlib.context import CryptContext
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 # ====================== ROUTERS ======================
 public_router = APIRouter(prefix="/users")
@@ -59,7 +57,7 @@ def get_user_or_401(request: Request, session: Session):
 
 
 # ══════════════════════════════════════════════════════════════
-# PUBLIC ROUTES — Không cần đăng nhập
+# PUBLIC ROUTES
 # ══════════════════════════════════════════════════════════════
 
 @public_router.post("/send-otp")
@@ -67,45 +65,22 @@ async def send_otp_route(
     data: SendOTPRequest,
     session: Session = Depends(get_session)
 ):
-    """Gửi mã OTP qua email - Hỗ trợ cả đăng ký và reset mật khẩu"""
-
     user = find_user_by_email(session, data.email)
 
     if data.purpose == "register":
-        # Đăng ký: email phải CHƯA tồn tại
         if user:
-            raise HTTPException(
-                status_code=400,
-                detail="Email này đã được sử dụng để đăng ký"
-            )
-
+            raise HTTPException(status_code=400, detail="Email này đã được sử dụng để đăng ký")
     elif data.purpose == "reset":
-        # Quên mật khẩu: email PHẢI đã tồn tại
         if not user:
-            raise HTTPException(
-                status_code=400,
-                detail="Email này chưa được đăng ký trên hệ thống"
-            )
+            raise HTTPException(status_code=400, detail="Email này chưa được đăng ký trên hệ thống")
     else:
-        raise HTTPException(
-            status_code=400,
-            detail="Purpose không hợp lệ. Chỉ chấp nhận 'register' hoặc 'reset'"
-        )
+        raise HTTPException(status_code=400, detail="Purpose không hợp lệ. Chỉ chấp nhận 'register' hoặc 'reset'")
 
-    # Gửi OTP
     success = await send_otp(data.email, session)
-
     if not success:
-        raise HTTPException(
-            status_code=500,
-            detail="Không thể gửi OTP. Vui lòng thử lại sau."
-        )
+        raise HTTPException(status_code=500, detail="Không thể gửi OTP. Vui lòng thử lại sau.")
 
-    return {
-        "success": True,
-        "message": "Đã gửi mã OTP đến email của bạn",
-        "purpose": data.purpose
-    }
+    return {"success": True, "message": "Đã gửi mã OTP đến email của bạn", "purpose": data.purpose}
 
 
 @public_router.post("/register-otp", response_model=TokenOut, status_code=201)
@@ -114,110 +89,73 @@ def register_otp_route(
     response: Response,
     session: Session = Depends(get_session)
 ):
-    """Xác thực OTP và tạo tài khoản"""
-    # Kiểm tra OTP
     if not verify_otp(data.email, data.otp, session):
-        raise HTTPException(
-            status_code=400,
-            detail="Mã OTP không hợp lệ hoặc đã hết hạn"
-        )
+        raise HTTPException(status_code=400, detail="Mã OTP không hợp lệ hoặc đã hết hạn")
 
-    # Kiểm tra email chưa được dùng (phòng trường hợp race condition)
     if find_user_by_email(session, data.email):
-        raise HTTPException(
-            status_code=400,
-            detail="Email này đã được sử dụng"
-        )
+        raise HTTPException(status_code=400, detail="Email này đã được sử dụng")
 
-    # Tạo user
     user_data = UserRegister(
         ho_ten=data.ho_ten,
         email=data.email,
         so_dien_thoai=data.so_dien_thoai,
         password=data.password
     )
-
     user = create_user(session, user_data)
-
-    # Tạo token và set cookie
     token = create_access_token({"sub": str(user.id)})
     set_auth_cookie(response, token)
 
-    return TokenOut(
-        access_token=token,
-        token_type="bearer",
-        user=to_user_out(user)
-    )
+    return TokenOut(access_token=token, token_type="bearer", user=to_user_out(user))
+
 
 @public_router.post("/verify-otp")
 def verify_otp_route(
-    data: dict,   # nhận email + otp + purpose
+    data: dict,
     session: Session = Depends(get_session)
 ):
-    """Xác thực OTP cho cả đăng ký và reset mật khẩu"""
-    email = data.get("email")
-    otp = data.get("otp")
+    email   = data.get("email")
+    otp     = data.get("otp")
     purpose = data.get("purpose", "register")
 
     if not email or not otp:
         raise HTTPException(status_code=400, detail="Email và OTP là bắt buộc")
 
     if not verify_otp(email, otp, session, purpose):
-        raise HTTPException(
-            status_code=400,
-            detail="Mã OTP không đúng hoặc đã hết hạn"
-        )
+        raise HTTPException(status_code=400, detail="Mã OTP không đúng hoặc đã hết hạn")
 
-    return {
-        "success": True,
-        "message": "Xác thực OTP thành công",
-        "purpose": purpose
-    }
+    return {"success": True, "message": "Xác thực OTP thành công", "purpose": purpose}
+
 
 @public_router.post("/reset-password")
 def reset_password(
     data: ResetPasswordRequest,
     session: Session = Depends(get_session)
 ):
-    """Đặt lại mật khẩu - Sử dụng argon2 (ổn định, không giới hạn 72 bytes)"""
     try:
-        print(f"🔄 [RESET-PASSWORD] Nhận request | email={data.email} | pass_length={len(data.new_password)}")
-
         if len(data.new_password) < 6:
             raise HTTPException(status_code=400, detail="Mật khẩu mới phải có ít nhất 6 ký tự")
 
         user = find_user_by_email(session, data.email)
         if not user:
-            print(f"❌ Không tìm thấy user với email: {data.email}")
             raise HTTPException(status_code=400, detail="Email chưa được đăng ký trên hệ thống")
 
-        # Hash bằng argon2 (không cần truncate)
-        hashed_password = pwd_context.hash(data.new_password)
-        print("✅ Hash mật khẩu thành công (argon2)")
-
-        user.password_hash = hashed_password
+        # ← Dùng hash_password (bcrypt+SHA256) thay vì argon2
+        user.password_hash = hash_password(data.new_password)
         session.add(user)
         session.commit()
         session.refresh(user)
 
-        print(f"✅ Đặt lại mật khẩu THÀNH CÔNG cho {data.email}")
+        return {"success": True, "message": "Mật khẩu đã được đặt lại thành công."}
 
-        return {
-            "success": True,
-            "message": "Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập ngay."
-        }
-
-    except HTTPException as e:
+    except HTTPException:
         session.rollback()
-        print(f"⚠️ HTTP Error: {e.detail}")
         raise
-
-    except Exception as e:
+    except Exception:
         session.rollback()
         import traceback
-        print("❌ LỖI KHÔNG MONG MUỐN:")
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="Đặt lại mật khẩu thất bại. Vui lòng thử lại sau.")
+
 
 @public_router.post("/register", response_model=TokenOut, status_code=201)
 def register(
@@ -225,7 +163,6 @@ def register(
     response: Response,
     session: Session = Depends(get_session)
 ):
-    """Đăng ký truyền thống (không dùng OTP)"""
     if find_user_by_email(session, data.email):
         raise HTTPException(status_code=400, detail="Email đã được sử dụng")
 
@@ -233,11 +170,7 @@ def register(
     token = create_access_token({"sub": str(user.id)})
     set_auth_cookie(response, token)
 
-    return TokenOut(
-        access_token=token,
-        token_type="bearer",
-        user=to_user_out(user)
-    )
+    return TokenOut(access_token=token, token_type="bearer", user=to_user_out(user))
 
 
 @public_router.post("/login", response_model=TokenOut)
@@ -253,11 +186,7 @@ def login(
     token = create_access_token({"sub": str(user.id)})
     set_auth_cookie(response, token)
 
-    return TokenOut(
-        access_token=token,
-        token_type="bearer",
-        user=to_user_out(user)
-    )
+    return TokenOut(access_token=token, token_type="bearer", user=to_user_out(user))
 
 
 @public_router.post("/logout")
@@ -267,7 +196,7 @@ def logout(response: Response):
 
 
 # ══════════════════════════════════════════════════════════════
-# PRIVATE ROUTES — Phải đăng nhập
+# PRIVATE ROUTES
 # ══════════════════════════════════════════════════════════════
 
 @private_router.get("/me", response_model=UserOut)

@@ -35,11 +35,11 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Xác thực mật khẩu sử dụng cùng scheme với lúc hash (argon2)
-    """
     try:
-        return pwd_context.verify(plain_password, hashed_password)
+        return bcrypt.checkpw(
+            _prepare_password(plain_password),
+            hashed_password.encode()
+        )
     except Exception as e:
         print(f"[VERIFY_PASSWORD] Lỗi xác thực: {e}")
         return False

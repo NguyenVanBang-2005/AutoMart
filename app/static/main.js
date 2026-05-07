@@ -95,8 +95,13 @@ async function handleLoginSubmit(e) {
   e.preventDefault();
   const form = e.target;
   const btn  = form.querySelector('button[type="submit"]');
-  const email    = form.querySelector('input[type="email"]').value.trim();
-  const password = form.querySelector('input[type="password"]').value;
+  const emailInput    = document.getElementById('loginEmail')
+                     || form.querySelector('input[type="email"]')
+                     || form.querySelector('input[type="text"]');
+  const passwordInput = document.getElementById('loginPassword')
+                     || form.querySelector('input[type="password"]');
+  const email    = emailInput    ? emailInput.value.trim() : '';
+  const password = passwordInput ? passwordInput.value     : '';
 
   if (!email || password.length < 6) {
     const errEl = document.getElementById('loginError');
@@ -515,12 +520,12 @@ function initMobileNav() {
 let _regData = { ho_ten: '', email: '', phone: '', password: '' };
 
 // ==================== HÀM GỬI OTP (định nghĩa trực tiếp) ====================
-async function sendOTP(email) {
+async function sendOTP(email, purpose = "register") {
   try {
     const res = await fetch(`${API_BASE}/users/send-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email, purpose })
     });
 
     const result = await res.json();
