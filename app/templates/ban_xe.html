@@ -8,30 +8,26 @@
 
 {% block content %}
 
-<!-- ══ HERO FORM (CHE MỜ + PANEL OVERLAY) ══ -->
-<section class="section section-gray" style="padding: 40px 24px;">
-  <div class="container" style="max-width: 1100px;">
+<section class="section section-gray sell-section">
+  <div class="container sell-container">
     <div class="sell-login-overlay">
 
-      <!-- Blur layer (chỉ áp dụng khi chưa login) -->
       {% if not current_user %}
       <div class="sell-login-blur">
       {% endif %}
 
-        <div style="display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;">
+        <!-- Grid: Form + Chat — dùng CLASS thay inline style -->
+        <div class="sell-grid">
 
           <!-- CỘT TRÁI: Form -->
           <div class="search-box">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+            <div class="sell-form-header">
               <h3 class="search-title" style="margin-bottom:0;">Nhập thông tin xe cơ bản</h3>
-              <a href="#" style="font-size:13px;color:var(--accent-primary);font-weight:600;text-decoration:none;">
-                Tìm hiểu quy trình bán →
-              </a>
+              <a href="#" class="sell-form-link">Tìm hiểu quy trình bán →</a>
             </div>
             <form id="sellForm" onsubmit="handleSellSubmit(event)">
 
-              <!-- Row 1 -->
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div class="sell-row-3">
                 <div class="form-group">
                   <select class="form-control" name="hang_xe" required>
                     <option value="">Hãng</option>
@@ -48,8 +44,7 @@
                 </div>
               </div>
 
-              <!-- Row 2 -->
-              <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div class="sell-row-3">
                 <div class="form-group">
                   <input type="number" class="form-control" name="gia_mong_muon" placeholder="Giá mong muốn (triệu)" required>
                 </div>
@@ -70,8 +65,7 @@
                 </div>
               </div>
 
-              <!-- Row 3 -->
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div class="sell-row-2">
                 <div class="form-group">
                   <input type="text" class="form-control" name="ho_ten" placeholder="Họ và tên" required>
                 </div>
@@ -80,25 +74,25 @@
                 </div>
               </div>
 
-              <!-- Mô tả -->
-              <div class="form-group" style="margin-bottom:16px;">
-                <label style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+              <div class="form-group sell-desc-group">
+                <label class="sell-desc-label">
                   <i data-lucide="clipboard-pen" style="width:14px;height:14px;color:var(--accent-primary);"></i>
                   Mô tả hiện trạng xe
                 </label>
-                <textarea class="form-control" name="mo_ta" rows="4" placeholder="Mô tả tình trạng xe..." style="resize:vertical;min-height:100px;font-family:inherit;font-size:13.5px;line-height:1.6;"></textarea>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
-                  <span style="font-size:11px;color:#aaa;">Mô tả càng chi tiết, xe càng dễ bán được giá cao</span>
-                  <button type="button" onclick="bxSelectSug('Gợi ý cách mô tả xe cho tôi')" style="font-size:11px;color:var(--accent-primary);background:none;border:none;cursor:pointer;padding:0;font-family:inherit;">💡 Nhờ AI gợi ý →</button>
+                <textarea class="form-control" name="mo_ta" rows="4"
+                  placeholder="Mô tả tình trạng xe..."></textarea>
+                <div class="sell-desc-footer">
+                  <span>Mô tả càng chi tiết, xe càng dễ bán được giá cao</span>
+                  <button type="button" onclick="bxSelectSug('Gợi ý cách mô tả xe cho tôi')"
+                    class="sell-ai-hint">💡 Nhờ AI gợi ý →</button>
                 </div>
               </div>
 
-              <!-- CTA -->
-              <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:15px;border-radius:8px;display:flex;align-items:center;gap:8px;">
+              <button type="submit" class="btn btn-primary sell-submit-btn">
                 <i data-lucide="tag" style="width:18px;height:18px;"></i>
                 Định giá & bán xe ngay
               </button>
-              <p style="font-size:11px;color:#888;margin-top:10px;text-align:center;">
+              <p class="sell-policy-note">
                 ✓ Tôi đã đọc, hiểu rõ và đồng ý với
                 <a href="#" style="color:var(--accent-primary);">Chính sách bảo mật</a> và
                 <a href="#" style="color:var(--accent-primary);">Quy chế hoạt động</a> của AutoMart
@@ -107,57 +101,52 @@
           </div>
 
           <!-- CỘT PHẢI: AI Chatbox -->
-          <div id="ai-chat-container" style="position:sticky;top:80px;background:#fff;border-radius:14px;border:1.5px solid #eaeae0;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);">
-            <!-- Header -->
-            <div style="background:var(--accent-primary);padding:14px 16px;display:flex;align-items:center;gap:10px;">
-              <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <div id="ai-chat-container">
+            <div class="bx-chat-header">
+              <div class="bx-chat-avatar">
                 <i data-lucide="bot" style="width:18px;height:18px;color:#fff;"></i>
               </div>
               <div>
-                <div style="font-size:14px;font-weight:700;color:#fff;">Tư vấn bán xe AI</div>
-                <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.8);">
-                  <span style="width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block;"></span>
+                <div class="bx-chat-title">Tư vấn bán xe AI</div>
+                <div class="bx-chat-status">
+                  <span class="bx-online-dot"></span>
                   Đang hoạt động
                 </div>
               </div>
             </div>
-            <div id="bxChatMessages" style="height:280px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;background:#f8f8f6;"></div>
-            <div id="bxSuggestions" style="display:flex;flex-wrap:wrap;gap:5px;padding:8px 12px;background:#f8f8f6;border-top:1px solid #eaeae0;"></div>
-            <div style="display:flex;gap:8px;padding:10px 12px;border-top:1px solid #eaeae0;background:#fff;">
-              <input id="bxInput" type="text" placeholder="Hỏi về bán xe..." style="flex:1;border:1.5px solid #e2e2da;border-radius:20px;padding:8px 14px;font-size:13px;font-family:inherit;outline:none;transition:.2s;" onfocus="this.style.borderColor='var(--accent-primary)'" onblur="this.style.borderColor='#e2e2da'">
-              <button onclick="bxSend()" style="width:36px;height:36px;background:var(--accent-primary);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <div id="bxChatMessages"></div>
+            <div id="bxSuggestions"></div>
+            <div class="bx-chat-input-row">
+              <input id="bxInput" type="text" placeholder="Hỏi về bán xe..."
+                onfocus="this.style.borderColor='var(--accent-primary)'"
+                onblur="this.style.borderColor='#e2e2da'">
+              <button onclick="bxSend()" class="bx-send-btn">
                 <i data-lucide="send" style="width:15px;height:15px;color:#fff;"></i>
               </button>
             </div>
           </div>
 
-        </div>
+        </div><!-- /sell-grid -->
 
       {% if not current_user %}
-      </div> <!-- /sell-login-blur -->
+      </div><!-- /sell-login-blur -->
       {% endif %}
 
-      <!-- Panel Overlay (chỉ hiện khi chưa login) -->
       {% if not current_user %}
       <div class="sell-login-gate">
         <div class="sell-gate-card">
-          <!-- Icon lock với ring -->
           <div class="sell-gate-icon-wrap">
             <div class="sell-gate-icon-ring"></div>
             <div class="sell-gate-icon">
               <i data-lucide="lock" style="width:22px;height:22px;color:#c8a96e;"></i>
             </div>
           </div>
-
-          <!-- Text -->
           <div class="sell-gate-body">
             <h3 class="sell-gate-title">Đăng nhập để tiếp tục</h3>
             <p class="sell-gate-desc">
               Đăng nhập để đăng tin bán xe và nhận tư vấn định giá từ AI trong vài giây.
             </p>
           </div>
-
-          <!-- Actions -->
           <div class="sell-gate-actions">
             <button class="btn btn-primary sell-gate-btn-login" onclick="bxOpenModal('loginModal')">
               <i data-lucide="log-in" style="width:15px;height:15px;"></i>
@@ -167,8 +156,6 @@
               Tạo tài khoản miễn phí
             </button>
           </div>
-
-          <!-- Divider hint -->
           <p class="sell-gate-note">
             <i data-lucide="shield-check" style="width:12px;height:12px;"></i>
             Miễn phí · Bảo mật · Không spam
@@ -177,12 +164,9 @@
       </div>
       {% endif %}
 
-    </div>
+    </div><!-- /sell-login-overlay -->
   </div>
 </section>
-
-<!-- Phần còn lại của trang (4 bước bán xe, Testimonials) giữ nguyên như cũ -->
-<!-- ... (bạn paste phần 4 bước và Testimonials cũ vào đây) ... -->
 
 {% endblock %}
 

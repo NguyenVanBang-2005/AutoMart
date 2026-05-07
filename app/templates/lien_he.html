@@ -10,7 +10,7 @@
       <p class="section-subtitle">Chúng tôi luôn sẵn sàng hỗ trợ bạn</p>
     </div>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; max-width:960px; margin:0 auto;">
+    <div class="lh-grid">
 
       <!-- Thông tin liên hệ -->
       <div>
@@ -103,13 +103,13 @@ async function handleContactSubmit(e) {
     });
     const data = await res.json();
     if (!res.ok) {
-      showToast('❌ ' + (data.detail || 'Gửi thất bại!'));
+      showToast((data.detail || 'Gửi thất bại!'));
       return;
     }
-    showToast('✅ Đã gửi tin nhắn! Chúng tôi sẽ phản hồi sớm.');
+    showToast('Đã gửi tin nhắn! Chúng tôi sẽ phản hồi sớm.');
     form.reset();
   } catch {
-    showToast('❌ Không thể kết nối server!');
+    showToast('Không thể kết nối server!');
   } finally {
     btn.disabled  = false;
     btn.innerHTML = '<i data-lucide="send" style="width:16px;height:16px;"></i> Gửi tin nhắn';

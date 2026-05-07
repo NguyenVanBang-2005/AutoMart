@@ -1,30 +1,33 @@
 {% extends 'base.html' %}
 {% block title %}{{ car.hang }} {{ car.dong }} - AutoMart{% endblock %}
 
-{% block content %}
-<script src="https://unpkg.com/lucide@latest"></script>
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/car_detail.css') }}">
+{% endblock %}
 
-<section class="section" style="padding-top: 32px;">
+{% block content %}
+
+<section class="section cd-section" style="padding-top: 32px;">
   <div class="container" style="max-width: 1100px;">
 
     <!-- Breadcrumb -->
-    <div style="font-size:13px;color:#888;margin-bottom:20px;">
-      <a href="/" style="color:var(--accent-primary);text-decoration:none;">Trang chủ</a>
+    <div class="cd-breadcrumb">
+      <a href="/">Trang chủ</a>
       <span style="margin:0 6px;">›</span>
-      <a href="/mua-xe" style="color:var(--accent-primary);text-decoration:none;">Mua xe</a>
+      <a href="/mua-xe">Mua xe</a>
       <span style="margin:0 6px;">›</span>
       <span>{{ car.hang }} {{ car.dong }}</span>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 360px;gap:32px;align-items:start;">
+    <!-- Grid chính — class để CSS responsive control -->
+    <div class="cd-main-grid">
 
       <!-- CỘT TRÁI -->
       <div>
         <!-- Ảnh chính -->
-        <div style="border-radius:16px;overflow:hidden;background:#f0f0ea;margin-bottom:16px;aspect-ratio:16/9;position:relative;">
+        <div class="cd-main-image-wrap">
           {% if images %}
-            <img id="mainImage" src="{{ images[0].url }}" alt="{{ car.hang }} {{ car.dong }}"
-              style="width:100%;height:100%;object-fit:cover;">
+            <img id="mainImage" src="{{ images[0].url }}" alt="{{ car.hang }} {{ car.dong }}">
           {% else %}
             <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#4f46e5);">
               <svg width="180" height="100" viewBox="0 0 100 60" fill="white" style="opacity:.8;">
@@ -40,14 +43,13 @@
 
         <!-- Thumbnail strip -->
         {% if images|length > 1 %}
-        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:20px;">
+        <div class="cd-thumbs">
           {% for img in images %}
           <img src="{{ img.url }}"
             onclick="switchImage('{{ img.url }}')"
-            style="width:80px;height:56px;object-fit:cover;border-radius:8px;cursor:pointer;
-            flex-shrink:0;border:2px solid transparent;transition:.2s;"
             onmouseover="this.style.borderColor='var(--accent-primary)'"
-            onmouseout="this.style.borderColor='transparent'">
+            onmouseout="this.style.borderColor='transparent'"
+            alt="Ảnh {{ loop.index }}">
           {% endfor %}
         </div>
         {% endif %}
@@ -64,7 +66,7 @@
             <i data-lucide="clipboard-list" style="width:18px;height:18px;color:var(--accent-primary);"></i>
             Thông số kỹ thuật
           </h3>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="cd-specs-grid">
             {% set specs = [
               ('car', 'Hãng xe', car.hang),
               ('tag', 'Dòng xe', car.dong),
@@ -104,7 +106,7 @@
             <i data-lucide="briefcase" style="width:18px;height:18px;color:var(--accent-primary);"></i>
             Dịch vụ đi kèm
           </h3>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="cd-services-grid">
             {% set services = [
               ('search', 'Kiểm định xe miễn phí', 'Kiểm tra 150 hạng mục'),
               ('file-check', 'Hỗ trợ sang tên', 'Nhanh chóng, đúng quy trình'),
@@ -137,23 +139,16 @@
             Hỏi AI về xe này
           </h3>
           <p style="font-size:13px;color:#888;margin-bottom:16px;">Đặt câu hỏi về xe, tài chính, bảo hiểm...</p>
-
-          <div id="aiMessages" style="min-height:120px;max-height:320px;overflow-y:auto;
-            display:flex;flex-direction:column;gap:10px;margin-bottom:12px;"></div>
-
+          <div id="aiMessages" style="min-height:120px;max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;"></div>
           <div id="aiSuggestions" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
-
           <div style="display:flex;gap:8px;">
             <input id="aiInput" type="text"
               placeholder="Hỏi gì về {{ car.hang }} {{ car.dong }}..."
-              style="flex:1;border:1.5px solid #e2e2da;border-radius:10px;padding:10px 14px;
-              font-size:14px;font-family:inherit;outline:none;"
+              style="flex:1;border:1.5px solid #e2e2da;border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none;"
               onkeydown="if(event.key==='Enter') sendAiMessage()"
               onfocus="this.style.borderColor='var(--accent-primary)'"
               onblur="this.style.borderColor='#e2e2da'">
-            <button onclick="sendAiMessage()" style="width:42px;height:42px;
-              background:var(--accent-primary);border:none;border-radius:10px;
-              cursor:pointer;display:flex;align-items:center;justify-content:center;">
+            <button onclick="sendAiMessage()" style="width:42px;height:42px;background:var(--accent-primary);border:none;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
               <i data-lucide="send" style="width:18px;height:18px;color:#fff;"></i>
             </button>
           </div>
@@ -161,31 +156,28 @@
       </div>
 
       <!-- CỘT PHẢI -->
-      <div style="position:sticky;top:80px;">
+      <div class="cd-sidebar">
 
         <!-- Giá & CTA -->
-        <div style="background:#fff;border:2px solid var(--accent-primary);border-radius:16px;padding:24px;margin-bottom:16px;">
+        <div style="background:#fff;border:2px solid var(--accent-primary);border-radius:16px;padding:24px;">
           <div style="font-size:13px;color:#888;margin-bottom:4px;">Giá bán</div>
           <div style="font-size:30px;font-weight:800;color:var(--accent-primary);margin-bottom:20px;">
             {{ "{:,}".format(car.gia) }} triệu
           </div>
           <button onclick="window.location.href='/lien-he'"
-              style="width:100%;padding:14px;background:var(--accent-primary);color:#fff;border:none;
-              border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;
-              display:flex;align-items:center;justify-content:center;gap:8px;">
-              <i data-lucide="phone" style="width:18px;height:18px;"></i>
-              Liên hệ ngay
+            style="width:100%;padding:14px;background:var(--accent-primary);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i data-lucide="phone" style="width:18px;height:18px;"></i>
+            Liên hệ ngay
           </button>
-            <button onclick="window.location.href='/dich-vu'"
-              style="width:100%;padding:12px;background:transparent;color:var(--accent-primary);
-              border:2px solid var(--accent-primary);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;
-              display:flex;align-items:center;justify-content:center;gap:8px;">
-              <i data-lucide="car" style="width:16px;height:16px;"></i>
-              Đăng ký lái thử
-            </button>
+          <button onclick="window.location.href='/dich-vu'"
+            style="width:100%;padding:12px;background:transparent;color:var(--accent-primary);border:2px solid var(--accent-primary);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <i data-lucide="car" style="width:16px;height:16px;"></i>
+            Đăng ký lái thử
+          </button>
+        </div>
 
         <!-- Thông tin liên hệ -->
-        <div style="background:#f8f8f6;border-radius:14px;padding:20px;margin-bottom:16px;">
+        <div style="background:#f8f8f6;border-radius:14px;padding:20px;">
           <div style="font-weight:700;margin-bottom:12px;">Thông tin liên hệ</div>
           <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;">
             <div style="display:flex;align-items:center;gap:8px;">
@@ -203,14 +195,13 @@
           </div>
         </div>
 
-        <!-- Tính vay -->
+        <!-- Tính khoản vay -->
         <div style="background:#fffbf0;border:1px solid #f0d080;border-radius:14px;padding:20px;">
           <div style="font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
             <i data-lucide="landmark" style="width:16px;height:16px;color:var(--accent-primary);"></i>
             Tính khoản vay
           </div>
           <div style="font-size:12px;color:#666;margin-bottom:12px;">Lãi suất tham khảo 9%/năm</div>
-
           <div style="margin-bottom:8px;">
             <label style="font-size:12px;color:#888;">Trả trước</label>
             <input id="downPaymentPct" type="range" min="20" max="80" value="30"
@@ -221,7 +212,6 @@
               <span>80%</span>
             </div>
           </div>
-
           <div style="margin-bottom:12px;">
             <label style="font-size:12px;color:#888;">Thời hạn vay</label>
             <select id="loanTerm" onchange="calcLoan()"
@@ -233,7 +223,6 @@
               <option value="60">60 tháng</option>
             </select>
           </div>
-
           <div style="background:#fff;border-radius:10px;padding:12px;text-align:center;">
             <div style="font-size:11px;color:#888;">Trả góp mỗi tháng ~</div>
             <div id="monthlyPayment" style="font-size:22px;font-weight:800;color:var(--accent-primary);">—</div>
@@ -241,8 +230,8 @@
           </div>
         </div>
 
-      </div>
-    </div>
+      </div><!-- /cd-sidebar -->
+    </div><!-- /cd-main-grid -->
   </div>
 </section>
 

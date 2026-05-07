@@ -1,0 +1,96 @@
+/* ================================================
+   CAR_DETAIL.CSS — AutoMart (mobile-first)
+   Chỉ xử lý responsive, không đụng logic JS
+   ================================================ */
+
+.cd-section { padding: 24px 16px !important; }
+
+/* ── Breadcrumb ── */
+.cd-breadcrumb {
+  font-size: 13px; color: #888;
+  margin-bottom: 16px;
+  display: flex; align-items: center;
+  flex-wrap: wrap; gap: 4px;
+}
+.cd-breadcrumb a { color: var(--accent-primary); text-decoration: none; }
+
+/* ══════════════════
+   GRID CHÍNH
+   Mobile: 1 cột
+   Desktop: 2 cột
+   ══════════════════ */
+.cd-main-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ── Ảnh chính ── */
+.cd-main-image-wrap {
+  border-radius: 14px;
+  overflow: hidden;
+  background: #f0f0ea;
+  margin-bottom: 12px;
+  aspect-ratio: 16/9;
+}
+.cd-main-image-wrap img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+/* ── Thumbnail strip ── */
+.cd-thumbs {
+  display: flex; gap: 8px;
+  overflow-x: auto; padding-bottom: 4px;
+  margin-bottom: 16px;
+  scrollbar-width: none;
+}
+.cd-thumbs::-webkit-scrollbar { display: none; }
+.cd-thumbs img {
+  width: 76px; height: 54px;
+  object-fit: cover; border-radius: 8px;
+  cursor: pointer; flex-shrink: 0;
+  border: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+.cd-thumbs img:hover { border-color: var(--accent-primary); }
+
+/* ── Specs grid: luôn 2 cột ── */
+.cd-specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ── Services grid: mobile 1 cột ── */
+.cd-services-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+/* ── Sidebar: mobile hiển thị trước form ── */
+.cd-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ══════════════════
+   RESPONSIVE
+   ══════════════════ */
+
+@media (min-width: 640px) {
+  .cd-section { padding: 28px 24px !important; }
+  .cd-services-grid { grid-template-columns: 1fr 1fr; }
+  .cd-thumbs img { width: 80px; height: 58px; }
+}
+
+@media (min-width: 960px) {
+  .cd-section { padding: 32px 24px !important; }
+  .cd-main-grid {
+    grid-template-columns: 1fr 360px;
+    gap: 32px;
+  }
+  .cd-sidebar { position: sticky; top: 80px; }
+}

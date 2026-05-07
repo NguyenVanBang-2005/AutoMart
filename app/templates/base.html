@@ -6,6 +6,8 @@
   <title>{% block title %}AutoMart - Mua Bán Xe Cũ Uy Tín{% endblock %}</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/footer.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/news.css') }}">
   <style>@view-transition { navigation: auto; }</style>
   <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
@@ -60,7 +62,6 @@
     <i data-lucide="arrow-up" style="width:22px; height:22px;"></i>
   </button>
   <script src="{{ url_for('static', path='main.js') }}"></script>
-  <script src="{{ url_for('static', path='js/email.js') }}"></script>
   <script>lucide.createIcons();</script>
   {% block extra_scripts %}{% endblock %}
  </body>
