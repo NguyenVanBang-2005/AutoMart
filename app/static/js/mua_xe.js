@@ -1,5 +1,3 @@
-console.log("mua_xe.js loaded successfully");
-
 // ==================== LOAD & RENDER ====================
 async function loadCars() {
   try {
@@ -347,7 +345,7 @@ function submitUuDai() {
 async function semanticSearch() {
   const input = document.getElementById('semanticInput');
   const query = input.value.trim();
-  if (!query) return;
+  if (!query || query.length < 2) return;
 
   const btn    = document.getElementById('btnSemanticSearch');
   const status = document.getElementById('semanticStatus');
@@ -355,7 +353,7 @@ async function semanticSearch() {
   btn.disabled    = true;
   btn.textContent = '...';
   status.style.display = 'block';
-  status.textContent   = '🤖 Đang tìm xe phù hợp...';
+  status.textContent   = 'Đang tìm xe phù hợp...';
   status.style.color   = '#888';
 
   try {
@@ -370,19 +368,19 @@ async function semanticSearch() {
 
     if (data.cars && data.cars.length > 0) {
       renderCars(data.cars);
-      const mode = data.mode === 'keyword' ? '🔍 Kết quả chính xác' : '🤖 Xe tương tự';
+      const mode = data.mode === 'keyword' ? 'Kết quả chính xác' : '🤖 Xe tương tự';
       status.textContent = mode + ': ' + data.cars.length + ' xe cho "' + query + '"';
       status.style.color = '#2a7a2a';
     } else {
       document.getElementById('carGrid').innerHTML =
         '<p style="grid-column:1/-1;text-align:center;padding:60px 20px;color:#888;">' +
         'Không tìm thấy xe phù hợp với mô tả này.</p>';
-      status.textContent = '❌ Không tìm thấy kết quả cho "' + query + '"';
+      status.textContent = 'Không tìm thấy kết quả cho "' + query + '"';
       status.style.color = '#e03030';
     }
   } catch (err) {
     console.error('[SemanticSearch]', err);
-    status.textContent = '❌ Lỗi tìm kiếm, vui lòng thử lại';
+    status.textContent = 'Lỗi tìm kiếm, vui lòng thử lại';
     status.style.color = '#e03030';
   } finally {
     btn.disabled    = false;

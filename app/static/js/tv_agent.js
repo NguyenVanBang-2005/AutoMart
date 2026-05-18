@@ -224,7 +224,7 @@ function tvAppendBot(text) {
         <line x1="12" y1="15" x2="12" y2="17"/>
       </svg>
     </div>
-    <div class="tv-text tv-text-bot" style="white-space:pre-line;">${tvEscape(text)}</div>`;
+    <div class="tv-text tv-text-bot">${tvMarkdown(text)}</div>`;
   wrap.appendChild(div);
   tvScrollBottom();
 }
@@ -358,6 +358,22 @@ function tvEscape(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// ── Markdown parser nhỏ ────────────────────────────────────
+function tvMarkdown(text) {
+  return tvEscape(text)
+    // **bold** — phải xử lý trước *italic*
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // * bullet list đầu dòng (dạng "* item" hoặc "- item")
+    .replace(/(^|\n)\* (.+)/g, '$1<span style="margin-right:6px;">•</span>$2')
+    .replace(/(^|\n)- (.+)/g,  '$1<span style="margin-right:6px;">•</span>$2')
+    // *italic* — chỉ match khi không phải bullet
+    .replace(/\*([^\*\n]+)\*/g, '<em>$1</em>')
+    // `code`
+    .replace(/`([^`]+)`/g, '<code style="background:#f0ede4;padding:1px 5px;border-radius:3px;font-size:12px;">$1</code>')
+    // xuống dòng
+    .replace(/\n/g, '<br>');
 }
 
 // ── Form submit ────────────────────────────────────────────

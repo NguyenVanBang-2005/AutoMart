@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from app.api.v1.endpoints import (
     cars, ban_xe, lien_he, tu_van,
-    tin_tuc, uu_dai_thang, auth, ai_chat
+    tin_tuc, uu_dai_thang, auth, ai_chat, sql_agent
 )
 from app.api.v1.endpoints.user import public_router, private_router
 from app.core.security import get_current_user_required
@@ -18,6 +18,7 @@ api_router.include_router(ai_chat.router,       tags=["AI"])
 api_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 
 api_router.include_router(public_router,        tags=["Users"])
+api_router.include_router(sql_agent.router,     tags=["SQL Agent"])
 
 # Private routes
 api_router.include_router(

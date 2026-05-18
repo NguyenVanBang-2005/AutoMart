@@ -1,0 +1,38 @@
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info
+.eggs/
+dist/
+build/
+
+# Virtual environments
+.venv
+venv
+env
+
+# Environment files (KHÔNG copy .env vào image)
+.env
+.env.*
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+
+# Logs
+*.log
+
+# Scripts (không cần trong production)
+Scripts/
+
+# OS
+.DS_Store
+Thumbs.db
