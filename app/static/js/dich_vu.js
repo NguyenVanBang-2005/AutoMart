@@ -1,9 +1,3 @@
-// ══════════════════════════════════════════════════
-// dich_vu.js — Trang Dịch Vụ AutoMart
-// ══════════════════════════════════════════════════
-
-const API_BASE = `${window.location.origin}/api/v1`;
-
 // ── Đọc trạng thái login từ data attribute ────────
 // Tránh Jinja2-in-JS: main.py truyền qua hidden div
 function getIsLoggedIn() {
