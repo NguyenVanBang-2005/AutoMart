@@ -45,6 +45,6 @@ if __name__ == "__main__":
     print("🔗 Connecting to:", DATABASE_URL)
     try:
         with engine.connect() as conn:
-            print("✅ Kết nối thành công!")
+            print("Kết nối thành công!")
     except Exception as e:
-        print("❌ Lỗi kết nối:", e)
+        print("Lỗi kết nối:", e)

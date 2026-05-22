@@ -64,7 +64,7 @@ async function handleSellSubmit(e) {
       showToast(result.detail || 'Đăng tin thất bại!');
       return;
     }
-    showToast('✅ Đăng tin bán xe thành công!');
+    showToast('Đăng tin bán xe thành công!');
     form.reset();
     setTimeout(() => { window.location.href = '/danh-sach-ban-xe'; }, 1200);
   } catch (err) {
@@ -97,7 +97,7 @@ async function loadRealCars() {
       km: c.km || 0,
       fuel: c.loai || ''
     }));
-    console.log(`✅ Đã load ${bxState.cars.length} xe từ database`);
+    console.log(`Đã load ${bxState.cars.length} xe từ database`);
   } catch (e) {
     console.warn('Không load được danh sách xe:', e);
   }
@@ -217,7 +217,6 @@ function initBxChat() {
 
 // ==================== KHỞI TẠO ====================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('✅ ban_xe.js loaded');
   await loadRealCars();
   initBxChat();
 });

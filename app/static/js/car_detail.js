@@ -36,7 +36,7 @@ async function loadRealCars() {
                 fuel: c.nhien_lieu || '',
                 location: c.khu_vuc || ''
             }));
-            console.log(`✅ Đã load ${ai.cars.length} xe từ DB`);
+            console.log(`Đã load ${ai.cars.length} xe từ DB`);
         }
     } catch (e) {
         console.warn('Không load được danh sách xe', e);
@@ -219,7 +219,7 @@ initLoanCalculator();
 
 // Khởi tạo
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('✅ car_detail.js loaded');
+//    console.log('car_detail.js loaded');
 
     ai.currentCar = getCurrentCar();
     await loadRealCars();
