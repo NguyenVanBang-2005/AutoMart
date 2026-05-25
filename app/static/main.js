@@ -284,7 +284,7 @@ function buildCarCard(car, isDeal = false) {
         </div>
         <div class="car-footer">
           <button class="btn-quote" onclick="viewCar(${car.id})">Nhận báo giá</button>
-          <button class="btn-trial" onclick="showToast('Đăng ký lái thử thành công!')">Đăng ký lái thử</button>
+          <a href="/dich-vu" class="btn-trial">Đăng ký lái thử</a>
         </div>
       </div>
     </div>`;
@@ -892,7 +892,30 @@ function showResetPasswordModal() {
 async function init() {
   const cars = await loadCarsFromAPI();
   renderScrollRow('featuredRow', cars, false);
-  renderScrollRow('dealsRow', cars, true);
+  var dealEl = document.getElementById('dealCarsData');
+  if (dealEl && dealEl.dataset.deals) {
+    try {
+      var dealCars = JSON.parse(dealEl.dataset.deals);
+      if (dealCars.length > 0) {
+        var mappedDeals = dealCars.map(function(d) {
+          return {
+            id: d.id, brand: d.hang || '', model: d.dong || '',
+            year: d.nam || 0, price: d.gia_khuyen_mai || d.gia || 0,
+            km: d.km || 0, fuel: '', trans: '',
+            image_url: d.anh || '', badge: 'deal',
+            originalPrice: d.gia, percent: d.phan_tram
+          };
+        });
+        renderScrollRow('dealsRow', mappedDeals, true);
+      } else {
+        var dealsSection = document.getElementById('deals');
+        if (dealsSection) dealsSection.style.display = 'none';
+      }
+    } catch(e) { console.warn('Deal parse error:', e); }
+  } else {
+    var dealsSection = document.getElementById('deals');
+    if (dealsSection) dealsSection.style.display = 'none';
+  }
   const dealMonth = document.getElementById('dealMonth');
   if (dealMonth) dealMonth.textContent = new Date().getMonth() + 1;
   renderCarsData(cars);

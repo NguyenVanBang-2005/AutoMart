@@ -97,7 +97,7 @@ async function loadRealCars() {
       km: c.km || 0,
       fuel: c.loai || ''
     }));
-    console.log(`Đã load ${bxState.cars.length} xe từ database`);
+//    console.log(`Đã load ${bxState.cars.length} xe từ database`);
   } catch (e) {
     console.warn('Không load được danh sách xe:', e);
   }

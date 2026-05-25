@@ -5,6 +5,7 @@
 {% block content %}
  {% include 'partials/hero.html' %}
  {% include 'partials/stats.html' %}
+ <div id="dealCarsData" data-deals='{{ deal_cars_json | tojson }}' style="display:none;"></div>
  {% include 'partials/cars.html' %}
  {% include 'partials/dealers.html' %}
  {% include 'partials/news_home.html' %}

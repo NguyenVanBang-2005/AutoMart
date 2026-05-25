@@ -93,17 +93,52 @@ def home(request: Request):
     with Session(engine) as session:
         from app.services.news_service import get_all_news
         from app.models.news import NewsCategory
+        from app.models.uu_dai import UuDai
+        from app.models.cars import Car
+        from sqlmodel import select
+        from datetime import date
+
         news_list    = get_all_news(session, NewsCategory.tin_tuc)
         hoi_dap_list = get_all_news(session, NewsCategory.hoi_dap)
+
+        # Lấy xe có ưu đãi đang active
+        today = date.today()
+        active_deals = session.exec(
+            select(UuDai).where(
+                UuDai.ngay_bat_dau <= today,
+                UuDai.ngay_ket_thuc >= today,
+            )
+        ).all()
+        deal_map = {ud.xe_id: ud for ud in active_deals}
+        xe_ids = list(deal_map.keys())
+        deal_cars = session.exec(
+            select(Car).where(Car.id.in_(xe_ids))
+        ).all() if xe_ids else []
+
+        deal_data = []
+        for xe in deal_cars:
+            ud = deal_map[xe.id]
+            deal_data.append({
+                "id": xe.id,
+                "hang": xe.hang,
+                "dong": xe.dong,
+                "nam": xe.nam,
+                "gia": xe.gia,
+                "gia_khuyen_mai": int(xe.gia * (1 - ud.phan_tram_giam / 100)),
+                "km": xe.km,
+                "anh": xe.anh,
+                "phan_tram": int(ud.phan_tram_giam),
+            })
+
     return templates.TemplateResponse(
         request=request,
         name="index.html",
         context={
             "current_user": user,
-            "current_user": user,
             "news_list": news_list,
             "hoi_dap_list": hoi_dap_list,
             "is_news_page": True,
+            "deal_cars_json": deal_data,
         }
     )
 
