@@ -20,6 +20,135 @@ const TV_BUDGET_LABELS = [
   '500 triệu–1 tỷ', '1–1.5 tỷ', '1.5–2 tỷ', 'trên 2 tỷ'
 ];
 
+// ── Chat History ───────────────────────────────────────────
+var tvSessionId = null;
+var tvIsLoggedIn = false;
+
+// Kiểm tra đăng nhập
+function tvCheckLogin() {
+    var el = document.getElementById('pageData');
+    tvIsLoggedIn = el && el.dataset.userName && el.dataset.userName.length > 0;
+}
+
+// Lưu message lên DB (chỉ khi đã đăng nhập)
+async function tvSaveMessages(messages) {
+    if (!tvIsLoggedIn) {
+        // Guest → lưu localStorage
+        try {
+            localStorage.setItem('tv_chat_history', JSON.stringify(tvHistory));
+        } catch (e) {}
+        return;
+    }
+
+    try {
+        var res = await fetch('/api/v1/chat-history/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                session_id: tvSessionId,
+                messages: messages,
+                page: 'tu_van'
+            })
+        });
+        if (res.ok) {
+            var data = await res.json();
+            tvSessionId = data.session_id;
+        }
+    } catch (e) {
+        console.error('[ChatHistory] Save error:', e);
+    }
+}
+
+// Load sessions sidebar
+async function tvLoadSessions() {
+    if (!tvIsLoggedIn) return;
+    try {
+        var res = await fetch('/api/v1/chat-history/sessions?page=tu_van', {
+            credentials: 'include'
+        });
+        if (!res.ok) return;
+        var sessions = await res.json();
+        tvRenderSessions(sessions);
+    } catch (e) {
+        console.error('[ChatHistory] Load error:', e);
+    }
+}
+
+// Render danh sách sessions
+function tvRenderSessions(sessions) {
+    var slot = document.getElementById('tvHistorySlot');
+    if (!slot) return;
+    if (!sessions.length) {
+        slot.innerHTML = '<div style="padding:12px;font-size:12px;color:#888;text-align:center;">Chưa có lịch sử chat</div>';
+        return;
+    }
+    slot.innerHTML = sessions.map(function(s) {
+        var date = new Date(s.created_at);
+        var dateStr = date.toLocaleDateString('vi-VN') + ' ' + date.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+        return '<div onclick="tvLoadSession(' + s.id + ')" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #eaeae0;transition:background .15s;"'
+            + ' onmouseover="this.style.background=\'#f8f8f5\'" onmouseout="this.style.background=\'transparent\'">'
+            + '<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + tvEscape(s.title) + '</div>'
+            + '<div style="font-size:11px;color:#888;margin-top:2px;">' + dateStr + '</div>'
+            + '<div style="font-size:11px;color:#aaa;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + tvEscape(s.preview) + '</div>'
+            + '</div>';
+    }).join('');
+}
+
+// Load 1 session cụ thể
+async function tvLoadSession(sessionId) {
+    try {
+        var res = await fetch('/api/v1/chat-history/' + sessionId, {
+            credentials: 'include'
+        });
+        if (!res.ok) return;
+        var messages = await res.json();
+
+        // Clear chat hiện tại
+        tvHistory = [];
+        document.getElementById('tvMessages').innerHTML = '';
+        tvSessionId = sessionId;
+
+        // Render lại messages
+        messages.forEach(function(m) {
+            if (m.role === 'user') tvAppendUser(m.content);
+            else tvAppendBot(m.content);
+            tvHistory.push({ role: m.role, content: m.content });
+        });
+    } catch (e) {
+        console.error('[ChatHistory] Load session error:', e);
+    }
+}
+
+// Load localStorage cho guest
+function tvLoadLocalHistory() {
+    if (tvIsLoggedIn) return;
+    try {
+        var saved = localStorage.getItem('tv_chat_history');
+        if (!saved) return;
+        var messages = JSON.parse(saved);
+        if (!messages.length) return;
+
+        document.getElementById('tvMessages').innerHTML = '';
+        messages.forEach(function(m) {
+            if (m.role === 'user') tvAppendUser(m.content);
+            else tvAppendBot(m.content);
+        });
+        tvHistory = messages;
+    } catch (e) {}
+}
+
+function tvToggleHistory() {
+    var panel = document.getElementById('tvHistoryPanel');
+    if (!panel) return;
+    if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        tvLoadSessions();
+    } else {
+        panel.style.display = 'none';
+    }
+}
+
 // ── System prompt builder ──────────────────────────────────
 function tvBuildSystemPrompt() {
   const budget = tvConfig.budget === 5
@@ -182,13 +311,18 @@ function tvUpdateSubtitle() {
 
 // ── Clear chat ─────────────────────────────────────────────
 function tvClearChat() {
-  tvHistory = [];
-  tvLoading = false;
-  document.getElementById('tvMessages').innerHTML = '';
-  document.getElementById('tvCarSlot').style.display  = 'none';
-  document.getElementById('tvCarSlot').innerHTML      = '';
-  document.getElementById('tvChips').innerHTML        = '';
-  tvShowWelcome();
+    tvHistory = [];
+    tvLoading = false;
+    tvSessionId = null;  // ← reset session
+    document.getElementById('tvMessages').innerHTML = '';
+    document.getElementById('tvCarSlot').style.display  = 'none';
+    document.getElementById('tvCarSlot').innerHTML      = '';
+    document.getElementById('tvChips').innerHTML        = '';
+    // Xóa localStorage cho guest
+    if (!tvIsLoggedIn) {
+        try { localStorage.removeItem('tv_chat_history'); } catch(e) {}
+    }
+    tvShowWelcome();
 }
 
 // ── Welcome message ────────────────────────────────────────
@@ -285,50 +419,55 @@ function tvChipClick(el, text) {
 
 // ── Send message ───────────────────────────────────────────
 async function tvSend() {
-  if (tvLoading) return;
-  const input = document.getElementById('tvInput');
-  const text  = input.value.trim();
-  if (!text) return;
+    if (tvLoading) return;
+    var input = document.getElementById('tvInput');
+    var text  = input.value.trim();
+    if (!text) return;
 
-  input.value = '';
-  tvResize(input);
-  document.getElementById('tvChips').innerHTML = '';
+    input.value = '';
+    tvResize(input);
+    document.getElementById('tvChips').innerHTML = '';
 
-  tvAppendUser(text);
-  tvHistory.push({ role: 'user', content: text });
+    tvAppendUser(text);
+    tvHistory.push({ role: 'user', content: text });
 
-  tvLoading = true;
-  tvShowTyping();
+    tvLoading = true;
+    tvShowTyping();
 
-  try {
-    const res = await fetch('/api/v1/tu-van/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages:      tvHistory,
-        system_prompt: tvBuildSystemPrompt(),
-      }),
-    });
+    try {
+        var res = await fetch('/api/v1/tu-van/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages:      tvHistory,
+                system_prompt: tvBuildSystemPrompt(),
+            }),
+        });
 
-    tvHideTyping();
+        tvHideTyping();
 
-    if (!res.ok) throw new Error('API error ' + res.status);
-    const data = await res.json();
-    const reply = data.reply || data.message || '(Không có phản hồi)';
+        if (!res.ok) throw new Error('API error ' + res.status);
+        var data = await res.json();
+        var reply = data.reply || data.message || '(Không có phản hồi)';
 
-    tvAppendBot(reply);
-    tvHistory.push({ role: 'assistant', content: reply });
+        tvAppendBot(reply);
+        tvHistory.push({ role: 'assistant', content: reply });
 
-    // Gợi ý chips tiếp theo
-    tvSetChips(['Xem thêm xe khác', 'So sánh 2 xe', 'Tư vấn vay vốn', 'Đặt lịch xem xe']);
+        // Lưu 2 message mới nhất (user + assistant)
+        tvSaveMessages([
+            { role: 'user', content: text },
+            { role: 'assistant', content: reply }
+        ]);
 
-  } catch (err) {
-    tvHideTyping();
-    tvAppendBot('Xin lỗi, hiện tại không thể kết nối. Vui lòng thử lại sau hoặc gọi Hotline 1900 1234.');
-    console.error('[tv_agent]', err);
-  }
+        tvSetChips(['Xem thêm xe khác', 'So sánh 2 xe', 'Tư vấn vay vốn', 'Đặt lịch xem xe']);
 
-  tvLoading = false;
+    } catch (err) {
+        tvHideTyping();
+        tvAppendBot('Xin lỗi, hiện tại không thể kết nối. Vui lòng thử lại sau hoặc gọi Hotline 1900 1234.');
+        console.error('[tv_agent]', err);
+    }
+
+    tvLoading = false;
 }
 
 // ── Keyboard handler ───────────────────────────────────────
@@ -363,13 +502,15 @@ function tvEscape(str) {
 // ── Markdown parser nhỏ ────────────────────────────────────
 function tvMarkdown(text) {
   return tvEscape(text)
-    // **bold** — phải xử lý trước *italic*
+    // **bold**
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // * bullet list đầu dòng (dạng "* item" hoặc "- item")
+    // * bullet list đầu dòng
     .replace(/(^|\n)\* (.+)/g, '$1<span style="margin-right:6px;">•</span>$2')
     .replace(/(^|\n)- (.+)/g,  '$1<span style="margin-right:6px;">•</span>$2')
-    // *italic* — chỉ match khi không phải bullet
+    // *italic*
     .replace(/\*([^\*\n]+)\*/g, '<em>$1</em>')
+    // link /xe/ID
+    .replace(/\/xe\/(\d+)/g, '<a href="/xe/$1" target="_blank" style="color:#c8a96e;font-weight:600;text-decoration:underline;">Xem chi tiết</a>')
     // `code`
     .replace(/`([^`]+)`/g, '<code style="background:#f0ede4;padding:1px 5px;border-radius:3px;font-size:12px;">$1</code>')
     // xuống dòng
@@ -400,19 +541,24 @@ async function tvFormSubmit(e) {
 }
 
 // ── Init ───────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  // Prefill form từ user đang đăng nhập (nếu có)
-  const pageData = document.getElementById('pageData');
-  if (pageData) {
-    const name  = pageData.dataset.userName;
-    const phone = pageData.dataset.userPhone;
-    if (name)  { const el = document.getElementById('tvHoTen');  if (el) el.value = name; }
-    if (phone) { const el = document.getElementById('tvPhone');  if (el) el.value = phone; }
-  }
+document.addEventListener('DOMContentLoaded', function() {
+    var pageData = document.getElementById('pageData');
+    if (pageData) {
+        var name  = pageData.dataset.userName;
+        var phone = pageData.dataset.userPhone;
+        if (name)  { var el = document.getElementById('tvHoTen');  if (el) el.value = name; }
+        if (phone) { var el = document.getElementById('tvPhone');  if (el) el.value = phone; }
+    }
 
-  // Budget track init (slider bắt đầu ở max = "Mọi mức")
-  tvBudgetChange(5);
+    tvBudgetChange(5);
+    tvCheckLogin();
 
-  // Hiện welcome message
-  tvShowWelcome();
+    // Load history
+    if (tvIsLoggedIn) {
+        tvLoadSessions();
+        tvShowWelcome();
+    } else {
+        tvLoadLocalHistory();
+        if (!tvHistory.length) tvShowWelcome();
+    }
 });

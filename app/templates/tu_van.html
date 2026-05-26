@@ -60,9 +60,24 @@
                 </div>
               </div>
             </div>
-            <button onclick="tvClearChat()" style="background:rgba(255,255,255,0.08);border:none;border-radius:7px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.6);" title="Xóa chat">
-              <i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i>
-            </button>
+
+            <!-- Nút Xoá và Xem lịch sử chat -->
+            <div style="display:flex;gap:6px;">
+              <button onclick="tvToggleHistory()" style="background:rgba(255,255,255,0.08);border:none;border-radius:7px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.6);" title="Lịch sử chat">
+                <i data-lucide="history" style="width:15px;height:15px;"></i>
+              </button>
+              <button onclick="tvClearChat()" style="background:rgba(255,255,255,0.08);border:none;border-radius:7px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.6);" title="Chat mới">
+                <i data-lucide="rotate-ccw" style="width:15px;height:15px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- History panel -->
+          <div id="tvHistoryPanel" style="display:none;max-height:300px;overflow-y:auto;background:#fff;border-bottom:1px solid #eaeae0;flex-shrink:0;">
+            <div style="padding:10px 14px;font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #eaeae0;">
+              Lịch sử trò chuyện
+            </div>
+            <div id="tvHistorySlot"></div>
           </div>
 
           <!-- Messages -->

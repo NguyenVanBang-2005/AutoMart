@@ -1,17 +1,12 @@
-// car_detail.js - AI Chat cho trang chi tiết xe (tương tự tv_agent.js)
-
-const API_BASE = `${window.location.origin}/api/v1`;
-
 const ai = {
     messages: [],
-    cars: [],
-    currentCar: null,
-    busy: false
+    busy: false,
+    currentCar: null
 };
 
-// Lấy thông tin xe đang xem
+// ── Lấy thông tin xe đang xem ──────────────────────────────
 function getCurrentCar() {
-    const el = document.getElementById('carData');
+    var el = document.getElementById('carData');
     if (!el) return null;
     return {
         name: el.dataset.name || '',
@@ -19,119 +14,112 @@ function getCurrentCar() {
     };
 }
 
-// Load danh sách xe từ database
-async function loadRealCars() {
-    try {
-        const res = await fetch(`${API_BASE}/cars`, { credentials: 'include' });
-        if (res.ok) {
-            const data = await res.json();
-            const carsArray = Array.isArray(data) ? data : (data.cars || data.data || []);
-            ai.cars = carsArray.map(c => ({
-                id: c.id,
-                brand: c.hang || '',
-                model: c.dong || '',
-                year: c.nam || 0,
-                price: c.gia || 0,
-                km: c.km || 0,
-                fuel: c.nhien_lieu || '',
-                location: c.khu_vuc || ''
-            }));
-            console.log(`Đã load ${ai.cars.length} xe từ DB`);
-        }
-    } catch (e) {
-        console.warn('Không load được danh sách xe', e);
-    }
+function switchImage(url) {
+    var main = document.getElementById('mainImage');
+    if (main) main.src = url;
 }
 
-// System prompt chất lượng cao (có thông tin xe đang xem)
+// ── System prompt (inject context xe đang xem) ─────────────
 function buildSystemPrompt() {
-    const car = ai.currentCar;
-    const carContext = car
-        ? `Xe đang xem: ${car.name} - Giá ${car.price} triệu\n`
+    var car = ai.currentCar;
+    var carContext = car
+        ? 'Khách hàng đang xem xe: ' + car.name + ' - Giá ' + car.price + ' triệu.\n'
         : '';
 
-    const carList = ai.cars.length
-        ? ai.cars.map(c => `[ID:${c.id}] ${c.brand} ${c.model} | ${c.year} | ${c.price}tr | ${c.km}km`).join('\n')
-        : 'Chưa có xe nào trong kho.';
-
-    return `Bạn là trợ lý AI chuyên tư vấn mua xe của AutoMart.
-${carContext}
-NHIỆM VỤ:
-- Tư vấn chi tiết về xe đang xem
-- So sánh với các xe khác trong kho
-- Giải thích thông số kỹ thuật, chi phí sở hữu, vay vốn, bảo hiểm
-- Trả lời ngắn gọn, thân thiện, bằng tiếng Việt
-
-DANH SÁCH XE TRONG KHO:
-${carList}`;
+    return 'Bạn là AutoMart AI, trợ lý tư vấn xe cũ thông minh của AutoMart Việt Nam.\n'
+        + carContext
+        + '\nQUY TẮC:\n'
+        + '- Luôn trả lời bằng tiếng Việt, thân thiện và ngắn gọn.\n'
+        + '- Tư vấn chi tiết về xe đang xem, so sánh với xe khác trong kho.\n'
+        + '- Giải thích thông số kỹ thuật, chi phí sở hữu, vay vốn, bảo hiểm.\n'
+        + '- Không bịa đặt thông tin. Nếu không chắc, hãy nói "Bạn nên liên hệ nhân viên AutoMart để xác nhận."\n'
+        + '- Cuối mỗi câu trả lời dài, hỏi thêm 1 câu để hiểu thêm nhu cầu.\n';
 }
 
-// Helper functions
+// ── Markdown parser ─────────────────────────────────────────
+function cdEscape(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function cdMarkdown(text) {
+    return cdEscape(text)
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/(^|\n)\* (.+)/g, '$1<span style="margin-right:6px;">•</span>$2')
+        .replace(/(^|\n)- (.+)/g, '$1<span style="margin-right:6px;">•</span>$2')
+        .replace(/\*([^\*\n]+)\*/g, '<em>$1</em>')
+        .replace(/\/xe\/(\d+)/g, '<a href="/xe/$1" target="_blank" style="color:#c8a96e;font-weight:600;text-decoration:underline;">Xem chi tiết</a>')
+        .replace(/`([^`]+)`/g, '<code style="background:#f0ede4;padding:1px 5px;border-radius:3px;font-size:12px;">$1</code>')
+        .replace(/\n/g, '<br>');
+}
+
+// ── Chat UI ─────────────────────────────────────────────────
 function aiUserMsg(text) {
-    const box = document.getElementById('aiMessages');
+    var box = document.getElementById('aiMessages');
     if (!box) return;
-    const div = document.createElement('div');
+    var div = document.createElement('div');
     div.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:12px;';
-    div.innerHTML = `
-        <div style="max-width:75%;background:var(--accent-primary);color:white;padding:10px 14px;border-radius:12px 4px 12px 12px;">
-            ${text}
-        </div>`;
+    div.innerHTML = '<div style="max-width:75%;background:var(--accent-primary);color:white;padding:10px 14px;border-radius:12px 4px 12px 12px;">'
+        + cdEscape(text) + '</div>';
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
 
-function aiBotMsg(text) {
-    const box = document.getElementById('aiMessages');
+function aiBotMsg(text, isHtml) {
+    var box = document.getElementById('aiMessages');
     if (!box) return;
-    const div = document.createElement('div');
+    var div = document.createElement('div');
     div.style.cssText = 'display:flex;margin-bottom:12px;';
-    div.innerHTML = `
-        <div style="max-width:75%;background:#fff;padding:10px 14px;border-radius:4px 12px 12px 12px;box-shadow:0 1px 4px rgba(0,0,0,.08);">
-            ${text}
-        </div>`;
+    var content = isHtml ? text : cdMarkdown(text);
+    div.innerHTML = '<div style="max-width:75%;background:#fff;padding:10px 14px;border-radius:4px 12px 12px 12px;box-shadow:0 1px 4px rgba(0,0,0,.08);">'
+        + content + '</div>';
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
 }
 
 function aiShowTyping() {
-    const box = document.getElementById('aiMessages');
+    var box = document.getElementById('aiMessages');
     if (!box) return;
-    const typing = document.createElement('div');
+    var typing = document.createElement('div');
     typing.id = 'aiTyping';
     typing.style.cssText = 'display:flex;margin-bottom:12px;';
-    typing.innerHTML = `
-        <div style="background:#fff;padding:10px 14px;border-radius:4px 12px 12px 12px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;gap:5px;">
-            <div class="tv-dot"></div><div class="tv-dot"></div><div class="tv-dot"></div>
-        </div>`;
+    typing.innerHTML = '<div style="background:#fff;padding:10px 14px;border-radius:4px 12px 12px 12px;box-shadow:0 1px 4px rgba(0,0,0,.08);display:flex;gap:5px;">'
+        + '<div class="tv-dot"></div><div class="tv-dot"></div><div class="tv-dot"></div></div>';
     box.appendChild(typing);
     box.scrollTop = box.scrollHeight;
 }
 
 function aiHideTyping() {
-    const el = document.getElementById('aiTyping');
+    var el = document.getElementById('aiTyping');
     if (el) el.remove();
 }
 
 function aiShowSuggestions(items) {
-    const box = document.getElementById('aiSuggestions');
+    var box = document.getElementById('aiSuggestions');
     if (!box) return;
-    box.innerHTML = items.map(item =>
-        `<button onclick="aiQuickAsk('${item}')" style="font-size:12px;padding:4px 12px;border:1px solid #d4af37;color:#d4af37;background:transparent;border-radius:9999px;margin-right:6px;margin-bottom:6px;cursor:pointer;">${item}</button>`
-    ).join('');
+    box.innerHTML = items.map(function(item) {
+        return '<button onclick="aiQuickAsk(\'' + item.replace(/'/g, '') + '\')" '
+            + 'style="font-size:12px;padding:4px 12px;border:1px solid #c8a96e;color:#c8a96e;'
+            + 'background:transparent;border-radius:9999px;cursor:pointer;font-family:inherit;">'
+            + item + '</button>';
+    }).join('');
 }
 
 function aiQuickAsk(text) {
-    const input = document.getElementById('aiInput');
+    var input = document.getElementById('aiInput');
     if (input) {
         input.value = text;
         sendAiMessage();
     }
 }
 
-// Gửi tin nhắn AI
+// ── Gửi tin nhắn — dùng chung endpoint /tu-van/chat ────────
 async function sendAiMessage() {
-    const input = document.getElementById('aiInput');
-    const text = input ? input.value.trim() : '';
+    var input = document.getElementById('aiInput');
+    var text = input ? input.value.trim() : '';
     if (!text || ai.busy) return;
 
     input.value = '';
@@ -142,106 +130,87 @@ async function sendAiMessage() {
     aiShowTyping();
 
     try {
-        const res = await fetch(`${API_BASE}/ai/chat`, {
+        var res = await fetch('/api/v1/tu-van/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
             body: JSON.stringify({
-                system: buildSystemPrompt(),
-                messages: ai.messages
+                messages: ai.messages,
+                system_prompt: buildSystemPrompt()
             })
         });
 
-        const data = await res.json();
         aiHideTyping();
 
-        const reply = data.content?.[0]?.text || data.reply || 'Xin lỗi, tôi chưa hiểu rõ.';
-        aiBotMsg(reply);
+        if (!res.ok) throw new Error('API error ' + res.status);
+        var data = await res.json();
+        var reply = data.reply || '(Không có phản hồi)';
+
+        aiBotMsg(reply, false);
         ai.messages.push({ role: 'assistant', content: reply });
 
-        // Gợi ý tiếp theo
-        aiShowSuggestions(['So sánh xe khác', 'Chi phí vay', 'Bảo hiểm', 'Lái thử', 'Xem thêm xe']);
+        aiShowSuggestions(['So sánh xe khác', 'Chi phí vay', 'Bảo hiểm', 'Đăng ký lái thử']);
 
     } catch (e) {
         aiHideTyping();
-        aiBotMsg('Không thể kết nối AI. Vui lòng thử lại sau.');
-        console.error(e);
+        aiBotMsg('Không thể kết nối AI. Vui lòng thử lại sau hoặc gọi Hotline 1900 1234.', true);
+        console.error('[car_detail AI]', e);
     }
 
     ai.busy = false;
 }
 
-// ====================== TÍNH KHOẢN VAY ======================
+// ── Tính khoản vay ──────────────────────────────────────────
 function calcLoan() {
-  const carData = document.getElementById('carData');
-  if (!carData) return;
+    var carData = document.getElementById('carData');
+    if (!carData) return;
 
-  const price = parseFloat(carData.dataset.price) || 0;          // Giá xe (triệu)
-  if (price <= 0) return;
+    var price = parseFloat(carData.dataset.price) || 0;
+    if (price <= 0) return;
 
-  // Trả trước (%)
-  const downPct = parseFloat(document.getElementById('downPaymentPct').value) || 30;
-  document.getElementById('downPctLabel').textContent = downPct + '%';
+    var downPct = parseFloat(document.getElementById('downPaymentPct').value) || 30;
+    document.getElementById('downPctLabel').textContent = downPct + '%';
 
-  // Thời hạn vay (tháng)
-  const months = parseInt(document.getElementById('loanTerm').value) || 36;
+    var months = parseInt(document.getElementById('loanTerm').value) || 36;
+    var annualRate = 0.09;
+    var monthlyRate = annualRate / 12;
+    var loanAmount = price * (1 - downPct / 100);
 
-  // Tính toán vay
-  const annualRate = 0.09;                    // 9%/năm
-  const monthlyRate = annualRate / 12;
-  const loanAmount = price * (1 - downPct / 100);   // Số tiền vay
+    var monthlyPayment = 0;
+    if (monthlyRate > 0) {
+        monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) /
+            (Math.pow(1 + monthlyRate, months) - 1);
+    } else {
+        monthlyPayment = loanAmount / months;
+    }
 
-  let monthlyPayment = 0;
-  if (monthlyRate > 0) {
-    monthlyPayment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) /
-                     (Math.pow(1 + monthlyRate, months) - 1);
-  } else {
-    monthlyPayment = loanAmount / months;
-  }
-
-  // Hiển thị kết quả
-  const displayEl = document.getElementById('monthlyPayment');
-  if (displayEl) {
-    displayEl.textContent = monthlyPayment.toFixed(2);
-  }
+    var displayEl = document.getElementById('monthlyPayment');
+    if (displayEl) {
+        displayEl.textContent = monthlyPayment.toFixed(2);
+    }
 }
 
-// Gọi lần đầu khi trang load để hiển thị giá trị mặc định
 function initLoanCalculator() {
-  const slider = document.getElementById('downPaymentPct');
-  const select = document.getElementById('loanTerm');
-  if (slider) slider.addEventListener('input', calcLoan);
-  if (select) select.addEventListener('change', calcLoan);
-  calcLoan();   // Tính ngay khi load
+    var slider = document.getElementById('downPaymentPct');
+    var select = document.getElementById('loanTerm');
+    if (slider) slider.addEventListener('input', calcLoan);
+    if (select) select.addEventListener('change', calcLoan);
+    calcLoan();
 }
 
 initLoanCalculator();
 
-// Khởi tạo
-document.addEventListener('DOMContentLoaded', async () => {
-//    console.log('car_detail.js loaded');
-
+// ── Khởi tạo ────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
     ai.currentCar = getCurrentCar();
-    await loadRealCars();
 
-    // Khởi tạo chat
-    const initialMsg = ai.currentCar
-        ? `Chào bạn! Bạn đang xem xe <strong>${ai.currentCar.name}</strong> giá ${ai.currentCar.price} triệu.<br>Mình có thể tư vấn gì cho bạn về xe này?`
+    var car = ai.currentCar;
+    var initialMsg = car
+        ? 'Chào bạn! Bạn đang xem xe <strong>' + cdEscape(car.name) + '</strong> giá ' + car.price + ' triệu.<br>Mình có thể tư vấn gì cho bạn về xe này?'
         : 'Chào bạn! Bạn muốn hỏi gì về xe này?';
 
-    aiBotMsg(initialMsg);
-    aiShowSuggestions(['Giá có thương lượng không?', 'Chi phí bảo dưỡng?', 'So sánh với xe khác', 'Tính vay mua xe', 'Đăng ký lái thử']);
-
-    // Enter để gửi
-    const input = document.getElementById('aiInput');
-    if (input) {
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                sendAiMessage();
-            }
-        });
-    }
+    aiBotMsg(initialMsg, true);
+    aiShowSuggestions(['Giá có thương lượng không?', 'Chi phí bảo dưỡng?', 'So sánh với xe khác', 'Tính vay mua xe']);
 
     if (window.lucide) lucide.createIcons();
 });

@@ -33,6 +33,14 @@ class NewsCreate(SQLModel):
     category: NewsCategory = NewsCategory.tin_tuc
     author: str = "AutoMart"
 
+class NewsUpdate(SQLModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    content: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    video_url: Optional[str] = None
+    category: Optional[NewsCategory] = None
+
 
 class NewsOut(SQLModel):
     id: int

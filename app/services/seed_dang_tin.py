@@ -50,11 +50,11 @@ def seed_dang_tin(session: Session):
     # Lấy user admin thay vì hardcode id=8
     admin = session.exec(select(User).where(User.role == UserRole.admin)).first()
     if not admin:
-        print("⚠️ Không có user admin nào, bỏ qua seed dang_tin")
+        print("Không có user admin nào, bỏ qua seed dang_tin")
         return
 
     for item in SAMPLE_DANG_TIN:
         tin = DangTin(user_id=admin.id, **item)
         session.add(tin)
     session.commit()
-    print(f"✅ Đã seed {len(SAMPLE_DANG_TIN)} tin bán xe mẫu")
+    print(f"Đã seed {len(SAMPLE_DANG_TIN)} tin bán xe mẫu")

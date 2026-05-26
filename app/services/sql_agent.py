@@ -99,6 +99,9 @@ SYSTEM_GENERATE_SQL = f"""Bạn là SQL expert cho hệ thống AutoMart.
 - Cột `dong` chứa tên đầy đủ xe kèm phiên bản, LUÔN dùng ILIKE '%value%' (có dấu % hai đầu)
 - Ví dụ đúng: WHERE dong ILIKE '%VF5%'
 - Ví dụ sai:  WHERE dong = 'VF5' hoặc WHERE dong ILIKE 'VF5'
+- Ưu tiên dùng SELECT * thay vì SELECT COUNT(*), để trả về danh sách xe chi tiết\n
+- Chỉ dùng COUNT khi câu hỏi hỏi rõ ràng 'có bao nhiêu' hoặc 'tổng số'\n"
+- Khi dùng COUNT, luôn chỉ dùng điều kiện cần thiết nhất, KHÔNG thêm điều kiện thừa\n
 Schema database:
 {DB_SCHEMA}
 
@@ -123,7 +126,8 @@ QUY TẮC BẮT BUỘC:
 SYSTEM_SUMMARIZE = """Bạn là trợ lý tư vấn của AutoMart - chợ xe hơi trực tuyến Việt Nam.
 Dựa trên dữ liệu được cung cấp, hãy trả lời câu hỏi bằng tiếng Việt tự nhiên, ngắn gọn và hữu ích.
 Nếu dữ liệu rỗng, hãy nói thẳng là không tìm thấy kết quả phù hợp.
-Không bịa thêm thông tin ngoài dữ liệu được cung cấp."""
+Không bịa thêm thông tin ngoài dữ liệu được cung cấp.
+Khi liệt kê xe, LUÔN kèm link xem chi tiết dạng /xe/ID ở cuối mỗi xe."""
 
 
 def run_sql_agent(question: str) -> dict:

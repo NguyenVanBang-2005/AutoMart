@@ -24,7 +24,7 @@
   </div>
 </section>
 
-<!-- ══ MODAL ĐĂNG TIN (admin only) ══ -->
+<!-- ══ MODAL ĐĂNG TIN + CHỈNH SỬA (admin only) ══ -->
 {% if current_user and current_user.role.value == 'admin' %}
 <div id="newsModal" class="modal">
   <div class="modal-content" style="max-width:600px;">
@@ -81,6 +81,59 @@
     </div>
   </div>
 </div>
+
+<div id="newsEditModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-header">
+      <span class="modal-title">
+        <i data-lucide="edit-3" style="width:18px;height:18px;"></i>
+        Chỉnh sửa bài viết
+      </span>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <input type="hidden" id="editNewsId">
+        <div class="form-group">
+          <label class="form-label">Tiêu đề *</label>
+          <input id="editNewsTitle" type="text" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Danh mục *</label>
+          <select id="editNewsCategory" class="form-control">
+            <option value="tin_tuc">Tin tức</option>
+            <option value="hoi_dap">Hỏi đáp</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tóm tắt *</label>
+          <textarea id="editNewsDesc" class="form-control" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nội dung *</label>
+          <textarea id="editNewsContent" class="form-control" rows="6"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL ảnh thumbnail</label>
+          <input id="editNewsThumbnail" type="text" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL Video</label>
+          <input id="editNewsVideo" type="text" class="form-control">
+          <span style="font-size:11px;color:#888;margin-top:4px;display:block;">
+            YouTube sẽ tự động phát • Web khác sẽ hiện nút xem ngoài
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeEditModal()" class="btn btn-gray btn-small">Hủy</button>
+      <button onclick="submitEditNews()" id="editNewsSubmitBtn" class="btn btn-primary btn-small">
+        Lưu thay đổi
+      </button>
+    </div>
+  </div>
+</div>
 {% endif %}
 
 <!-- ══ TIN TỨC NỔI BẬT ══ -->
@@ -91,7 +144,6 @@
     {% if news_list %}
     <div id="newsContainer">
 
-      {# --- Featured article --- #}
       {% set featured = news_list[0] %}
       <a href="/tin-tuc/{{ featured.id }}" class="nf-card">
         <div class="nf-image">
@@ -110,6 +162,9 @@
             <span>•</span>
             <span>{{ featured.created_at.strftime('%d/%m/%Y') }}</span>
             {% if current_user and current_user.role.value == 'admin' %}
+            <button class="nf-edit" onclick="openEditNewsModal({{ featured.id }}, event)">
+              <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+            </button>
             <button class="nf-delete" onclick="deleteNews({{ featured.id }}, event)">
               <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
             </button>
@@ -118,7 +173,6 @@
         </div>
       </a>
 
-      {# --- Grid bài còn lại --- #}
       <div class="ni-grid">
         {% for item in news_list[1:7] %}
         <a href="/tin-tuc/{{ item.id }}" class="ni-card">
@@ -136,6 +190,9 @@
               <span>•</span>
               <span>{{ item.created_at.strftime('%d/%m/%Y') }}</span>
               {% if current_user and current_user.role.value == 'admin' %}
+              <button class="nf-edit" onclick="openEditNewsModal({{ item.id }}, event)">
+                <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+              </button>
               <button class="nf-delete" onclick="deleteNews({{ item.id }}, event)">
                 <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
               </button>
@@ -187,6 +244,9 @@
           <span>•</span>
           <span>{{ featured_qa.created_at.strftime('%d/%m/%Y') }}</span>
           {% if current_user and current_user.role.value == 'admin' %}
+          <button class="nf-edit" onclick="openEditNewsModal({{ featured_qa.id }}, event)">
+            <i data-lucide="pencil" style="width:14px;height:14px;"></i>
+          </button>
           <button class="nf-delete" onclick="deleteNews({{ featured_qa.id }}, event)">
             <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
           </button>
@@ -214,6 +274,9 @@
             <span>•</span>
             <span>{{ item.created_at.strftime('%d/%m/%Y') }}</span>
             {% if current_user and current_user.role.value == 'admin' %}
+            <button class="nf-edit" onclick="openEditNewsModal({{ item.id }}, event)">
+              <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+            </button>
             <button class="nf-delete" onclick="deleteNews({{ item.id }}, event)">
               <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
             </button>

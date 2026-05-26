@@ -1,5 +1,5 @@
 from sqlmodel import Session, select
-from app.models.news import News, NewsCreate, NewsCategory
+from app.models.news import News, NewsCreate,NewsUpdate, NewsCategory
 from typing import Optional
 
 
@@ -16,6 +16,18 @@ def get_news_by_id(session: Session, news_id: int) -> Optional[News]:
 
 def create_news(session: Session, data: NewsCreate) -> News:
     news = News(**data.model_dump())
+    session.add(news)
+    session.commit()
+    session.refresh(news)
+    return news
+
+def update_news(session: Session, news_id: int, data: NewsUpdate) -> Optional[News]:
+    news = session.get(News, news_id)
+    if not news:
+        return None
+    update_data = data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(news, key, value)
     session.add(news)
     session.commit()
     session.refresh(news)

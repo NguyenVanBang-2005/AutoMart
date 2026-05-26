@@ -55,10 +55,22 @@
         {% endif %}
 
         <!-- Tên + giá -->
-        <h1 style="font-size:26px;font-weight:700;margin-bottom:8px;">{{ car.hang }} {{ car.dong }}</h1>
+        {% if uu_dai %}
+        <div style="margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:28px;font-weight:800;color:var(--accent-primary);">{{ "{:,}".format(gia_hien_thi) }} triệu</span>
+            <span style="background:#e03030;color:#fff;padding:3px 10px;border-radius:6px;font-size:13px;font-weight:700;">-{{ uu_dai.phan_tram_giam|int }}%</span>
+          </div>
+          <div style="font-size:15px;color:#aaa;text-decoration:line-through;margin-top:4px;">{{ "{:,}".format(car.gia) }} triệu</div>
+          <div style="font-size:12px;color:#e03030;font-weight:600;margin-top:4px;">
+            Tiết kiệm {{ "{:,}".format(car.gia - gia_hien_thi) }} triệu · Ưu đãi đến {{ uu_dai.ngay_ket_thuc.strftime("%d/%m/%Y") }}
+          </div>
+        </div>
+        {% else %}
         <div style="font-size:28px;font-weight:800;color:var(--accent-primary);margin-bottom:24px;">
           {{ "{:,}".format(car.gia) }} triệu
         </div>
+        {% endif %}
 
         <!-- Thông số kỹ thuật -->
         <div style="background:#f8f8f6;border-radius:14px;padding:24px;margin-bottom:24px;">
@@ -161,9 +173,19 @@
         <!-- Giá & CTA -->
         <div style="background:#fff;border:2px solid var(--accent-primary);border-radius:16px;padding:24px;">
           <div style="font-size:13px;color:#888;margin-bottom:4px;">Giá bán</div>
+          {% if uu_dai %}
+          <div style="font-size:13px;color:#888;margin-bottom:4px;">Giá ưu đãi</div>
+          <div style="font-size:30px;font-weight:800;color:var(--accent-primary);">{{ "{:,}".format(gia_hien_thi) }} triệu</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+            <span style="font-size:14px;color:#aaa;text-decoration:line-through;">{{ "{:,}".format(car.gia) }}tr</span>
+            <span style="background:#e03030;color:#fff;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700;">-{{ uu_dai.phan_tram_giam|int }}%</span>
+          </div>
+          {% else %}
+          <div style="font-size:13px;color:#888;margin-bottom:4px;">Giá bán</div>
           <div style="font-size:30px;font-weight:800;color:var(--accent-primary);margin-bottom:20px;">
             {{ "{:,}".format(car.gia) }} triệu
           </div>
+          {% endif %}
           <button onclick="window.location.href='/lien-he'"
             style="width:100%;padding:14px;background:var(--accent-primary);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
             <i data-lucide="phone" style="width:18px;height:18px;"></i>

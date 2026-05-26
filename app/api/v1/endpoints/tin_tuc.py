@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 from app.core.database import get_session
 from app.core.security import get_current_user_from_cookie
-from app.models.news import NewsCreate, NewsOut, NewsCategory
+from app.models.news import NewsCreate, NewsOut, NewsCategory, NewsUpdate
 from app.models.user import UserRole
-from app.services.news_service import get_all_news, get_news_by_id, create_news, delete_news
+from app.services.news_service import get_all_news, get_news_by_id, create_news, delete_news, update_news
 from fastapi import Request
 from typing import Optional
 
@@ -41,6 +41,18 @@ def post_news(
     admin=Depends(_require_admin)
 ):
     return create_news(session, data)
+
+@router.put("/{news_id}", response_model=NewsOut)
+def edit_news(
+    news_id: int,
+    data: NewsUpdate,
+    session: Session = Depends(get_session),
+    admin=Depends(_require_admin)
+):
+    news = update_news(session, news_id, data)
+    if not news:
+        raise HTTPException(status_code=404, detail="Không tìm thấy bài viết")
+    return news
 
 
 @router.delete("/{news_id}", status_code=204)

@@ -37,20 +37,28 @@
       <div style="font-size:12px; color:#888;">{{ news.created_at.strftime('%H:%M, %d/%m/%Y') }}</div>
     </div>
     {% if current_user and current_user.role.value == 'admin' %}
-    <button onclick="deleteNewsAndRedirect({{ news.id }})"
-      style="margin-left:auto; background:none; border:1px solid #ef4444;
-             color:#ef4444; border-radius:6px; padding:5px 12px;
-             font-size:12px; cursor:pointer; display:flex; align-items:center; gap:4px;">
-      <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
-      Xóa bài
-    </button>
+    <div style="margin-left:auto; display:flex; gap:8px;">
+      <button onclick="openEditNewsModalDetail()"
+        style="background:none; border:1px solid var(--accent-primary);
+               color:var(--accent-primary); border-radius:6px; padding:5px 12px;
+               font-size:12px; cursor:pointer; display:flex; align-items:center; gap:4px;">
+        <i data-lucide="pencil" style="width:13px;height:13px;"></i>
+        Sửa bài
+      </button>
+      <button onclick="deleteNewsAndRedirect({{ news.id }})"
+        style="background:none; border:1px solid #ef4444;
+               color:#ef4444; border-radius:6px; padding:5px 12px;
+               font-size:12px; cursor:pointer; display:flex; align-items:center; gap:4px;">
+        <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+        Xóa bài
+      </button>
+    </div>
     {% endif %}
   </div>
 
   <!-- ══ VIDEO / THUMBNAIL ══ -->
   {% if news.video_url %}
     {% if 'youtube.com/embed' in news.video_url %}
-    <!-- YouTube — nhúng iframe tự động phát -->
     <div style="position:relative; padding-bottom:56.25%; height:0;
                 overflow:hidden; border-radius:12px; margin-bottom:28px;
                 box-shadow:0 4px 20px rgba(0,0,0,0.15);">
@@ -63,7 +71,6 @@
       </iframe>
     </div>
     {% else %}
-    <!-- Web khác — hiện thumbnail + nút xem ngoài -->
     <div style="position:relative; border-radius:12px; overflow:hidden;
                 margin-bottom:28px; box-shadow:0 4px 20px rgba(0,0,0,0.1);">
       {% if news.thumbnail_url %}
@@ -92,7 +99,6 @@
     </div>
     {% endif %}
   {% elif news.thumbnail_url %}
-  <!-- Không có video — chỉ hiện thumbnail -->
   <div style="border-radius:12px; overflow:hidden; margin-bottom:28px;
               box-shadow:0 4px 20px rgba(0,0,0,0.1);">
     <img src="{{ news.thumbnail_url }}" alt="{{ news.title }}"
@@ -164,18 +170,80 @@
 {% endblock %}
 
 {% block extra_scripts %}
+{% if current_user and current_user.role.value == 'admin' %}
+<div id="newsEditModal" class="modal">
+  <div class="modal-content" style="max-width:600px;">
+    <div class="modal-header">
+      <span class="modal-title">
+        <i data-lucide="edit-3" style="width:18px;height:18px;"></i>
+        Chỉnh sửa bài viết
+      </span>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <input type="hidden" id="editNewsId" value="{{ news.id }}">
+        <div class="form-group">
+          <label class="form-label">Tiêu đề *</label>
+          <input id="editNewsTitle" type="text" class="form-control" value="{{ news.title }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Danh mục *</label>
+          <select id="editNewsCategory" class="form-control">
+            <option value="tin_tuc" {{ 'selected' if news.category.value == 'tin_tuc' }}>Tin tức</option>
+            <option value="hoi_dap" {{ 'selected' if news.category.value == 'hoi_dap' }}>Hỏi đáp</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tóm tắt *</label>
+          <textarea id="editNewsDesc" class="form-control" rows="2">{{ news.description }}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nội dung *</label>
+          <textarea id="editNewsContent" class="form-control" rows="6">{{ news.content }}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL ảnh thumbnail</label>
+          <input id="editNewsThumbnail" type="text" class="form-control" value="{{ news.thumbnail_url or '' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">URL Video</label>
+          <input id="editNewsVideo" type="text" class="form-control" value="{{ news.video_url or '' }}">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button onclick="closeEditModal()" class="btn btn-gray btn-small">Hủy</button>
+      <button onclick="submitEditNews()" id="editNewsSubmitBtn" class="btn btn-primary btn-small">
+        Lưu thay đổi
+      </button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script src="{{ url_for('static', path='js/news.js') }}"></script>
 <script>
-async function deleteNewsAndRedirect(newsId) {
+function openEditNewsModalDetail() {
+  var modal = document.getElementById('newsEditModal');
+  if (modal) {
+    modal.classList.add('active');
+    lucide.createIcons();
+  }
+}
+
+function deleteNewsAndRedirect(newsId) {
   if (!confirm('Xóa bài viết này?')) return;
-  try {
-    const res = await fetch(`/api/v1/tin-tuc/${newsId}`, {
-      method: 'DELETE', credentials: 'include'
-    });
+  fetch('/api/v1/tin-tuc/' + newsId, {
+    method: 'DELETE', credentials: 'include'
+  })
+  .then(function(res) {
     if (!res.ok) throw new Error('Xóa thất bại');
     window.location.href = '/tin-tuc';
-  } catch (err) {
+  })
+  .catch(function(err) {
     alert(err.message);
-  }
+  });
 }
 </script>
 <script>lucide.createIcons();</script>

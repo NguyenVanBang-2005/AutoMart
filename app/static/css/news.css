@@ -263,6 +263,22 @@
   flex-wrap: wrap;
 }
 
+/*Button chỉnh sửa*/
+.nf-edit {
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  transition: background 0.15s;
+}
+.nf-edit:hover {
+  background: rgba(200, 169, 110, 0.15);
+}
+
 /* ══════════════════════════════════════════════════
    RESPONSIVE
    ══════════════════════════════════════════════════ */

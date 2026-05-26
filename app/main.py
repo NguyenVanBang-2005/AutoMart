@@ -254,11 +254,49 @@ def staff_dashboard(request: Request):
 
 @app.get("/mua-xe")
 def mua_xe(request: Request):
+    from app.models.uu_dai import UuDai
+    from app.models.cars import Car
+    from datetime import date
+
     user = get_current_user_for_template(request)
+
+    with Session(engine) as session:
+        today = date.today()
+        active_deals = session.exec(
+            select(UuDai).where(
+                UuDai.ngay_bat_dau <= today,
+                UuDai.ngay_ket_thuc >= today,
+            )
+        ).all()
+
+        deal_map = {ud.xe_id: ud for ud in active_deals}
+        xe_ids = list(deal_map.keys())
+        xe_list = session.exec(
+            select(Car).where(Car.id.in_(xe_ids))
+        ).all() if xe_ids else []
+
+        from app.services.car_service import get_car_images
+        deals = []
+        for xe in xe_list:
+            ud = deal_map[xe.id]
+            imgs = get_car_images(session, xe.id)
+            deals.append({
+                "id": xe.id,
+                "hang": xe.hang,
+                "dong": xe.dong,
+                "nam": xe.nam,
+                "gia": xe.gia,
+                "gia_khuyen_mai": int(xe.gia * (1 - ud.phan_tram_giam / 100)),
+                "tiet_kiem": int(xe.gia * ud.phan_tram_giam / 100),
+                "phan_tram": int(ud.phan_tram_giam),
+                "ngay_ket_thuc": ud.ngay_ket_thuc.strftime("%d/%m/%Y"),
+                "anh": imgs[0].url if imgs else None,
+            })
+
     return templates.TemplateResponse(
         request=request,
         name="mua_xe.html",
-        context={"current_user": user}
+        context={"current_user": user, "deals": deals}
     )
 
 @app.get("/ban-xe")

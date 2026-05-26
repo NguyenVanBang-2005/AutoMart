@@ -47,7 +47,7 @@ def _query_cars_context(question: str, history: list) -> str:
     try:
         from app.services.sql_agent import run_sql_agent
 
-        # Resolve đại từ mơ hồ ("xe đó", "xe này"...) từ history
+        # Resolve đại từ mơ hồ
         VAGUE_REFS = [
             'xe đó', 'xe do', 'chiếc đó', 'chiec do',
             'xe này', 'xe nay', 'xe trên', 'xe tren',
@@ -78,20 +78,64 @@ def _query_cars_context(question: str, history: list) -> str:
             return ''
 
         rows = result['data']
+
+        # Nếu là COUNT query → chạy thêm SELECT * để lấy chi tiết
+        if len(rows) == 1 and 'count' in rows[0]:
+            count_val = rows[0]['count']
+            # Lấy SQL gốc, đổi COUNT(*) thành *
+            original_sql = result.get('sql', '')
+            detail_sql = original_sql.replace('SELECT COUNT(*)', 'SELECT *').replace('SELECT count(*)', 'SELECT *')
+            if detail_sql != original_sql:
+                try:
+                    from app.core.database import engine
+                    with engine.connect() as conn:
+                        # Dùng raw connection để tránh SQLAlchemy escape %
+                        print(f"[SQL Agent] Detail SQL: {detail_sql}")
+                        raw_conn = conn.connection
+                        cursor = raw_conn.cursor()
+                        cursor.execute(detail_sql)
+                        columns = [desc[0] for desc in cursor.description]
+                        detail_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+                    if detail_data:
+                        lines = [f"Tổng: {count_val} xe"]
+                        for r in detail_data[:10]:
+                            lines.append(
+                                '{hang} {dong} | Năm:{nam} | Giá:{gia:,} triệu | KM:{km:,} | Loại:{loai} | Xem: /xe/{id}'.format(
+                                    id=r.get('id', ''),
+                                    hang=r.get('hang', ''),
+                                    dong=r.get('dong', ''),
+                                    nam=r.get('nam', ''),
+                                    gia=int(r.get('gia') or 0),
+                                    km=int(r.get('km') or 0),
+                                    loai=r.get('loai', ''),
+                                )
+                            )
+                        return '\n'.join(lines)
+                except Exception as e:
+                    print(f"[SQL Agent] Detail query error: {e}")
+
+            return f"Kết quả: {count_val} xe"
+
+        # SELECT chi tiết bình thường
         lines = []
         for r in rows[:10]:
-            lines.append(
-                'ID:{id} | {hang} {dong} | Năm:{nam} | Giá:{gia:,}đ | KM:{km:,} | Loại:{loai}'.format(
-                    id=r.get('id', ''),
-                    hang=r.get('hang', ''),
-                    dong=r.get('dong', ''),
-                    nam=r.get('nam', ''),
-                    gia=int(r.get('gia') or 0),
-                    km=int(r.get('km') or 0),
-                    loai=r.get('loai', ''),
+            if r.get('hang') or r.get('dong'):
+                lines.append(
+                    '{hang} {dong} | Năm:{nam} | Giá:{gia:,} triệu | KM:{km:,} | Loại:{loai} | Xem: /xe/{id}'.format(
+                        id=r.get('id', ''),
+                        hang=r.get('hang', ''),
+                        dong=r.get('dong', ''),
+                        nam=r.get('nam', ''),
+                        gia=int(r.get('gia') or 0),
+                        km=int(r.get('km') or 0),
+                        loai=r.get('loai', ''),
+                    )
                 )
-            )
-        return '\n'.join(lines)
+            else:
+                lines.append(str(r))
+
+        return '\n'.join(lines) if lines else str(rows)
     except Exception as e:
         print(f'[SQL Agent] Lỗi: {e}')
         return ''
@@ -130,6 +174,8 @@ async def tu_van_chat(req: ChatRequest):
                 + "\n- Chỉ gợi ý xe có trong danh sách trên, KHÔNG bịa xe ngoài danh sách."
                 + "\n- Trích dẫn chính xác tên xe, năm, giá, số km từ danh sách."
                 + "\n- Nếu danh sách trống, nói thật là hiện không có xe phù hợp."
+                + "\n- Mỗi xe PHẢI kèm link xem chi tiết dạng /xe/ID (lấy từ dữ liệu). Ví dụ: 'Xem chi tiết: /xe/5'"
+                + "\n- KHÔNG BAO GIỜ nói 'không thể cung cấp link'. Link có sẵn trong dữ liệu."
             )
 
     full_system = req.system_prompt + db_block

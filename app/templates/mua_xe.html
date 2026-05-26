@@ -102,6 +102,75 @@
    </form>
   </div>
 
+     <!-- Bảng xe đang ưu đãi -->
+  {% if deals %}
+  <div style="background:#fffbf0;border:1.5px solid #f0d080;border-radius:16px;padding:24px;margin-bottom:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="width:40px;height:40px;border-radius:12px;background:var(--accent-primary);display:flex;align-items:center;justify-content:center;">
+          <i data-lucide="flame" style="width:20px;height:20px;color:#fff;"></i>
+        </div>
+        <div>
+          <div style="font-size:18px;font-weight:700;">Xe đang ưu đãi</div>
+          <div style="font-size:13px;color:#888;">{{ deals|length }} xe có khuyến mãi đặc biệt</div>
+        </div>
+      </div>
+      <a href="/uu-dai-thang" style="font-size:13px;font-weight:600;color:var(--accent-primary);text-decoration:none;display:flex;align-items:center;gap:4px;">
+        Xem tất cả ưu đãi
+        <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+      </a>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:separate;border-spacing:0;font-size:14px;">
+        <thead>
+          <tr style="background:#fff;">
+            <th style="padding:12px 14px;text-align:left;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #f0d080;">Xe</th>
+            <th style="padding:12px 14px;text-align:left;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #f0d080;">Năm</th>
+            <th style="padding:12px 14px;text-align:right;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #f0d080;">Giá gốc</th>
+            <th style="padding:12px 14px;text-align:right;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #f0d080;">Giảm</th>
+            <th style="padding:12px 14px;text-align:right;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #f0d080;">Giá KM</th>
+            <th style="padding:12px 14px;text-align:center;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #f0d080;">Hết hạn</th>
+            <th style="padding:12px 14px;text-align:center;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #f0d080;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in deals %}
+          <tr style="border-bottom:1px solid #f0e8d0;transition:.15s;"
+              onmouseover="this.style.background='#fff8e8'" onmouseout="this.style.background='transparent'">
+            <td style="padding:12px 14px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                {% if d.anh %}
+                <img src="{{ d.anh }}" style="width:56px;height:40px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+                {% else %}
+                <div style="width:56px;height:40px;background:#eee;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                  <i data-lucide="car" style="width:18px;height:18px;color:#bbb;"></i>
+                </div>
+                {% endif %}
+                <span style="font-weight:600;">{{ d.hang }} {{ d.dong }}</span>
+              </div>
+            </td>
+            <td style="padding:12px 14px;">{{ d.nam }}</td>
+            <td style="padding:12px 14px;text-align:right;color:#aaa;text-decoration:line-through;">{{ "{:,}".format(d.gia) }}tr</td>
+            <td style="padding:12px 14px;text-align:right;">
+              <span style="background:#e03030;color:#fff;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700;">-{{ d.phan_tram }}%</span>
+            </td>
+            <td style="padding:12px 14px;text-align:right;font-weight:700;color:var(--accent-primary);font-size:15px;">{{ "{:,}".format(d.gia_khuyen_mai) }}tr</td>
+            <td style="padding:12px 14px;text-align:center;font-size:13px;color:#888;">{{ d.ngay_ket_thuc }}</td>
+            <td style="padding:12px 14px;text-align:center;">
+              <a href="/xe/{{ d.id }}" style="display:inline-flex;align-items:center;gap:4px;padding:6px 14px;background:var(--accent-primary);color:#fff;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;">
+                <i data-lucide="eye" style="width:13px;height:13px;"></i>
+                Chi tiết
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Nút Thêm xe - chỉ hiện với Admin & Staff -->
   {% if current_user and current_user.role %}
    {% if current_user.role == 'admin' or current_user.role == 'staff' or
