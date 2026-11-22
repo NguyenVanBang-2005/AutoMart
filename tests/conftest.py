@@ -6,6 +6,7 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key-for-automart-tests")
 os.environ.setdefault("ALGORITHM", "HS256")
 os.environ.setdefault("ACCESS_TOKEN_EXPIRE_MINUTES", "30")
 os.environ.setdefault("ENVIRONMENT", "development")
+os.environ.setdefault("GROQ_API_KEY", "test-groq-key")  # sql_agent builds its client at import time
 
 import pytest
 from fastapi import FastAPI

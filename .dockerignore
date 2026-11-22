@@ -8,24 +8,44 @@ __pycache__
 .eggs/
 dist/
 build/
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Virtual environments
 .venv
 venv
 env
 
-# Environment files (KHÔNG copy .env vào image)
+# Secrets / env files (KHÔNG copy vào image)
 .env
 .env.*
+!.env.example
 
-# Git
+# Local databases
+*.db
+*.sqlite3
+
+# Git / CI
 .git
 .gitignore
+.github
 
 # IDE
 .vscode
 .idea
 *.swp
+
+# Tests & tài liệu không cần trong image
+tests/
+pytest.ini
+requirements-dev.txt
+README.md
+supabase_hardening.sql
+
+# Docker files
+Dockerfile
+docker-compose*.yml
 
 # Logs
 *.log
